@@ -1,0 +1,95 @@
+"use client";
+import React, { useState } from "react";
+import {
+  Create,
+  SimpleForm,
+  TextInput,
+  useNotify,
+  useRedirect,
+  CreateProps,
+  required,
+} from "react-admin";
+import { InputLabel, Button } from "@mui/material";
+import UploadIcon from "@mui/icons-material/Upload";
+
+const generateSlug = (text: string) =>
+  text
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/(^-|-$)+/g, "");
+
+const CategoryCreate: React.FC<CreateProps> = (props) => {
+  const [file, setFile] = useState<File | null>(null);
+  const [slug, setSlug] = useState("");
+
+  const notify = useNotify();
+  const redirect = useRedirect();
+
+  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    if (event.target?.files) {
+      setFile(event.target.files[0]);
+    }
+  };
+
+  const handleSubmit = async (values: any) => {
+    const formData = new FormData();
+    formData.append("name", values.name);
+    formData.append("slug", slug || values.slug); // Use auto-generated or fallback to user input
+    formData.append("description", values.description || "");
+    formData.append("metaTitle", values.metaTitle || "");
+    formData.append("metaDescription", values.metaDescription || "");
+
+    if (file) {
+      formData.append("image", file);
+    }
+
+    try {
+      const response = await fetch("/api/category", {
+        method: "POST",
+        body: formData,
+      });
+
+      if (response.ok) {
+        notify("Category created successfully", { type: "success" });
+        redirect("/category");
+      } else {
+        throw new Error("Failed to create category");
+      }
+    } catch (error) {
+      notify("Error creating category", { type: "error" });
+    }
+  };
+
+  return (
+    <Create {...props}>
+      <SimpleForm onSubmit={handleSubmit}>
+        <TextInput
+          source="name"
+          validate={required()}
+          onChange={(e) => setSlug(generateSlug(e.target.value))}
+        />
+        <TextInput source="slug" validate={required()} value={slug} disabled />
+        <TextInput source="description" multiline />
+        <TextInput source="metaTitle" />
+        <TextInput source="metaDescription" multiline />
+
+        <InputLabel style={{ marginTop: "1em" }}>
+          Upload Category Image:
+        </InputLabel>
+        <Button
+          component="label"
+          variant="outlined"
+          startIcon={<UploadIcon />}
+        >
+          Choose File
+          <input type="file" hidden accept="image/*" onChange={handleFileChange} />
+        </Button>
+        {file && <p style={{ marginTop: 8 }}>Selected: {file.name}</p>}
+
+        <button type="submit">Create Category</button>
+      </SimpleForm>
+    </Create>
+  );
+};
+
+export default CategoryCreate;
