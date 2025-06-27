@@ -1,23 +1,24 @@
 import { NextResponse } from "next/server";
 import jwt from "jsonwebtoken";
-import clientPromise from '../../../lib/mongodb';
+import clientPromise from "../../../lib/mongodb";
 import { z } from "zod";
 import cookie from "cookie";
 import sanitizeHtml from "sanitize-html";
+import bcrypt from "bcryptjs";
 
 // MongoDB setup
 const client = await clientPromise;
 const db = client.db("school-project");
+const adminCollection = db.collection("admins");
 const attemptsCollection = db.collection("loginAttempts");
 
-// Environment variables
-const ADMIN_EMAIL = process.env.ADMIN_EMAIL!;
-const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD!;
+// .env variables
+const ADMIN_EMAIL = process.env.ADMIN_EMAIL!; // ✅ Still required
 const SECRET_KEY = process.env.JWT_SECRET_KEY!;
 const MAX_ATTEMPTS = 5;
 const BLOCK_TIME = 60 * 60 * 1000; // 1 hour
 
-// Zod schema validation
+// Zod validation
 const loginSchema = z.object({
   email: z.string().email(),
   password: z.string().min(6),
@@ -26,19 +27,14 @@ const loginSchema = z.object({
 export async function POST(req: Request) {
   try {
     const { email, password } = await req.json();
-
-    // Sanitize inputs (especially email)
     const cleanEmail = sanitizeHtml(email, { allowedTags: [], allowedAttributes: {} });
 
-    // Validate sanitized input
     loginSchema.parse({ email: cleanEmail, password });
 
-    await client.connect();
-
     const userAttempts = await attemptsCollection.findOne({ email: cleanEmail });
+    const now = Date.now();
 
     if (userAttempts) {
-      const now = Date.now();
       const lastAttempt = new Date(userAttempts.lastAttempt).getTime();
 
       if (userAttempts.attempts >= MAX_ATTEMPTS && now - lastAttempt < BLOCK_TIME) {
@@ -53,22 +49,40 @@ export async function POST(req: Request) {
       }
     }
 
-    if (cleanEmail !== ADMIN_EMAIL || password !== ADMIN_PASSWORD) {
+    // 🔐 Check if admin already exists in DB
+    let admin = await adminCollection.findOne({ email: cleanEmail });
+
+    // 🧠 If not, create the very first admin account if email matches
+    if (!admin && cleanEmail === ADMIN_EMAIL) {
+      const hashed = await bcrypt.hash(password, 10);
+      await adminCollection.insertOne({
+        email: cleanEmail,
+        passwordHash: hashed,
+        createdAt: new Date(),
+      });
+      console.log("✅ Initial admin created in DB.");
+      admin = await adminCollection.findOne({ email: cleanEmail }); // re-fetch
+    }
+
+    if (!admin) {
       await logFailedAttempt(cleanEmail);
       return NextResponse.json({ error: "Invalid credentials" }, { status: 401 });
     }
 
-    // Create JWT token
+    const passwordMatch = await bcrypt.compare(password, admin.passwordHash);
+    if (!passwordMatch) {
+      await logFailedAttempt(cleanEmail);
+      return NextResponse.json({ error: "Invalid credentials" }, { status: 401 });
+    }
+
     const token = jwt.sign({ email: cleanEmail }, SECRET_KEY, { expiresIn: "1h" });
 
-    // Reset login attempts on success
     await attemptsCollection.updateOne(
       { email: cleanEmail },
       { $set: { attempts: 0, lastAttempt: new Date() } },
       { upsert: true }
     );
 
-    // Secure cookie options
     const cookieOptions = {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
@@ -78,25 +92,16 @@ export async function POST(req: Request) {
     };
 
     const cookieHeader = cookie.serialize("auth_token", token, cookieOptions);
-    const response = NextResponse.json({ message: "Login successful" });
+    const response = NextResponse.json({ message: "Login successful", token });
     response.headers.set("Set-Cookie", cookieHeader);
-
-    // Optional: Set extra security headers (Content-Security-Policy)
-    response.headers.set(
-      "Content-Security-Policy",
-      "default-src 'self'; script-src 'none'; object-src 'none';"
-    );
 
     return response;
   } catch (error) {
-    return NextResponse.json(
-      { error: "Invalid input or internal error" },
-      { status: 400 }
-    );
+    console.error("Login error:", error);
+    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
 }
 
-// Logs failed attempts to MongoDB
 async function logFailedAttempt(email: string) {
   const now = new Date();
   const existing = await attemptsCollection.findOne({ email });
@@ -104,10 +109,7 @@ async function logFailedAttempt(email: string) {
   if (existing) {
     await attemptsCollection.updateOne(
       { email },
-      {
-        $set: { lastAttempt: now },
-        $inc: { attempts: 1 },
-      }
+      { $set: { lastAttempt: now }, $inc: { attempts: 1 } }
     );
   } else {
     await attemptsCollection.insertOne({

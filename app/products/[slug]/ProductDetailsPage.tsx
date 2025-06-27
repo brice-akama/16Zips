@@ -9,6 +9,9 @@ import DOMPurify from "dompurify";
 import { toast } from 'react-hot-toast';
 import ReviewList from "./ReviewList";
 import RelatedProducts from "./RelatedProduct";
+import { useReviewCount } from "./ReviewList";
+import Link from "next/link";
+
 
 const stripHtmlTags = (html: string): string => {
   if (typeof window !== 'undefined') {
@@ -19,6 +22,9 @@ const stripHtmlTags = (html: string): string => {
   }
   return html;
 };
+
+
+
 
 const formatDescription = (description: string): string => {
   return description
@@ -64,6 +70,7 @@ interface Props {
 }
 
 const ProductDetailsPage: React.FC<Props> = ({ product }) => {
+  const reviewCount = useReviewCount(product.slug);
   const [selectedThumbnail, setSelectedThumbnail] = useState<number>(0);
   const [quantity, setQuantity] = useState(1);
   const [showDescription, setShowDescription] = useState(true);
@@ -207,7 +214,7 @@ const ProductDetailsPage: React.FC<Props> = ({ product }) => {
               sku: product.slug,
               offers: {
                 "@type": "Offer",
-                url: `https://yourdomain.com/product/${product.slug}`,
+                url: `https://16zip.com/product/${product.slug}`,
                 priceCurrency: "USD",
                 price: product.price,
                 availability: "https://schema.org/InStock",
@@ -233,7 +240,7 @@ const ProductDetailsPage: React.FC<Props> = ({ product }) => {
 </div>
 
 
-            <div className="flex gap-4 mt-4">
+            <div className="flex gap-4 mt-0 lg:mt-8">
               {[product.mainImage, ...product.thumbnails].map((thumb, index) => (
                 <div
                   key={index}
@@ -254,7 +261,34 @@ const ProductDetailsPage: React.FC<Props> = ({ product }) => {
 
           {/* Right: Product Details */}
           <div className="w-full md:w-1/2 mt-10 md:mt-20">
-            <h1 className="text-3xl font-semibold text-gray-900">{product.name}</h1>
+    <nav
+  className="inline-block text-sm text-gray-600 mb-4"
+  aria-label="Breadcrumb"
+>
+  <ol className="inline-flex items-center space-x-1 md:space-x-2">
+    <li>
+      <Link href="/" className="text-blue-600 hover:underline">Home</Link>
+    </li>
+    <li>/</li>
+    <li>
+      <Link href="/shop" className="text-blue-600 hover:underline">Shop</Link>
+    </li>
+    <li>/</li>
+    <li className="text-gray-900 truncate max-w-[200px]">{product.name}</li>
+  </ol>
+</nav>
+
+ <div
+  role="heading"
+  aria-level={1}
+   className="text-3xl font-semibold text-gray-900 mb-5"
+>
+  {product.name}
+</div>
+
+
+
+             
             <p className="text-xl text-blue-600 mt-2">${totalPrice.toFixed(2)}</p>
 
 
@@ -359,11 +393,17 @@ const ProductDetailsPage: React.FC<Props> = ({ product }) => {
             Product Description
           </span>
           <span
-            className={`text-lg font-semibold cursor-pointer ${showReviewList || showReviewForm ? "text-blue-600 border-b-2 border-blue-600" : "text-gray-700"}`}
-            onClick={toggleReviews}
-          >
-            Reviews
-          </span>
+  className={`text-lg font-semibold cursor-pointer ${
+    showReviewList || showReviewForm
+      ? "text-blue-600 border-b-2 border-blue-600"
+      : "text-gray-700"
+  }`}
+  onClick={toggleReviews}
+>
+  Reviews (<span className="text-yellow-500">{reviewCount}</span>)
+</span>
+
+
         </div>
 
         {/* Product Description */}

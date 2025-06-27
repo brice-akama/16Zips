@@ -55,7 +55,15 @@ export default function FaqPage() {
 
   return (
     <div className="px-4 py-10 space-y-8 mt-20">
-      <h1 className="text-3xl font-bold text-center text-green-700 mt-8 sm:mt-10 md:mt-20 lg:mt-20">Frequently Asked Questions</h1>
+      <div
+  role="heading"
+  aria-level={1}
+  className="text-3xl font-bold text-center text-green-700 sm:mt-10 md:mt-20 lg:mt-20"
+>
+  Frequently Asked Questions
+</div>
+
+
       
       {faqs.map((faq, index) => (
         <div key={index} className="border-b border-gray-300 pb-4">

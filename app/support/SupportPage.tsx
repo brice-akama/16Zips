@@ -1,8 +1,6 @@
 // SupportPage.tsx
 "use client";
 
-
-
 import React, { useState } from "react";
 
 const SupportPage = () => {
@@ -14,24 +12,33 @@ const SupportPage = () => {
     setActiveQuestion((prev) => (prev === question ? null : question));
   };
 
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({ ...prev, [name]: value }));
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    const response = await fetch("/api/contact", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(formData),
-    });
+    try {
+      const response = await fetch("/api/contact", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(formData),
+      });
 
-    const data = await response.json();
+      const data = await response.json();
 
-    if (response.ok) {
-      setStatusMessage("Your message has been sent successfully.");
-      setFormData({ name: "", email: "", message: "" }); // Clear the form after success
-    } else {
-      setStatusMessage(data.error || "An error occurred. Please try again.");
+      if (response.ok) {
+        setStatusMessage("Your message has been sent successfully.");
+        setFormData({ name: "", email: "", message: "" }); // Clear form after success
+      } else {
+        setStatusMessage(data.error || "An error occurred. Please try again.");
+      }
+    } catch (error) {
+      setStatusMessage("Network error. Please try again later.");
     }
   };
 
@@ -54,7 +61,7 @@ const SupportPage = () => {
         <ul className="list-disc pl-6 text-gray-600">
           <li>Credit and Debit Cards (Visa, MasterCard, American Express)</li>
           <li>PayPal</li>
-          <li>Bank Transfer</li>
+          <li>Bitcoin</li>
         </ul>
         <p className="mt-4 text-gray-600">
           All payments are processed securely to ensure your information is protected. You will receive a confirmation email once your payment is successfully processed.
@@ -108,29 +115,39 @@ const SupportPage = () => {
       </section>
 
       {/* Contact Support Section */}
-      <section className="bg-gray-100 p-6 rounded-lg shadow-lg mb-12">
+      <section className="bg-gray-100 p-6 rounded-lg shadow-lg mb-12 max-w-md mx-auto">
         <h2 className="text-2xl font-semibold text-gray-800 mb-4">Contact Support</h2>
         <p className="text-lg text-gray-600 mb-4">
           If you have any further questions, feel free to reach out to our customer support team.
         </p>
-        <form  onSubmit={handleSubmit} className="space-y-4">
+
+        <form onSubmit={handleSubmit} className="space-y-4">
           <input
             type="text"
             name="name"
+            value={formData.name}
+            onChange={handleChange}
             className="w-full p-3 border border-gray-300 rounded-md"
             placeholder="Your Name"
+            required
           />
           <input
             type="email"
             name="email"
+            value={formData.email}
+            onChange={handleChange}
             className="w-full p-3 border border-gray-300 rounded-md"
             placeholder="Your Email"
+            required
           />
           <textarea
             name="message"
+            value={formData.message}
+            onChange={handleChange}
             className="w-full p-3 border border-gray-300 rounded-md"
             placeholder="Your Message"
             rows={4}
+            required
           />
           <button
             type="submit"
@@ -139,6 +156,10 @@ const SupportPage = () => {
             Submit
           </button>
         </form>
+
+        {statusMessage && (
+          <p className="mt-4 text-center text-green-600 font-medium">{statusMessage}</p>
+        )}
       </section>
     </div>
   );

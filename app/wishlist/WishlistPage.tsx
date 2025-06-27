@@ -112,17 +112,24 @@ const WishlistPage: React.FC = () => {
               </button>
 
               {/* Social Media Share Icons */}
-              <div className="flex space-x-3 mt-4">
-                <Link href={`https://www.facebook.com/sharer/sharer.php?u=https://yourwebsite.com/product/${product.slug}`} target="_blank" rel="noopener noreferrer">
-                  <FaFacebookF className="text-blue-600 text-2xl hover:text-blue-800" />
-                </Link>
-                <Link href={`https://www.instagram.com/share?url=https://yourwebsite.com/product/${product.slug}`} target="_blank" rel="noopener noreferrer">
-                  <FaInstagram className="text-pink-600 text-2xl hover:text-pink-800" />
-                </Link>
-                <Link href={`https://twitter.com/share?url=https://yourwebsite.com/product/${product.slug}`} target="_blank" rel="noopener noreferrer">
-                  <FaTwitter className="text-blue-400 text-2xl hover:text-blue-600" />
-                </Link>
-              </div>
+         <div className="flex space-x-3 mt-4">
+  <a
+    href={`https://www.facebook.com/profile.php?id=100091838611593`}
+    target="_blank"
+    rel="noopener noreferrer"
+  >
+    <FaFacebookF className="text-blue-600 text-2xl hover:text-blue-800" />
+  </a>
+
+  <a
+    href={`https://t.me/+KA6CTymnCfsxNTJk`}
+    target="_blank"
+    rel="noopener noreferrer"
+  >
+    <FaTwitter className="text-blue-400 text-2xl hover:text-blue-600" />
+  </a>
+</div>
+
             </div>
           ))}
         </div>

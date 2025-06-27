@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import clientPromise from "../../lib/mongodb";
 import sanitizeHtml from "sanitize-html";
+import nodemailer from "nodemailer";
 
 // Type for request body
 type ContactFormInput = {
@@ -23,7 +24,7 @@ function sanitizeInput(input: string): string {
   try {
     const decoded = decodeURIComponent(input);
     const sanitized = sanitizeHtml(decoded, {
-      allowedTags: [], // Remove all HTML tags
+      allowedTags: [],
       allowedAttributes: {},
     });
     return sanitized.trim();
@@ -75,17 +76,19 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "Invalid email format." }, { status: 400 });
     }
 
-    // Sanitize inputs
+    // Sanitize
     const sanitizedName = sanitizeInput(name);
     const sanitizedEmail = sanitizeInput(email);
     const sanitizedMessage = sanitizeInput(message);
 
-    // Basic content length check
-    if (sanitizedName.length > 100 || sanitizedEmail.length > 100 || sanitizedMessage.length > 1000) {
+    if (
+      sanitizedName.length > 100 ||
+      sanitizedEmail.length > 100 ||
+      sanitizedMessage.length > 1000
+    ) {
       return NextResponse.json({ error: "Input too long." }, { status: 400 });
     }
 
-    // Detect potential attacks
     if (
       containsMaliciousContent(name) ||
       containsMaliciousContent(email) ||
@@ -95,6 +98,7 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "Suspicious input detected." }, { status: 400 });
     }
 
+    // Save to DB
     const client = await clientPromise;
     const db = client.db("school-project");
     const collection = db.collection("contact_messages");
@@ -105,6 +109,32 @@ export async function POST(req: Request) {
       message: sanitizedMessage,
       submittedAt: new Date(),
     });
+
+    // Send email using Nodemailer
+    const transporter = nodemailer.createTransport({
+      host: "mail.16zip.com", // check your hosting email settings
+      port: 465,
+      secure: true,
+      auth: {
+        user: process.env.EMAIL_USER!,
+        pass: process.env.EMAIL_PASS!,
+      },
+    });
+
+    await transporter.sendMail({
+  from: `"16Zip Website" <support@16zip.com>`, // authenticated sender
+  to: "support@16zip.com", // your inbox receives the message
+  replyTo: sanitizedEmail, // replies go to the customer
+  subject: "New Contact Message from Website",
+  html: `
+    <h3>New Message from 16Zip Website</h3>
+    <p><strong>Name:</strong> ${sanitizedName}</p>
+    <p><strong>Email:</strong> ${sanitizedEmail}</p>
+    <p><strong>Message:</strong></p>
+    <p>${sanitizedMessage}</p>
+  `,
+});
+
 
     return NextResponse.json({ message: "Your message has been sent successfully." }, { status: 201 });
 

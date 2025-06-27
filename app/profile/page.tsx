@@ -18,13 +18,13 @@ export default function Page() {
     "@context": "https://schema.org",
     "@type": "WebPage",
     name: "Login - 16Zips",
-    url: "https://www.16zips.com/login",
+    url: "https://www.16zip.com/login",
     description:
       "Login to your 16Zips account for a personalized experience, order tracking, and access to premium cannabis products.",
     publisher: {
       "@type": "Organization",
       name: "16Zips",
-      url: "https://www.16zips.com",
+      url: "https://www.16zip.com",
     },
   };
 

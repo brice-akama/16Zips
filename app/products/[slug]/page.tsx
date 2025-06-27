@@ -1,5 +1,6 @@
+export const dynamic = "force-dynamic";
 
-// app/[slug]/page.tsx
+
 import { fetchProduct } from "./fetchProduct";
 import ProductDetailsPage from "./ProductDetailsPage";
 import { Metadata } from "next";
@@ -10,31 +11,43 @@ type Props = {
   searchParams: { lang: string };
 };
 
-// ✅ Build-time static paths
+// ✅ Build-time static paths (TEMPORARILY DISABLED to prevent build errors)
+/*
 export async function generateStaticParams() {
-  const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/products`);
+  try {
+    const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/products`);
 
-  const data = await res.json();
-  console.log('generateStaticParams - fetched data:', data); // Check shape here
+    // If fetch failed, this will throw and go to catch block
+    if (!res.ok) {
+      console.warn("⚠️ Failed to fetch products. Status:", res.status);
+      return [];
+    }
 
-  return Array.isArray(data)
-    ? data.map((product: any) => ({ slug: product.slug }))
-    : [];
+    const data = await res.json();
+    console.log('generateStaticParams - fetched data:', data); // For debug
+
+    return Array.isArray(data)
+      ? data.map((product: any) => ({ slug: product.slug }))
+      : [];
+  } catch (error) {
+    console.error("❌ generateStaticParams failed:", error);
+    return []; // Prevent build crash
+  }
 }
+*/
 
 
 // ✅ Awaiting async `params` and `searchParams`
 export async function generateMetadata(props: Promise<Props>): Promise<Metadata> {
-  const { params, searchParams } = await props;
-  const lang = searchParams.lang || "en";
+  const { params } = await props;
 
-  const product = await fetchProduct(params.slug, lang);
+  const product = await fetchProduct(params.slug, "en");
 
   if (!product || !product.name) return notFound();
 
   const ogImageUrl = `${process.env.NEXT_PUBLIC_API_URL}/api/products/og?title=${encodeURIComponent(product.name)}`;
   const image = product.mainImage || ogImageUrl;
-  const baseUrl = `https://16zips.com/products/${product.slug}`;
+  const baseUrl = `https://16zip.com/products/${product.slug}`;
 
   return {
     title: product.seoTitle || `${product.name} | 16Zips`,
@@ -53,16 +66,11 @@ export async function generateMetadata(props: Promise<Props>): Promise<Metadata>
       images: [image],
     },
     alternates: {
-      canonical: baseUrl,
-      languages: {
-        'en': `${baseUrl}?lang=en`,
-        'fr': `${baseUrl}?lang=fr`,
-        'es': `${baseUrl}?lang=es`,
-        'it': `${baseUrl}?lang=it`,
-      },
+      canonical: baseUrl, // ✅ Clean canonical without ?lang
     },
   };
 }
+
 
 
 export const revalidate = 60;

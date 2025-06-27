@@ -18,13 +18,13 @@ export default function Page() {
     "@context": "https://schema.org",
     "@type": "WebPage",
     name: "Wishlist - 16Zips",
-    url: "https://www.16zips.com/wishlist",
+    url: "https://www.16zip.com/wishlist",
     description:
       "The Wishlist page allows users to save their favorite cannabis products for later purchase on 16Zips.",
     publisher: {
       "@type": "Organization",
       name: "16Zips",
-      url: "https://www.16zips.com",
+      url: "https://www.16zip.com",
     },
   };
 

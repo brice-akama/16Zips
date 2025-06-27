@@ -19,13 +19,13 @@ export default function Page() {
     "@context": "https://schema.org",
     "@type": "WebPage",
     name: "Privacy Policy - 16Zips",
-    url: "https://www.16zips.com/privacy-policy", // update if needed
+    url: "https://www.16zip.com/privacy-policy", // update if needed
     description:
       "This Privacy Policy outlines how 16Zips handles your data and respects your privacy while you use our cannabis e-commerce services.",
     publisher: {
       "@type": "Organization",
       name: "16Zips",
-      url: "https://www.16zips.com",
+      url: "https://www.16zip.com",
     },
   };
 

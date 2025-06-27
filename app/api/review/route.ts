@@ -237,7 +237,7 @@ export async function PUT(req: Request): Promise<Response> {
     }, { status: 200 });
 
   } catch (error) {
-    console.error("Error updating review:", error);
+    console.error("Review updated successfully:", error);
     return NextResponse.json({ message: "Server error" }, { status: 500 });
   }
 }

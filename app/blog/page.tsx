@@ -3,6 +3,7 @@ import { Metadata } from "next";
 import BlogPage from "./BlogPage";
 import React from "react";
 
+
 // Metadata for SEO
 export const metadata: Metadata = {
   title: "Cannabis Blog - 16Zips",
@@ -18,13 +19,13 @@ export default function Page() {
     "@context": "https://schema.org",
     "@type": "Blog",
     name: "16Zips Blog",
-    url: "https://www.16zips.com/blog",
+    url: "https://www.16zip.com/blog",
     description:
       "16Zips Blog features cannabis news, product reviews, and education to support your cannabis lifestyle and knowledge.",
     publisher: {
       "@type": "Organization",
       name: "16Zips",
-      url: "https://www.16zips.com",
+      url: "https://www.16zip.com",
     },
   };
 

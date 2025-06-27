@@ -18,13 +18,13 @@ export default function Page() {
     "@context": "https://schema.org",
     "@type": "WebPage",
     name: "Terms and Conditions - 16Zips",
-    url: "https://www.16zips.com/terms-and-conditions",
+    url: "https://www.16zip.com/terms-and-conditions",
     description:
       "The Terms and Conditions page outlines the rules and regulations for using the 16Zips website and purchasing cannabis products.",
     publisher: {
       "@type": "Organization",
       name: "16Zips",
-      url: "https://www.16zips.com",
+      url: "https://www.16zip.com",
     },
   };
 

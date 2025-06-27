@@ -1,7 +1,7 @@
 'use client';
 
 import Head from "next/head";
-import Link from "next/link";
+
 
 const ShippingPolicy = () => {
   return (
@@ -13,8 +13,16 @@ const ShippingPolicy = () => {
           content="Learn about our shipping methods, delivery timelines, and policies for 16Zips cannabis products."
         />
       </Head>
+      <div
+  role="heading"
+  aria-level={1}
+  className="text-3xl font-bold text-gray-900 mt-8 sm:mt-10 md:mt-20 lg:mt-20"
+>
+Shipping Policy
+</div>
 
-      <h1 className="text-3xl font-bold text-gray-900 mt-8 sm:mt-10 md:mt-20 lg:mt-20">Shipping Policy</h1>
+
+       
       <p className="text-gray-600 mt-4">
         This Shipping Policy outlines how 16Zips handles shipping and delivery for all cannabis-related products purchased through our website.
       </p>
@@ -67,9 +75,9 @@ const ShippingPolicy = () => {
         <h2 className="text-xl font-semibold text-gray-800"> Contact Us</h2>
         <p className="text-gray-600">
           If you have any questions or concerns about shipping, please reach out to our support team at{" "}
-          <Link href="mailto:support@16zips.com" className="text-green-600 hover:underline">
-            support@16zips.com
-          </Link>.
+          <a href="mailto:support@16zip.com" className="text-green-600 hover:underline">
+            support@16zip.com
+          </a>.
         </p>
       </section>
     </main>

@@ -18,13 +18,13 @@ export default function Page() {
     "@context": "https://schema.org",
     "@type": "WebPage",
     name: "Refund Policy - 16Zips",
-    url: "https://www.16zips.com/refund-policy",
+    url: "https://www.16zip.com/refund-policy",
     description:
       "Our refund policy outlines the conditions under which refunds or replacements may be issued for cannabis products purchased from 16Zips.",
     publisher: {
       "@type": "Organization",
       name: "16Zips",
-      url: "https://www.16zips.com",
+      url: "https://www.16zip.com",
     },
   };
 

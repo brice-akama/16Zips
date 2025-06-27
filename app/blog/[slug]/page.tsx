@@ -1,32 +1,30 @@
-// app/blog/page.tsx
-
-// app/blog/[slug]/page.tsx
 import { getBlogPost } from './fetchBlog';
 import BlogDetails from './BlogDetails';
 import { Metadata } from 'next';
 
 type Props = {
   params: { slug: string };
-  searchParams: { lang?: string };
+  searchParams?: { lang?: string };
 };
 
-// ✅ Build-time static paths
+// TEMP: Comment out static path generation to prevent build errors
+/*
 export async function generateStaticParams() {
   const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/blog`);
-
   const data = await res.json();
-  console.log('generateStaticParams - fetched data:', data); // Check shape here
 
   return Array.isArray(data)
     ? data.map((post: any) => ({ slug: post.slug }))
     : [];
 }
+*/
 
-export async function generateMetadata({
-  params,
-  searchParams,
-}: Props): Promise<Metadata> {
-  const lang = searchParams.lang || 'en'; 
+// Tell Next.js to use runtime rendering instead of static generation
+export const dynamic = "force-dynamic";
+
+// Metadata generation
+export async function generateMetadata({ params, searchParams }: Props): Promise<Metadata> {
+  const lang = searchParams?.lang || 'en';
   const post = await getBlogPost(params.slug, lang);
 
   if (!post) return {};
@@ -37,8 +35,8 @@ export async function generateMetadata({
     translated?.metaDescription || post.metaDescription || post.title;
   const imageUrl = post.imageUrl;
   const ogImageUrl = `${process.env.NEXT_PUBLIC_API_URL}/api/blog/og?title=${encodeURIComponent(title)}`;
-  const image = imageUrl || ogImageUrl; // hybrid method here
-  const fullUrl = `${process.env.NEXT_PUBLIC_API_URL}/blog/${params.slug}`;
+  const image = imageUrl || ogImageUrl;
+  const canonicalUrl = `https://www.16zip.com/blog/${params.slug}`;
 
   return {
     title,
@@ -46,29 +44,30 @@ export async function generateMetadata({
     openGraph: {
       title,
       description,
-      url: fullUrl,
-      images: [{ url: image }], // ✅ use either DB image or generated image
+      url: canonicalUrl,
+      images: [{ url: image }],
       type: 'article',
     },
     twitter: {
       card: 'summary_large_image',
       title,
       description,
-      images: [image], // ✅ same here
+      images: [image],
+    },
+    alternates: {
+      canonical: canonicalUrl,
     },
     metadataBase: new URL(process.env.NEXT_PUBLIC_API_URL!),
   };
 }
 
+export const revalidate = 60;
 
-export default async function Page({
-  params,
-  searchParams,
-}: Props) {
-  const lang = searchParams.lang || 'en';
+// Page rendering
+export default async function Page({ params, searchParams }: Props) {
+  const lang = searchParams?.lang || 'en';
   const post = await getBlogPost(params.slug, lang);
 
-  // If the post doesn't exist, render a "Not Found" page or similar fallback
   if (!post) return <div>Post not found</div>;
 
   return <BlogDetails post={post} />;

@@ -70,15 +70,16 @@ const ReviewList = ({ productSlug }: { productSlug: string }) => {
                     height={50}
                     className="w-12 h-12 rounded-full object-cover"
                   />
-                  <div>
+                  <div className="overflow-visible">
                     <p className="font-semibold text-lg">{review.customerName}</p>
                     <p className="text-yellow-500">{renderStars(review.rating)}</p>
-                  </div>
-                </div>
-                <p className="mt-2 text-gray-700">{review.reviewContent}</p>
+                    <p className="mt-2 text-gray-700 ">{review.reviewContent}</p>
                 <p className="text-sm text-gray-500">
                   {new Date(review.createdAt).toLocaleDateString()}
                 </p>
+                  </div>
+                </div>
+
               </li>
             ))}
           </ul>
@@ -109,5 +110,34 @@ const ReviewList = ({ productSlug }: { productSlug: string }) => {
     </div>
   );
 };
+
+export const useReviewCount = (productSlug: string) => {
+  const [count, setCount] = useState(0);
+
+  useEffect(() => {
+    const fetchReviewCount = async () => {
+      try {
+        const response = await fetch(`/api/review?slug=${productSlug}`);
+        const result = await response.json();
+
+        if (result?.data) {
+          setCount(result.data.length);
+        } else {
+          setCount(0);
+        }
+      } catch (error) {
+        console.error("Error fetching review count:", error);
+        setCount(0);
+      }
+    };
+
+    if (productSlug) {
+      fetchReviewCount();
+    }
+  }, [productSlug]);
+
+  return count;
+};
+
 
 export default ReviewList;

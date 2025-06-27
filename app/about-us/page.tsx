@@ -17,8 +17,8 @@ export default function Page() {
     "@context": "https://schema.org",
     "@type": "Organization",
     name: "16Zips",
-    url: "https://www.16zips.com",
-    logo: "https://www.16zips.com/logo.png",
+    url: "https://www.16zip.com",
+    
     description:
       "16Zips is a premium cannabis brand offering high-quality cannabis flower, edibles, and concentrates. Trusted by thousands for discreet and reliable delivery.",
     sameAs: [

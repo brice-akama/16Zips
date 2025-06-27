@@ -18,13 +18,13 @@ export default function Page() {
     "@context": "https://schema.org",
     "@type": "WebPage",
     name: "Support - 16Zips",
-    url: "https://www.16zips.com/support",
+    url: "https://www.16zip.com/support",
     description:
       "The Support page provides answers to common questions like order tracking, return policies, and account updates. Get help with your cannabis orders on 16Zips.",
     publisher: {
       "@type": "Organization",
       name: "16Zips",
-      url: "https://www.16zips.com",
+      url: "https://www.16zip.com",
     },
   };
 

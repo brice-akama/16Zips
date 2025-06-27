@@ -66,14 +66,16 @@ export default function SlideContact() {
       </button>
 
       {/* WhatsApp Button */}
-      <Link
-        href="https://wa.me/237681152712"
-        target="_blank"
-        rel="noopener noreferrer"
-        className="bg-green-600 text-white px-3 py-2 rounded-r-none shadow-lg hover:bg-green-700 transition transform -rotate-90 origin-top-left"
-      >
-        <FaWhatsapp size={24} />
-      </Link>
+  <Link
+  href="https://wa.me/16266587663?text=Hi%2C%20I'm%20looking%20for%20more%20information%20about%20your%20cannabis%20products."
+  target="_blank"
+  rel="noopener noreferrer"
+  className="bg-green-600 text-white px-3 py-2 rounded-r-none shadow-lg hover:bg-green-700 transition transform -rotate-90 origin-top-left"
+>
+  <FaWhatsapp size={24} />
+</Link>
+
+
     </>
 
     

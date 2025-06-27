@@ -47,6 +47,9 @@ const ReviewEdit: React.FC = (props) => {
         body: JSON.stringify(updatedReview),
       });
 
+      console.log("Backend response status:", response.status);
+
+
       if (response.ok) {
         notify("Review updated successfully", { type: "success" });
         refresh();

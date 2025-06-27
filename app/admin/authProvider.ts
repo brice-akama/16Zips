@@ -2,10 +2,8 @@ export const authProvider = {
   login: async ({ email, password }: { email: string; password: string }) => {
     const response = await fetch('/api/auth/secure-login', {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      credentials: 'include', // ✅ ensures cookie is stored
+      headers: { 'Content-Type': 'application/json' },
+      credentials: 'include',
       body: JSON.stringify({ email, password }),
     });
 
@@ -16,21 +14,18 @@ export const authProvider = {
   },
 
   logout: async () => {
-    // ✅ Calls API to clear the cookie
     await fetch('/api/auth/logout', {
       method: 'POST',
-      credentials: 'include', // ✅ sends auth cookie to server
+      credentials: 'include',
     });
-
     return Promise.resolve();
   },
 
   checkAuth: async () => {
-    // ✅ Uses cookie instead of token in header
     try {
       const response = await fetch('/api/protected', {
         method: 'GET',
-        credentials: 'include', // ✅ sends cookie with request
+        credentials: 'include',
       });
 
       if (!response.ok) {
@@ -43,8 +38,14 @@ export const authProvider = {
     }
   },
 
-  checkError: (error: any) => {
-    if (error.status === 401 || error.status === 403) {
+  checkError: (error: unknown) => {
+    if (
+      typeof error === "object" &&
+      error !== null &&
+      'status' in error &&
+      ((error as { status?: number }).status === 401 ||
+       (error as { status?: number }).status === 403)
+    ) {
       return Promise.reject();
     }
     return Promise.resolve();

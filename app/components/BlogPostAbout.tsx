@@ -52,13 +52,14 @@ export default function BlogPostAbout() {
 
   return (
     <div className="container mx-auto px-4 py-10 mt-7">
-      <div className="flex justify-between items-center mb-8">
-        <h2 className="text-3xl font-bold">Latest in Cannabis Wellness</h2>
-        <Link href="/blog" className="text-green-600 hover:text-green-800 flex items-center space-x-1">
-          <span className="text-lg font-medium">View All Articles</span>
-          <span>&gt;</span>
-        </Link>
-      </div>
+<div className="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-8 gap-4">
+  <h2 className="text-2xl sm:text-3xl font-bold">Latest in Cannabis Wellness</h2>
+  <Link href="/blog" className="text-green-600 hover:text-green-800 flex items-center space-x-1">
+    <span className="text-base sm:text-lg font-medium">View All Articles</span>
+    <span>&gt;</span>
+  </Link>
+</div>
+
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
         {posts.length > 0 ? (
           posts.map((post) => (

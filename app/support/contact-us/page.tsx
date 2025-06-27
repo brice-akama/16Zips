@@ -18,13 +18,13 @@ export default function Page() {
     "@context": "https://schema.org",
     "@type": "WebPage",
     name: "Contact Us - 16Zips",
-    url: "https://www.16zips.com/contact-us",
+    url: "https://www.16zip.com/contact-us",
     description:
       "Contact 16Zips for any inquiries, or visit us. We are happy to assist you with any questions about our products or services.",
     publisher: {
       "@type": "Organization",
       name: "16Zips",
-      url: "https://www.16zips.com",
+      url: "https://www.16zip.com",
     },
   };
 

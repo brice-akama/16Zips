@@ -79,7 +79,15 @@ export default function BlogPage() {
 
   return (
     <div className="container mx-auto px-4 py-10 mt-20">
-      <h1 className="text-4xl font-bold text-center mb-12">Latest Blog Posts</h1>
+<div
+  role="heading"
+  aria-level={1}
+  className="text-4xl font-bold text-center mt-10 md:mt-20"
+>
+  Latest Blog Posts
+</div>
+
+      
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
         {currentPosts.length > 0 ? (
           currentPosts.map((post) => (
@@ -94,6 +102,7 @@ export default function BlogPage() {
 />
 
               <div className="p-6">
+                   
                 <h2 className="text-2xl font-semibold mb-3">{post.title}</h2>
                 {/* Removed author, date, and content preview */}
                 <Link href={`/blog/${post.slug}`} className="inline-block mt-4">

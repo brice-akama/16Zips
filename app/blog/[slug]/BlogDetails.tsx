@@ -2,6 +2,7 @@
 import parse from 'html-react-parser';
 import Image from 'next/image';
 import Head from 'next/head';
+import Link from 'next/link';
 
 interface BlogPost {
   title: string;
@@ -42,8 +43,26 @@ export default function BlogDetails({ post }: { post: BlogPost }) {
       </Head>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mt-10 md:mt-20 lg:mt-20">
+        <nav
+  className="block lg:hidden text-sm text-gray-600"
+  aria-label="Breadcrumb"
+>
+  <ol className="inline-flex items-center space-x-1">
+    <li>
+      <Link href="/" className="text-blue-600 hover:underline">Home</Link>
+    </li>
+    <li>/</li>
+    <li>
+      <Link href="/blog" className="text-blue-600 hover:underline">Blog</Link>
+    </li>
+    
+    
+  </ol>
+</nav>
+
         {post.imageUrl && (
           <div className="w-full h-[300px] lg:h-[500px] relative">
+            
             <Image
               src={post.imageUrl}
               alt={post.title}
@@ -55,6 +74,24 @@ export default function BlogDetails({ post }: { post: BlogPost }) {
           </div>
         )}
         <div className="flex flex-col justify-center">
+<nav
+  className="hidden lg:inline-block text-sm text-gray-600 mb-4"
+  aria-label="Breadcrumb"
+>
+  <ol className="inline-flex items-center space-x-1 lg:space-x-2">
+    <li>
+      <Link href="/" className="text-blue-600 hover:underline">Home</Link>
+    </li>
+    <li>/</li>
+    <li>
+      <Link href="/blog" className="text-blue-600 hover:underline">Blog</Link>
+    </li>
+    
+    
+  </ol>
+</nav>
+
+
           <h1 className="text-3xl font-bold mb-2">{post.title}</h1>
           <p className="text-gray-500 text-sm">
             {new Date(post.createdAt).toLocaleDateString(undefined, {

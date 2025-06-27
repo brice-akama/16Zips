@@ -140,7 +140,23 @@ const [categorySEO, setCategorySEO] = useState<any | null>(null);
 
 
   return (
-    <div className="max-w-7xl mx-auto px-4 py-10 mt-20">
+    <div className="max-w-7xl mx-auto px-4 py-10 mt-10">
+
+     
+<nav
+  className="block text-sm text-gray-600  mt-20 lg:mt-20"
+  aria-label="Breadcrumb"
+>
+  <ol className="inline-flex items-center space-x-2">
+    <li>
+      <Link href="/" className="text-blue-600 hover:underline">Home</Link>
+    </li>
+    <li>/</li>
+    <li className="text-gray-900 font-medium">Shop</li>
+  </ol>
+</nav>
+
+
 
     
     <Head>
@@ -206,7 +222,7 @@ const [categorySEO, setCategorySEO] = useState<any | null>(null);
 
       {/* Desktop View - Sorting on the Left */}
       {/* Desktop View - Sorting on the Right */}
-      <div className="hidden md:flex justify-end items-center mt-20">
+      <div className="hidden md:flex justify-end items-center ">
         <select
           className="border p-2 rounded w-40"
           value={sortOrder}
@@ -222,7 +238,14 @@ const [categorySEO, setCategorySEO] = useState<any | null>(null);
       <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mt-2">
         {/* Left Sidebar - Categories */}
         <div className="hidden md:block">
-          <h2 className="text-xl font-bold mb-4">Categories</h2>
+                 <div
+  role="heading"
+  aria-level={2}
+   className="text-xl font-bold mb-8"
+>
+  Categories
+</div>
+           
           <ul>
             {categories.map((category) => (
               <li

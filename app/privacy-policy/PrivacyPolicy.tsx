@@ -2,7 +2,7 @@
 
 import React from "react";
 import Head from "next/head";
-import Link from "next/link";
+
 
 const PrivacyPolicy = () => {
   return (
@@ -14,8 +14,16 @@ const PrivacyPolicy = () => {
           content="Read our Privacy Policy to understand how 16Zips handles your data and protects your privacy when purchasing cannabis products."
         />
       </Head>
+      <div
+  role="heading"
+  aria-level={1}
+   className="text-3xl font-bold text-gray-900 mt-8 sm:mt-10 md:mt-20 lg:mt-20"
+>
+  Privacy Policy
+</div>
 
-      <h1 className="text-3xl font-bold text-gray-900 mt-8 sm:mt-10 md:mt-20 lg:mt-20">Privacy Policy</h1>
+
+     
       <p className="text-gray-600 mt-4">
         Welcome to 16Zips. Your privacy matters to us. This policy outlines how we collect, use, and protect your personal information when you interact with our cannabis marketplace.
       </p>
@@ -66,9 +74,10 @@ const PrivacyPolicy = () => {
         <h2 className="text-xl font-semibold text-gray-800"> Contact Us</h2>
         <p className="text-gray-600">
           If you have any questions about our privacy practices, reach out to us at{" "}
-          <Link href="mailto:support@16zips.com" className="text-blue-600 hover:underline">
-            support@16zips.com
-          </Link>.
+<a href="mailto:support@16zip.com" className="text-blue-600 hover:underline">
+  support@16zip.com
+</a>
+
         </p>
       </section>
     </main>

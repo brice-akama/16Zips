@@ -7,7 +7,7 @@ import { useCart } from "../context/CartContext";
 import { useRouter } from "next/navigation";
 import { toast, Toaster } from "react-hot-toast";
 import { ChevronDown, ChevronUp, ChevronRight } from "lucide-react";
-import SelectLanguageButton from "./SelectLanguageButton";
+
 import { useLanguage } from "../context/LanguageContext";
 import { useWishlist } from "../context/WishlistContext";
 
@@ -63,11 +63,20 @@ const Navbar = () => {
    
   // Ensure this is defined at the top or inside the component where it's being used
 const toSlug = (text: string): string => {
-  return text
+  const baseSlug = text
     .toLowerCase()
     .replace(/[^a-z0-9]+/g, '-')
     .replace(/(^-|-$)+/g, '');
+
+  // Add dash prefix only to specific ones
+  const exceptions = ['vape pods', 'vape cartridges'];
+  if (exceptions.includes(text.toLowerCase().trim())) {
+    return `-${baseSlug}`;
+  }
+
+  return baseSlug;
 };
+
 
 
 
@@ -101,24 +110,21 @@ const handleCategoryClick = (index: number) => {
                 await translate("Edibles Gummies"), 
                 await translate("Chocolates Edibles"),
                 
-                await translate("Brownies"),
-                await translate("Hard Candies")
+                
               ] 
             },
             
             {
               name: await translate("Concentrates"),
               subMenu: [
-                await translate("Wax"),
-                await translate("Shatter"),
-                await translate("Snowball"),
+                
                 await translate("Moon Rock"),
                 await translate("Live Resin"),
-                await translate("Rosin"),
+              
                 await translate("Distillate"),
-                await translate("Hash"),
+                
                 await translate("Budder"),
-                await translate("Kief"),
+                
                 await translate("Crumble"),
                 
               ]
@@ -130,7 +136,7 @@ const handleCategoryClick = (index: number) => {
                 await translate("Dried Mushrooms"),
                 await translate("Chocolate Bars"),
                 await translate("Gummies"),
-                await translate("Microdose Kits"),
+                
                 
               ]
             },
@@ -170,9 +176,13 @@ const handleCategoryClick = (index: number) => {
     // Define a list of known paths to handle directly
     const knownPaths = [
       "/privacy-policy",
-      "/terms-of-service",
-      "/contact-us",
-      "/about-us", // Match "about" to "/about-us"
+      "/terms",
+      "/support",
+      "/about-us", 
+      "/refund-policy",
+      "/shipping-info",
+      "/faqs",
+       "/contact-us",
     ];
 
     try {
@@ -399,8 +409,7 @@ const goBack = () => {
               </div>
             ))}
 
-            {/* Language Selector Button */}
-            <SelectLanguageButton />
+            
           </div>
         </div>
       )}

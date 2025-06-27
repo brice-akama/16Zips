@@ -18,13 +18,13 @@ export default function Page() {
     "@context": "https://schema.org",
     "@type": "WebPage",
     name: "Shipping Policy - 16Zips",
-    url: "https://www.16zips.com/shipping-policy",
+    url: "https://www.16zip.com/shipping-policy",
     description:
       "This Shipping Policy explains how and when cannabis products from 16Zips will be delivered, including estimated delivery times and shipping restrictions.",
     publisher: {
       "@type": "Organization",
       name: "16Zips",
-      url: "https://www.16zips.com",
+      url: "https://www.16zip.com",
     },
   };
 

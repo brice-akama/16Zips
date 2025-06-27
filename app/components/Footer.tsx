@@ -3,7 +3,7 @@
 
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
-import { FaFacebookF, FaInstagram,  FaTelegramPlane } from "react-icons/fa";
+import { FaFacebookF,   FaTelegramPlane } from "react-icons/fa";
 import { useLanguage } from "@/app/context/LanguageContext";
 
 const Footer: React.FC = () => {
@@ -26,7 +26,7 @@ const Footer: React.FC = () => {
     shippingInfo: "Shipping Info",
     refundPolicy: "Shipping Info",
     followUs: "Follow Us",
-    copyright: `© ${new Date().getFullYear()} 16zips.com. All rights reserved.`,
+    copyright: `© ${new Date().getFullYear()} 16zip.com. All rights reserved.`,
   });
 
   useEffect(() => {
@@ -160,15 +160,27 @@ const Footer: React.FC = () => {
         <div>
           <h3 className="font-semibold text-lg">{translatedTexts.followUs}</h3>
           <div className="flex justify-center md:justify-start space-x-4 mt-4">
-            <Link href="#" className="text-blue-800 hover:text-blue-300">
-              <FaFacebookF size={20} />
-            </Link>
-            <Link href="#" className="text-red-400 hover:text-blue-300">   
-              <FaInstagram size={20} />
-            </Link>
-            <Link href="#" className="text-[#0088cc] hover:text-blue-300">   
-              <FaTelegramPlane size={20} />
-            </Link>
+<Link
+  href="https://www.facebook.com/profile.php?id=100091838611593"
+  target="_blank"
+  rel="noopener noreferrer"
+  className="text-blue-800 hover:text-blue-300"
+>
+  <FaFacebookF size={20} />
+</Link>
+
+            
+<Link
+  href="https://t.me/+KA6CTymnCfsxNTJk"
+  target="_blank"
+  rel="noopener noreferrer"
+  className="text-[#0088cc] hover:text-blue-300"
+>
+  <FaTelegramPlane size={20} />
+</Link>
+
+
+
           </div>
         </div>
       </div>

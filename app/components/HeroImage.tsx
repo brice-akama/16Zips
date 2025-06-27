@@ -14,6 +14,11 @@ const HeroImage = () => {
       title: "Relax, Recharge, Reconnect",
       subtitle: "Explore our curated edibles and concentrates",
     },
+    {
+      image: "/assets/images.png",
+      title: "Crafted for the Curated Experience.",
+      subtitle: "Premium cannabis products crafted for your lifestyle.",
+    },
   ];
 
   const [currentIndex, setCurrentIndex] = useState(0);

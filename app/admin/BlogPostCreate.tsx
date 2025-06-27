@@ -72,17 +72,16 @@ const BlogPostCreate: React.FC<CreateProps> = (props) => {
 
   // Add event listener for paste
   useEffect(() => {
-    const editor = quillRef.current?.getEditor();
-    if (editor) {
-      editor.root.addEventListener("paste", handlePaste); // Listen for paste events
-    }
-    return () => {
-      const editor = quillRef.current?.getEditor();
-      if (editor) {
-        editor.root.removeEventListener("paste", handlePaste); // Clean up event listener on unmount
-      }
-    };
-  }, []);
+  const editor = quillRef.current?.getEditor();
+  if (!editor) return;
+
+  editor.root.addEventListener("paste", handlePaste);
+
+  return () => {
+    editor.root.removeEventListener("paste", handlePaste);
+  };
+}, []);
+
 
   // Submit form data
   const handleSubmit = async (values: any) => {

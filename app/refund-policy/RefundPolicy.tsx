@@ -1,7 +1,7 @@
 'use client';
 
 import Head from "next/head";
-import Link from "next/link";
+
 
 const RefundPolicy = () => {
   return (
@@ -14,7 +14,16 @@ const RefundPolicy = () => {
         />
       </Head>
 
-      <h1 className="text-3xl font-bold text-gray-900 mt-8 sm:mt-10 md:mt-20 lg:mt-20">Refund & Return Policy</h1>
+      <div
+  role="heading"
+  aria-level={1}
+   className="text-3xl font-bold text-gray-900 mt-8 sm:mt-10 md:mt-20 lg:mt-20"
+>
+  Refund & Return Policy
+</div>
+
+
+      
       <p className="text-gray-600 mt-4">
         At 16Zips, we prioritize your satisfaction while complying with cannabis regulations. Please review our refund and return policy carefully before making a purchase.
       </p>
@@ -48,8 +57,8 @@ const RefundPolicy = () => {
         <h2 className="text-xl font-semibold text-gray-800"> Order Cancellations</h2>
         <p className="text-gray-600">
           Orders cannot be canceled once they are processed and fulfilled. If you need to make changes to your order, contact us immediately at{" "}
-          <a href="mailto:support@16zips.com" className="text-green-600 hover:underline">
-            support@16zips.com
+          <a href="mailto:support@16zip.com" className="text-green-600 hover:underline">
+            support@16zip.com
           </a>, and we’ll do our best to accommodate your request if the order hasn’t shipped yet.
         </p>
       </section>
@@ -59,9 +68,9 @@ const RefundPolicy = () => {
         <h2 className="text-xl font-semibold text-gray-800"> Contact Us</h2>
         <p className="text-gray-600">
           For questions regarding refunds or returns, please email{" "}
-          <Link href="mailto:support@16zips.com" className="text-green-600 hover:underline">
-            support@16zips.com
-          </Link>. We’re here to help!
+          <a href="mailto:support@16zip.com" className="text-green-600 hover:underline">
+            support@16zip.com
+          </a>. We’re here to help!
         </p>
       </section>
     </main>

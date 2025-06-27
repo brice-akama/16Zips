@@ -11,7 +11,16 @@ const TermsAndConditions = () => {
         <meta name="description" content="Read the Terms and Conditions for using 16Zips' cannabis products and website." />
       </Head>
 
-      <h1 className="text-3xl font-bold text-gray-900 mt-8 sm:mt-10 md:mt-20 lg:mt-20">Terms & Conditions</h1>
+      <div
+  role="heading"
+  aria-level={1}
+  className="text-3xl font-bold text-gray-900 mt-8 sm:mt-10 md:mt-20 lg:mt-20"
+>
+  Terms & Conditions
+</div>
+
+
+       
       <p className="text-gray-600 mt-4">
         These terms outline the rules and regulations for using 16Zips' website and cannabis product-related services.
       </p>
@@ -48,8 +57,8 @@ const TermsAndConditions = () => {
         <h2 className="text-xl font-semibold text-gray-800"> Contact Us</h2>
         <p className="text-gray-600">
           If you have any questions or concerns about our terms or services, feel free to contact us at{" "}
-          <Link href="mailto:support@16zips.com" className="text-green-600 hover:underline">
-            support@16zips.com
+          <Link href="mailto:support@16zip.com" className="text-green-600 hover:underline">
+            support@16zip.com
           </Link>.
         </p>
       </section>
