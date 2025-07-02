@@ -12,7 +12,7 @@ const Footer: React.FC = () => {
   const [translatedTexts, setTranslatedTexts] = useState({
     companyName: "16Zips",
     description:
-      "At 16Zips, we’re committed to delivering high-quality cannabis, edibles, vapes, and more — all curated for your lifestyle and wellness. Shop confidently with fast delivery and a customer-first experience. ",
+      "At 16Zips, we’re committed to delivering high-quality cannabis Flowers, Quality Seeds, Edibles, Vapes, and more — all curated for your lifestyle and wellness. Shop confidently with fast delivery and a customer-first experience. ",
     newsletter: "Newsletter",
     newsletterDesc: "Get updates on new products and special offers.",
     placeholder: "Enter your email",
@@ -34,7 +34,7 @@ const Footer: React.FC = () => {
       setTranslatedTexts({
         companyName: await translate("16zips"),
         description: await translate(
-          "At 16Zips, we’re committed to delivering high-quality cannabis, edibles, vapes, and more — all curated for your lifestyle and wellness. Shop confidently with fast delivery and a customer-first experience. "
+          "At 16Zips, we’re committed to delivering high-quality cannabis Flowers, Quality Seeds, Edibles, Vapes, and more — all curated for your lifestyle and wellness. Shop confidently with fast delivery and a customer-first experience. "
         ),
         newsletter: await translate("Newsletter"),
         newsletterDesc: await translate("Get updates on new products and special offers."),
