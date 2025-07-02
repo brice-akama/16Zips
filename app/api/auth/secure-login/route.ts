@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import jwt from "jsonwebtoken";
 import clientPromise from "../../../lib/mongodb";
 import { z } from "zod";
-import cookie from "cookie";
+import { serialize } from "cookie";
 import sanitizeHtml from "sanitize-html";
 import bcrypt from "bcryptjs";
 
@@ -91,7 +91,7 @@ export async function POST(req: Request) {
       path: "/",
     };
 
-    const cookieHeader = cookie.serialize("auth_token", token, cookieOptions);
+    const cookieHeader = serialize("auth_token", token, cookieOptions);
     const response = NextResponse.json({ message: "Login successful", token });
     response.headers.set("Set-Cookie", cookieHeader);
 

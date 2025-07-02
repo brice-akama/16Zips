@@ -39,7 +39,13 @@ const WishlistPage: React.FC = () => {
   return (
     <section className="max-w-6xl mx-auto px-4 py-10 mt-20">
       <div className="text-center mb-10">
-        <h1 className="text-3xl sm:text-4xl font-bold text-gray-900 mt-20">Your Wishlist</h1>
+        <div
+  role="heading"
+  aria-level={1}
+   className="text-3xl sm:text-4xl font-bold text-gray-900 mt-20">
+   Your Wishlist
+</div>
+         
         <p className="text-lg mt-3 text-gray-600">Here are the products you've added to your wishlist.</p>
       </div>
 

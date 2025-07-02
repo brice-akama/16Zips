@@ -1,8 +1,9 @@
 import { NextResponse } from "next/server";
-import cookie from "cookie";
+import { serialize } from "cookie";
+
 
 export async function POST() {
-  const expiredCookie = cookie.serialize("auth_token", "", {
+ const expiredCookie = serialize("auth_token", "", {
     httpOnly: true,
     secure: process.env.NODE_ENV === "production",
     sameSite: "strict",
