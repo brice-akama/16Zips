@@ -7,18 +7,24 @@ const HeroImage = () => {
   // Array of image objects with text
   const slides = [
     
+  {
+  image: "/assets/cannabis.png",
+  title: "Where Quality Takes Root.",
+  subtitle: "Explore our expertly cultivated cannabis grown under precision lighting for peak potency.",
+},
+
     
-    
-    {
-      image: "/assets/hero1.jpg",
-      title: "Relax, Recharge, Reconnect",
-      subtitle: "Explore our curated edibles and concentrates",
-    },
-    {
-      image: "/assets/images.png",
-      title: "Crafted for the Curated Experience.",
-      subtitle: "Premium cannabis products crafted for your lifestyle.",
-    },
+{
+  image: "/assets/hero1.jpg",
+  title: "Relax. Recharge. Reconnect.",
+  subtitle: "Unwind with handpicked edibles and potent concentrates made for mindful moments.",
+},
+{
+  image: "/assets/images.png",
+  title: "Elevated Living Starts Here.",
+  subtitle: "Discover premium cannabis curated to complement your lifestyle and wellness journey.",
+}
+ 
   ];
 
   const [currentIndex, setCurrentIndex] = useState(0);

@@ -32,13 +32,14 @@ const BackToTop = () => {
   if (!isVisible) return null;
 
   return (
-    <button
-      onClick={scrollToTop}
-      className="fixed bottom-4 right-4 z-50 p-2 bg-blue-600 text-white rounded-full shadow-md hover:bg-blue-700 transition"
-      aria-label="Back to Top"
-    >
-      <MdArrowUpward className="h-6 w-6" /> {/* Use React Icon here */}
-    </button>
+<button
+  onClick={scrollToTop}
+  className="fixed bottom-20 right-4 z-50 p-2 bg-blue-600 text-white rounded-full shadow-md hover:bg-blue-700 transition"
+  aria-label="Back to Top"
+>
+  <MdArrowUpward className="h-6 w-6" />
+</button>
+
   );
 };
 

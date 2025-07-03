@@ -11,7 +11,7 @@ const Description: FC = () => {
   useEffect(() => {
     const translateText = async () => {
       const translated = await translate(
-        "At 16Zips, we’re passionate about offering you the highest-quality Cannabis Flowers, Seeds, Edibles, Vapes, and more — all carefully selected to enhance your lifestyle and wellness. We believe shopping should be easy, enjoyable, and personal, which is why we provide fast delivery and friendly, dedicated support every step of the way. Whether you’re exploring new favorites or sticking with trusted classics, we’re here to make your experience exceptional. Join the 16Zips family today and feel the difference in every order.",
+        "At 16Zips, we’re dedicated to delivering premium Cannabis Flowers, Seeds, Edibles, Vapes, and more — all carefully curated to elevate your lifestyle and wellness. With fast, discreet shipping and friendly, reliable support, we make your shopping experience smooth, safe, and enjoyable. Whether you're exploring new favorites or sticking with trusted classics, every order is handled with care and crafted to exceed expectations. Join the 16Zips family — where quality, convenience, and customer care come together.",
       );
       setTranslatedText(translated);
     };

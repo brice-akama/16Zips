@@ -28,7 +28,7 @@ interface BillingDetails {
 }
 
 interface OrderRequestBody {
-  paymentMethod: 'venmo' | 'Papal' | 'crypto';
+  paymentMethod: 'Cash App' | 'Paypal' | 'crypto';
   cartItems: CartItem[];
   totalPrice: number;
   billingDetails: BillingDetails;
@@ -63,7 +63,7 @@ export async function POST(req: Request) {
     });
 
     // Validate payment method
-    const validPaymentMethods = ['venmo', 'Papal', 'crypto'];
+    const validPaymentMethods = ['Cash App', 'Paypal', 'crypto'];
     if (!validPaymentMethods.includes(paymentMethod)) {
       console.error("Invalid payment method:", paymentMethod);
       return NextResponse.json({ error: 'Invalid payment method.' }, { status: 400 });

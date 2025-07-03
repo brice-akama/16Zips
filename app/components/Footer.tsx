@@ -53,7 +53,7 @@ const Footer: React.FC = () => {
         shippingInfo: await translate("Shipping Info"),
         followUs: await translate("Follow Us"),
         copyright: await translate(
-          `© ${new Date().getFullYear()}  16zips.com. All rights reserved.`
+          `© ${new Date().getFullYear()}  16zip.com. All rights reserved.`
         ),
       });
     };
@@ -184,30 +184,50 @@ const Footer: React.FC = () => {
 
 
 
+
           </div>
         </div>
       </div>
 
       
-  {/* Payment Methods */}
+{/* Payment Methods */}
 <div className="mt-10 text-center">
-  <h4 className="text-lg font-semibold mb-4 text-gray-800">We Accept</h4>
-  <div className="flex justify-center items-center flex-wrap gap-6">
-    <div className="flex flex-col items-center">
-      <FaPaypal size={30} className="text-blue-600" />
-      <span className="text-sm mt-1 text-gray-700">PayPal</span>
+  <h4 className="text-sm font-semibold mb-4 text-gray-800">We Accept</h4>
+  <div className="flex justify-center items-center flex-wrap gap-3">
+    {/* PayPal */}
+    <div className="w-12 h-12 flex flex-col items-center justify-center rounded-full bg-blue-50 shadow">
+      <FaPaypal size={16} className="text-blue-600" />
+      <span className="text-[8px] mt-0.5 text-blue-800 font-medium">PayPal</span>
     </div>
-    <div className="flex flex-col items-center">
-      <SiCashapp size={30} className="text-green-500" />
-      <span className="text-sm mt-1 text-gray-700">Cash App</span>
+
+    {/* Cash App */}
+    <div className="w-12 h-12 flex flex-col items-center justify-center rounded-full bg-green-50 shadow">
+      <SiCashapp size={16} className="text-green-500" />
+      <span className="text-[8px] mt-0.5 text-green-800 font-medium">Cash App</span>
     </div>
-    <div className="flex flex-col items-center">
-      <FaBitcoin size={30} className="text-yellow-500" />
-      <span className="text-sm mt-1 text-gray-700">Bitcoin</span>
+
+    {/* Bitcoin */}
+    <div className="w-12 h-12 flex flex-col items-center justify-center rounded-full bg-yellow-50 shadow">
+      <FaBitcoin size={16} className="text-yellow-500" />
+      <span className="text-[8px] mt-0.5 text-yellow-800 font-medium">Bitcoin</span>
     </div>
+
     
+
+    {/* Visa */}
+    <div className="w-12 h-12 flex flex-col items-center justify-center rounded-full bg-indigo-50 shadow">
+      <FaCcVisa size={16} className="text-indigo-600" />
+      <span className="text-[8px] mt-0.5 text-indigo-800 font-medium">Visa</span>
+    </div>
+
+    {/* MasterCard */}
+    <div className="w-12 h-12 flex flex-col items-center justify-center rounded-full bg-red-50 shadow">
+      <FaCcMastercard size={16} className="text-red-600" />
+      <span className="text-[8px] mt-0.5 text-red-800 font-medium">MasterCard</span>
+    </div>
   </div>
 </div>
+
 
 
 {/* Copyright */}

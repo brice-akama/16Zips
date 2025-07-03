@@ -142,7 +142,7 @@ const WishlistPage: React.FC = () => {
       ) : (
         <div className="text-center text-gray-600">
           <p>Your wishlist is empty.</p>
-          <Link href="/" className="text-blue-600 font-semibold hover:underline mt-4">
+          <Link href="/shop" className="text-blue-600 font-semibold hover:underline mt-4">
             Start shopping now!
           </Link>
         </div>

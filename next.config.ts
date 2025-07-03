@@ -28,7 +28,7 @@ const nextConfig: NextConfig = {
         source: '/(.*)', // Apply these headers globally to all routes
         headers: [
        // next.config.js or headers() in middleware
-{
+    {
   key: 'Content-Security-Policy',
   value: `
     default-src 'self';
@@ -37,7 +37,8 @@ const nextConfig: NextConfig = {
       https://www.googletagmanager.com
       https://www.google-analytics.com
       https://embed.tawk.to
-      https://*.tawk.to;
+      https://*.tawk.to
+      https://cdn.jsdelivr.net;
     style-src 'self' 'unsafe-inline' https://code.jivosite.com https://embed.tawk.to;
     img-src 'self' data: https: blob:;
     connect-src 'self' https: wss:
@@ -51,9 +52,6 @@ const nextConfig: NextConfig = {
     child-src https://www.google.com https://maps.google.com https://embed.tawk.to;
   `.replace(/\s{2,}/g, ' ').trim(),
 },
-
-
-
 
 
 
