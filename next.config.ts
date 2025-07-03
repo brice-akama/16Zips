@@ -35,16 +35,23 @@ const nextConfig: NextConfig = {
     script-src 'self' 'unsafe-inline' 'unsafe-eval'
       https://code.jivosite.com
       https://www.googletagmanager.com
-      https://www.google-analytics.com;
-    style-src 'self' 'unsafe-inline' http://code.jivosite.com https://code.jivosite.com;
+      https://www.google-analytics.com
+      https://embed.tawk.to
+      https://*.tawk.to;
+    style-src 'self' 'unsafe-inline' https://code.jivosite.com https://embed.tawk.to;
     img-src 'self' data: https: blob:;
-    connect-src 'self' https: wss: https://code.jivosite.com wss://*.jivosite.com;
-    font-src 'self' https:;
-    media-src 'self' https://code.jivosite.com;
-    frame-src https://www.google.com https://maps.google.com;
-    child-src https://www.google.com https://maps.google.com;
+    connect-src 'self' https: wss:
+      https://code.jivosite.com
+      wss://*.jivosite.com
+      https://embed.tawk.to
+      wss://*.tawk.to;
+    font-src 'self' https: https://embed.tawk.to;
+    media-src 'self' https://code.jivosite.com https://embed.tawk.to;
+    frame-src https://www.google.com https://maps.google.com https://embed.tawk.to;
+    child-src https://www.google.com https://maps.google.com https://embed.tawk.to;
   `.replace(/\s{2,}/g, ' ').trim(),
 },
+
 
 
 

@@ -25,7 +25,7 @@ interface BillingDetails {
 }
 
 const OrderPage = () => {
-  const [paymentMethod, setPaymentMethod] = useState<'venmo' | 'Papal' | 'crypto' | ''>('');
+  const [paymentMethod, setPaymentMethod] = useState<'Cash App' | 'Paypal' | 'crypto' | ''>('');
   const [orderStatus, setOrderStatus] = useState<'idle' | 'success' | 'error'>('idle');
   const { cartItems, totalPrice } = useCart();
   const [cryptoWarning, setCryptoWarning] = useState(false);
@@ -134,14 +134,14 @@ const OrderPage = () => {
 
           <h3 className="text-lg font-semibold mt-4">Payment Methods</h3>
           <div className="space-y-2">
-            {['venmo', 'Papal', 'crypto'].map((method) => (
+            {['Cash App', 'Paypal', 'crypto'].map((method) => (
               <label key={method} className="flex items-center gap-2 cursor-pointer">
                 <input
                   type="radio"
                   name="paymentMethod"
                   value={method}
                   checked={paymentMethod === method}
-                  onChange={() => setPaymentMethod(method as 'venmo' | 'Papal' | 'crypto')}
+                  onChange={() => setPaymentMethod(method as 'Cash App' | 'Paypal' | 'crypto')}
                 />
                 {method.charAt(0).toUpperCase() + method.slice(1)}
               </label>

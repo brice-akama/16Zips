@@ -112,8 +112,8 @@ export default function CookiesPolicyPage() {
       </p>
       <ul className="list-none pl-4">
         <li><strong>Email:</strong> support@16zips.com</li>
-        <li><strong>Phone:</strong> [Insert if applicable]</li>
-        <li><strong>Address:</strong> [Insert business address]</li>
+        <li><strong>Phone:</strong> + 1 626 658 7663</li>
+        <li><strong>Address:</strong> 1601 S Soto St, Los Angeles,CA 90023</li>
       </ul>
 
       <hr className="my-10" />

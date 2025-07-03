@@ -3,7 +3,10 @@
 
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
-import { FaFacebookF,   FaTelegramPlane } from "react-icons/fa";
+import { FaFacebookF,   FaTelegramPlane, FaPaypal, FaBitcoin, FaCcVisa, FaCcMastercard  } from "react-icons/fa";
+
+import { SiCashapp} from "react-icons/si";
+
 import { useLanguage } from "@/app/context/LanguageContext";
 
 const Footer: React.FC = () => {
@@ -185,10 +188,33 @@ const Footer: React.FC = () => {
         </div>
       </div>
 
-      {/* Copyright */}
-      <div className="mt-10 text-center text-sm text-gray-800">
-        {translatedTexts.copyright}
-      </div>
+      
+  {/* Payment Methods */}
+<div className="mt-10 text-center">
+  <h4 className="text-lg font-semibold mb-4 text-gray-800">We Accept</h4>
+  <div className="flex justify-center items-center flex-wrap gap-6">
+    <div className="flex flex-col items-center">
+      <FaPaypal size={30} className="text-blue-600" />
+      <span className="text-sm mt-1 text-gray-700">PayPal</span>
+    </div>
+    <div className="flex flex-col items-center">
+      <SiCashapp size={30} className="text-green-500" />
+      <span className="text-sm mt-1 text-gray-700">Cash App</span>
+    </div>
+    <div className="flex flex-col items-center">
+      <FaBitcoin size={30} className="text-yellow-500" />
+      <span className="text-sm mt-1 text-gray-700">Bitcoin</span>
+    </div>
+    
+  </div>
+</div>
+
+
+{/* Copyright */}
+<div className="mt-4 text-center text-sm text-gray-800">
+  {translatedTexts.copyright}
+</div>
+
     </footer>
   );
 };
