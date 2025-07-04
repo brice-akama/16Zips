@@ -75,6 +75,23 @@ export default function RootLayout({
             `,
           }}
         />
+
+          {/* Conditionally load JivoChat only if NOT admin and NOT reset-password */}
+
+        {!isAdminRoute && !isResetPasswordPage && !isAdminLoginPage && (
+
+          <Script
+
+            src="https://code.jivosite.com/widget/YO0AKY0r12"
+
+            strategy="afterInteractive"
+
+            async
+
+          />
+
+        )}
+
       </head>
 
       <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
@@ -100,75 +117,7 @@ export default function RootLayout({
           </CartProvider>
         </WishlistProvider>
 
-        {/* ✅ Load Tawk.to Live Chat - Just Before </body> */}
-        {!isAdminRoute && !isResetPasswordPage && !isAdminLoginPage && (
-  <Script
-    id="tawk-script"
-    strategy="afterInteractive"
-    dangerouslySetInnerHTML={{
-      __html: `
-        (function(global){
-          global.$_Tawk_AccountKey='6866211125edf7190f46dc4a';
-          global.$_Tawk_WidgetId='1iv7f2c64';
-          global.$_Tawk_Unstable=false;
-          global.$_Tawk = global.$_Tawk || {};
-          (function (w){
-            function l() {
-              if (window.$_Tawk.init !== undefined) {
-                return;
-              }
-              window.$_Tawk.init = true;
-              var files = [
-                'https://embed.tawk.to/_s/v4/app/685389b9a70/js/twk-main.js',
-                'https://embed.tawk.to/_s/v4/app/685389b9a70/js/twk-vendor.js',
-                'https://embed.tawk.to/_s/v4/app/685389b9a70/js/twk-chunk-vendors.js',
-                'https://embed.tawk.to/_s/v4/app/685389b9a70/js/twk-chunk-common.js',
-                'https://embed.tawk.to/_s/v4/app/685389b9a70/js/twk-runtime.js',
-                'https://embed.tawk.to/_s/v4/app/685389b9a70/js/twk-app.js'
-              ];
-              if (typeof Promise === 'undefined') {
-                files.unshift('https://embed.tawk.to/_s/v4/app/685389b9a70/js/twk-promise-polyfill.js');
-              }
-              if (typeof Symbol === 'undefined' || typeof Symbol.iterator === 'undefined') {
-                files.unshift('https://embed.tawk.to/_s/v4/app/685389b9a70/js/twk-iterator-polyfill.js');
-              }
-              if (typeof Object.entries === 'undefined') {
-                files.unshift('https://embed.tawk.to/_s/v4/app/685389b9a70/js/twk-entries-polyfill.js');
-              }
-              if (!window.crypto) {
-                window.crypto = window.msCrypto;
-              }
-              if (typeof Event !== 'function') {
-                files.unshift('https://embed.tawk.to/_s/v4/app/685389b9a70/js/twk-event-polyfill.js');
-              }
-              if (!Object.values) {
-                files.unshift('https://embed.tawk.to/_s/v4/app/685389b9a70/js/twk-object-values-polyfill.js');
-              }
-              if (typeof Array.prototype.find === 'undefined') {
-                files.unshift('https://embed.tawk.to/_s/v4/app/685389b9a70/js/twk-arr-find-polyfill.js');
-              }
-              var s0 = document.getElementsByTagName('script')[0];
-              for (var i = 0; i < files.length; i++) {
-                var s1 = document.createElement('script');
-                s1.src = files[i];
-                s1.charset = 'UTF-8';
-                s1.setAttribute('crossorigin','*');
-                s0.parentNode.insertBefore(s1, s0);
-              }
-            }
-            if (document.readyState === 'complete') {
-              l();
-            } else if (w.attachEvent) {
-              w.attachEvent('onload', l);
-            } else {
-              w.addEventListener('load', l, false);
-            }
-          })(window);
-        })(window);
-      `,
-    }}
-  />
-)}
+        
 
       </body>
     </html>

@@ -7,7 +7,7 @@ import { useCart } from "../context/CartContext";
 import { useRouter } from "next/navigation";
 import { toast, Toaster } from "react-hot-toast";
 import { ChevronDown, ChevronUp, ChevronRight } from "lucide-react";
-
+import Image from "next/image";
 import { useLanguage } from "../context/LanguageContext";
 import { useWishlist } from "../context/WishlistContext";
 
@@ -279,20 +279,39 @@ const goBack = () => {
       <div className="bg-white shadow-md py-4 px-6 flex justify-between items-center h-20 mt-8">
 
 
-        <div className="flex items-center space-x-4">
-          {isMobile && (
-            <button onClick={() => setIsSidebarOpen(!isSidebarOpen)} className="text-lg">
-              {isSidebarOpen ? <FaTimes /> : <FaBars />}
-            </button>
-          )}
-          <Link href="/" className="text-5xl font-bold hidden md:block mt-2">
-            {translatedTexts.aquaBite}
-          </Link>
-          <Link href="/" className="md:hidden block w-full text-4xl font-bold text-center">
-            {translatedTexts.aquaBite}
-          </Link>
-        </div>
+          <div className="flex items-center space-x-4 bg-transparent">
+  {/* Sidebar toggle for mobile */}
+  {isMobile && (
+    <button onClick={() => setIsSidebarOpen(!isSidebarOpen)} className="text-lg">
+      {isSidebarOpen ? <FaTimes /> : <FaBars />}
+    </button>
+  )}
 
+  {/* Logo for desktop */}
+  <Link href="/" className="hidden md:block mt-4 bg-transparent">
+    <Image
+      src="/assets/logo.png"
+      alt="logo"
+      width={120} // adjust size as needed
+      height={40}
+      className="object-contain bg-transparent "
+    />
+  </Link>
+
+  {/* Logo for mobile */}
+  <div className=" md:hidden w-full">
+  <Link href="/" className="block bg-transparent">
+    <Image
+      src="/assets/logo.png"
+      alt="logo"
+      width={100}
+      height={30}
+      className="object-contain bg-transparent"
+    />
+  </Link>
+</div>
+
+</div>
         {/* Search Bar (Centered on Medium and Larger Devices) */}
         <div className="flex items-center w-1/2 bg-gray-50 rounded-full shadow-inner px-6 py-3 mx-auto mt-3 hidden md:flex">
           <input
