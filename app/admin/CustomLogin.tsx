@@ -59,23 +59,23 @@ const CustomLogin: React.FC = () => {
       {!forgotPasswordMode ? (
         <form onSubmit={handleSubmit} className="w-96 p-6 bg-white rounded shadow">
           <div className="mb-4">
-            <label className="block text-sm font-medium mb-2">Email</label>
+            <label className="block text-sm font-medium mb-2 text-blue-600">Email</label>
             <input
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className="w-full p-3 border rounded"
+              className="w-full p-3 border rounded text-blue-600"
               placeholder="Enter email"
               required
             />
           </div>
           <div className="mb-4">
-            <label className="block text-sm font-medium mb-2">Password</label>
+            <label className="block text-sm font-medium mb-2 text-blue-600">Password</label>
             <input
               type="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              className="w-full p-3 border rounded"
+              className="w-full p-3 border rounded text-blue-600"
               placeholder="Enter password"
               required
             />
