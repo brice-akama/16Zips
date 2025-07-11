@@ -43,25 +43,10 @@ export default function BlogDetails({ post }: { post: BlogPost }) {
       </Head>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mt-10 md:mt-20 lg:mt-20">
-        <nav
-  className="block lg:hidden text-sm text-gray-600"
-  aria-label="Breadcrumb"
->
-  <ol className="inline-flex items-center space-x-1">
-    <li>
-      <Link href="/" className="text-blue-600 hover:underline">Home</Link>
-    </li>
-    <li>/</li>
-    <li>
-      <Link href="/blog" className="text-blue-600 hover:underline">Blog</Link>
-    </li>
-    
-    
-  </ol>
-</nav>
+        
 
         {post.imageUrl && (
-          <div className="w-full h-[300px] lg:h-[500px] relative">
+          <div className="w-full h-[300px]  md:h-[550px] lg:h-[500px] relative">
             
             <Image
               src={post.imageUrl}
@@ -75,10 +60,10 @@ export default function BlogDetails({ post }: { post: BlogPost }) {
         )}
         <div className="flex flex-col justify-center">
 <nav
-  className="hidden lg:inline-block text-sm text-gray-600 mb-4"
+  className="inline-block text-sm text-gray-600 mb-4"
   aria-label="Breadcrumb"
 >
-  <ol className="inline-flex items-center space-x-1 lg:space-x-2">
+  <ol className="inline-flex items-center space-x-1 sm:space-x-2">
     <li>
       <Link href="/" className="text-blue-600 hover:underline">Home</Link>
     </li>
@@ -86,10 +71,9 @@ export default function BlogDetails({ post }: { post: BlogPost }) {
     <li>
       <Link href="/blog" className="text-blue-600 hover:underline">Blog</Link>
     </li>
-    
-    
   </ol>
 </nav>
+
 
 
           <h1 className="text-3xl font-bold mb-2">{post.title}</h1>

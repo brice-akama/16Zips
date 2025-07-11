@@ -17,6 +17,8 @@ import { GA_TRACKING_ID } from "@/lib/analytics";
 import BackToTop from "./components/BackToTop";
 import { LanguageProvider } from "./context/LanguageContext";
 import { Toaster } from "react-hot-toast";
+import ScrollToTop from "./components/ScrollToTop";
+import SalesNotification from "./components/SalesNotification";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -104,8 +106,11 @@ export default function RootLayout({
               {/* Show only if not admin or reset-password */}
               {!isAdminRoute && !isResetPasswordPage && <Navbar />}
               <CartDrawer />
+              {/* Add SalesNotification here */}
+        {!isAdminRoute && !isResetPasswordPage && <SalesNotification />}
 
               <main>
+                 <ScrollToTop /> {/* ✅ Add this here */}
                 {children}
                 {!isAdminRoute && !isResetPasswordPage && <BackToTop />}
               </main>

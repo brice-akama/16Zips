@@ -185,7 +185,8 @@ const [categorySEO, setCategorySEO] = useState<any | null>(null);
         
     
       {/* Mobile View - Sorting & Categories */}
-      <div className="md:hidden flex flex-col space-y-4 mb-6">
+      <div className="lg:hidden flex flex-col space-y-4 mb-6">
+
         <button
           className="bg-blue-600 text-white p-2 rounded"
           onClick={() => setShowCategories(!showCategories)}
@@ -222,7 +223,7 @@ const [categorySEO, setCategorySEO] = useState<any | null>(null);
 
       {/* Desktop View - Sorting on the Left */}
       {/* Desktop View - Sorting on the Right */}
-      <div className="hidden md:flex justify-end items-center ">
+      <div className="hidden lg:flex justify-end items-center ">
         <select
           className="border p-2 rounded w-40"
           value={sortOrder}
@@ -233,11 +234,14 @@ const [categorySEO, setCategorySEO] = useState<any | null>(null);
           <option value="high-to-low">Price: High to Low</option>
         </select>
       </div>
+     
 
       {/* Desktop Layout */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mt-2">
+      <div className="grid grid-cols-1 lg:grid-cols-4 gap-6 mt-2">
+
         {/* Left Sidebar - Categories */}
-        <div className="hidden md:block">
+        <div className="hidden lg:block">
+
                  <div
   role="heading"
   aria-level={2}

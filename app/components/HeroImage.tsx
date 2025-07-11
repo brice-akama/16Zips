@@ -15,7 +15,7 @@ const HeroImage = () => {
     },
     {
       image: "/assets/hero1.jpg",
-      title: "Relax. Recharge. Reconnect.",
+      title: "Relax Recharge Reconnect.",
       subtitle:
         "Unwind with handpicked edibles and potent concentrates made for mindful moments.",
     },

@@ -37,7 +37,7 @@ export default function ResetPasswordPageInner() {
 
   return (
     <div className="max-w-md mx-auto mt-10 p-6 border rounded">
-      <h1 className="text-xl mb-4">Reset Password</h1>
+      <h1 className="text-xl mb-4 text-blue-600">Reset Password</h1>
       {message && <p className="mb-4">{message}</p>}
       <form onSubmit={handleSubmit}>
         <input
@@ -46,7 +46,7 @@ export default function ResetPasswordPageInner() {
           value={password}
           onChange={e => setPassword(e.target.value)}
           required
-          className="w-full p-2 border rounded mb-4"
+          className="w-full p-2 border rounded mb-4 text-blue-600"
           minLength={6}
         />
         <button type="submit" className="w-full bg-blue-600 text-white p-2 rounded">

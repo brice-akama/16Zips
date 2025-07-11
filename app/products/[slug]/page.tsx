@@ -11,31 +11,6 @@ type Props = {
   searchParams: { lang: string };
 };
 
-// ✅ Build-time static paths (TEMPORARILY DISABLED to prevent build errors)
-/*
-export async function generateStaticParams() {
-  try {
-    const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/products`);
-
-    // If fetch failed, this will throw and go to catch block
-    if (!res.ok) {
-      console.warn("⚠️ Failed to fetch products. Status:", res.status);
-      return [];
-    }
-
-    const data = await res.json();
-    console.log('generateStaticParams - fetched data:', data); // For debug
-
-    return Array.isArray(data)
-      ? data.map((product: any) => ({ slug: product.slug }))
-      : [];
-  } catch (error) {
-    console.error("❌ generateStaticParams failed:", error);
-    return []; // Prevent build crash
-  }
-}
-*/
-
 
 // ✅ Awaiting async `params` and `searchParams`
 export async function generateMetadata(props: Promise<Props>): Promise<Metadata> {
