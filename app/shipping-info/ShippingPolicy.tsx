@@ -75,8 +75,8 @@ Shipping Policy
         <h2 className="text-xl font-semibold text-gray-800"> Contact Us</h2>
         <p className="text-gray-600">
           If you have any questions or concerns about shipping, please reach out to our support team at{" "}
-          <a href="mailto:support@16zip.com" className="text-green-600 hover:underline">
-            support@16zip.com
+          <a href="mailto:info@16zip.com" className="text-green-600 hover:underline">
+            info@16zip.com
           </a>.
         </p>
       </section>

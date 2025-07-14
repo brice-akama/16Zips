@@ -13,6 +13,13 @@ const getProducts = async () => {
   return products;
 };
 
+// ✅ Fetch blogs
+const getBlogs = async () => {
+  const client = await clientPromise;
+  const db = client.db("school-project");
+  return db.collection('news').find({}, { projection: { slug: 1 } }).toArray();
+};
+
 export async function GET() {
   const sitemap = new SitemapStream({ hostname: 'https://www.16zip.com' });
 
@@ -34,7 +41,7 @@ export async function GET() {
 
   try {
     // Fetch product data from MongoDB
-    const products = await getProducts();
+    const [products, news] = await Promise.all([getProducts(), getBlogs()]);
 
     // Add product URLs to the sitemap
     products.forEach((product) => {
@@ -44,6 +51,17 @@ export async function GET() {
           url: `/products/${product.slug}`,  // Dynamic product URL
           changefreq: 'daily',
           priority: 0.7,
+        });
+      }
+    });
+
+    // ✅ Add blog URLs
+    news.forEach((blog) => {
+      if (blog.slug) {
+        sitemap.write({
+          url: `/blog/${blog.slug}`,
+          changefreq: 'weekly',
+          priority: 0.65,
         });
       }
     });

@@ -22,7 +22,7 @@ export async function generateMetadata(props: Promise<Props>): Promise<Metadata>
 
   const ogImageUrl = `${process.env.NEXT_PUBLIC_API_URL}/api/products/og?title=${encodeURIComponent(product.name)}`;
   const image = product.mainImage || ogImageUrl;
-  const baseUrl = `https://16zip.com/products/${product.slug}`;
+  const baseUrl = `https://www.16zip.com/products/${product.slug}`;
 
   return {
     title: product.seoTitle || `${product.name} | 16Zips`,

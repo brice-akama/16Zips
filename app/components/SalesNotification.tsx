@@ -13,12 +13,41 @@ type Sale = {
 };
 
 const fakeNames = [
-  "James", "Amina", "Luis", "Sarah", "Mohamed", "Léa", "Daniel", "Elena", "John", "Sofia",
+  // European
+  "James", "Oliver", "Lucas", "Emma", "Sophie", "Noah", "Liam", "Isabella", "Charlotte", "Léo",
+  "Chloé", "Mia", "Hugo", "Oscar", "Elena", "Maximilian", "Nina", "Theo", "Amelie", "Matteo",
+
+  // Latin America
+  "Carlos", "Mateo", "Santiago", "Valentina", "Camila", "Fernanda", "Diego", "Lucia", "Andrés", "Julieta",
+
+  // North America
+  "Aiden", "Grace", "Logan", "Harper", "Daniel", "Ava", "Benjamin", "Zoe", "Ella", "Michael",
+
+  // Asia
+  "Hiroshi", "Yuki", "Sakura", "Jin", "Min", "Sora", "Mei", "Akira", "Takeshi", "Naoko"
 ];
 
+
+
 const fakeLocations = [
-  "Berlin", "Toronto", "Paris", "Chicago", "Rome", "London", "New York", "Sydney", "Lagos", "Cape Town",
+  // Europe
+  "Berlin", "Paris", "Rome", "London", "Madrid", "Lisbon", "Vienna", "Prague", "Amsterdam", "Brussels",
+  "Zurich", "Oslo", "Copenhagen", "Stockholm", "Helsinki", "Athens", "Warsaw", "Budapest", "Dublin", "Munich",
+
+  // Latin America
+  "São Paulo", "Buenos Aires", "Lima", "Bogotá", "Santiago", "Mexico City", "Caracas", "Quito", "Montevideo", "La Paz",
+
+  // North America
+  "New York", "Los Angeles", "Chicago", "Toronto", "Vancouver", "Miami", "San Francisco", "Boston", "Seattle", "Dallas",
+
+  // Asia
+  "Tokyo", "Seoul", "Bangkok", "Singapore", "Hong Kong", "Dubai", "Kuala Lumpur", "Taipei", "Jakarta", "Istanbul",
+
+  // Oceania
+  "Sydney", "Melbourne", "Auckland", "Brisbane", "Perth"
 ];
+
+
 
 function getRandomInt(min: number, max: number) {
   return Math.floor(Math.random() * (max - min + 1)) + min;
@@ -89,7 +118,7 @@ export default function SalesNotification() {
   return (
     <AnimatePresence>
       {visible && current && (
-   <motion.div
+  <motion.div
   key={current.product}
   initial={{ opacity: 0, y: 40 }}
   animate={{ opacity: 1, y: 0 }}
@@ -98,26 +127,28 @@ export default function SalesNotification() {
   className="
     fixed z-50
     bottom-6
-     
-    w-[320px]
-    bg-blue-100 shadow-xl rounded-full flex items-center space-x-4 p-4
+    w-[320px] md:w-[380px] lg:w-[420px]
+    bg-blue-100 shadow-xl rounded-full flex items-center space-x-3 py-1 px-2
     border border-blue-200
   "
 >
 
-          <img
-            src={current.mainImage}
-            alt={current.product}
-            className="w-12 h-12 md:w-14 md:h-14 rounded-full object-cover border"
-          />
 
-          <div className="text-sm">
-            <p className="font-semibold text-gray-800">
-              {current.name} in {current.location} just bought
-            </p>
-            <p className="text-green-600 font-bold">{current.product}</p>
-            <p className="text-xs text-gray-500 mt-1">{current.timeAgo}</p>
-          </div>
+          <img
+  src={current.mainImage}
+  alt={current.product}
+  className="w-10 h-10 md:w-12 md:h-12 rounded-full object-cover border"
+/>
+
+
+          <div className="text-sm leading-tight">
+  <p className="font-medium text-gray-800">
+    {current.name} in {current.location} just bought
+  </p>
+  <p className="text-green-600 font-semibold text-sm">{current.product}</p>
+  <p className="text-xs text-gray-500 mt-0.5">{current.timeAgo}</p>
+</div>
+
         </motion.div>
       )}
     </AnimatePresence>

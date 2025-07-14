@@ -28,7 +28,7 @@ export async function POST(req: Request) {
 
     // Send reset email
     const transporter = nodemailer.createTransport({
-      host: "mail.16zip.com",
+      host: "smtp.zoho.com",
       port: 465,
       secure: true,
       auth: {

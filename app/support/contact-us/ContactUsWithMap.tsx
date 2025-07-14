@@ -22,8 +22,8 @@ Contact Us
           <p className="text-gray-600 mb-4">Phone: +1 (626) 658-7663</p>
           <p className="text-gray-600 mb-4">
   Email:{" "}
-  <a href="mailto:support@16zip.com" className="text-blue-600 hover:underline">
-    support@16zip.com
+  <a href="mailto:info@16zip.com" className="text-blue-600 hover:underline">
+    info@16zip.com
   </a>
 </p>
 

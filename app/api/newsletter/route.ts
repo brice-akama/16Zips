@@ -75,7 +75,7 @@ export async function POST(req: Request) {
 
     // ✅ Send email to the company
     const transporter = nodemailer.createTransport({
-      host: "mail.16zip.com",
+      host: "smtp.zoho.com",
       port: 465,
       secure: true,
       auth: {
@@ -86,7 +86,7 @@ export async function POST(req: Request) {
 
     await transporter.sendMail({
       from: `"16Zip Newsletter" <${process.env.EMAIL_USER}>`,
-      to: "support@16zip.com",
+      to: "info@16zip.com",
       subject: "New Newsletter Subscription",
       html: `
         <h3>New Subscriber</h3>

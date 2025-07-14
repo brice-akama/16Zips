@@ -74,8 +74,8 @@ const PrivacyPolicy = () => {
         <h2 className="text-xl font-semibold text-gray-800"> Contact Us</h2>
         <p className="text-gray-600">
           If you have any questions about our privacy practices, reach out to us at{" "}
-<a href="mailto:support@16zip.com" className="text-blue-600 hover:underline">
-  support@16zip.com
+<a href="mailto:info@16zip.com" className="text-blue-600 hover:underline">
+  info@16zip.com
 </a>
 
         </p>

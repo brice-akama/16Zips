@@ -35,6 +35,7 @@ const CartItemsField = () => {
 const OrderShow: React.FC = () => (
   <Show>
     <SimpleShowLayout>
+       <TextField source="id" />
       <TextField label="First Name" source="billingDetails.firstName" />
       <TextField label="Last Name" source="billingDetails.lastName" />
       <TextField label="Phone" source="billingDetails.phone" />

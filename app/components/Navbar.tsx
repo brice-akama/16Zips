@@ -290,7 +290,7 @@ const goBack = () => {
   {/* Logo for desktop */}
   <Link href="/" className="hidden md:block mt-4 bg-transparent">
     <Image
-      src="/assets/logo.png"
+      src="/assets/nel.png"
       alt="logo"
       width={120} // adjust size as needed
       height={40}
@@ -302,7 +302,7 @@ const goBack = () => {
   <div className=" md:hidden w-full">
   <Link href="/" className="block bg-transparent">
     <Image
-      src="/assets/logo.png"
+      src="/assets/nel.png"
       alt="logo"
       width={100}
       height={30}
