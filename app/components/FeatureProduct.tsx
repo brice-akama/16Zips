@@ -1,11 +1,14 @@
-
-
 'use client';
 
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { useWishlist } from "@/app/context/WishlistContext";
+import { motion, AnimatePresence } from "framer-motion";
+import { AiOutlineHeart } from "react-icons/ai";
+import { FiSearch } from "react-icons/fi";
+import { toast } from "react-hot-toast";
+import { useCart } from "@/app/context/CartContext";
 
 type Product = {
   id: string;
@@ -16,6 +19,10 @@ type Product = {
   popularProduct: boolean;
   mainImage: string;
   slug: string;
+  discount?: number;
+  seoDescription?: string;
+  seeds?: { label: string; price?: number }[];   // ✅ array of objects
+  weights?: { label: string; price?: number }[]; // ✅ array of objects
 };
 
 export default function FeatureProduct() {
@@ -29,38 +36,37 @@ export default function FeatureProduct() {
         const { data } = await res.json();
         setProducts(data);
       } catch (error) {
-        console.error('Failed to fetch edible products:', error);
+        console.error('Failed to fetch products:', error);
       }
     }
     fetchProducts();
   }, []);
 
-  const handleAddToWishlist = (id: string, slug: string, name: string, price: number, mainImage: string) => {
+  const handleAddToWishlist = (
+    id: string, slug: string, name: string, price: number, mainImage: string
+  ) => {
     addToWishlist({ _id: id, name, price: price.toString(), mainImage, slug });
-
   };
 
   return (
-    <div className="p-4">
-      {/* Heading and paragraph (one time at top) */}
-      <div className="text-center mb-8 px-4">
-        <h1 className="text-3xl md:text-4xl font-bold mb-4">
-        Browse Our Full Collection
-        </h1>
-        <p className="text-gray-600 text-base md:text-lg max-w-2xl mx-auto">
-        From flower to edibles and everything in between — find your perfect match in our curated collection.
+    <div className="p-6">
+      {/* Heading */}
+      <div className="text-center mb-10">
+        <h1 className="text-3xl md:text-4xl font-bold mb-3">Browse Our Full Collection</h1>
+        <p className="text-gray-600 max-w-2xl mx-auto">
+          From flower to edibles and everything in between — find your perfect match in our curated collection.
         </p>
       </div>
 
-      {/* Grid of products */}
-      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 auto-rows-fr">
-
+      {/* Products Grid */}
+      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-3 md:gap-4 lg:gap-6">
         {products.map(product => (
-          <ProductCard
-            key={product.id}
-            product={product}
-            handleAddToWishlist={handleAddToWishlist}
-          />
+          <div key={product.id} className="h-full flex">
+            <ProductCard
+              product={product}
+              handleAddToWishlist={handleAddToWishlist}
+            />
+          </div>
         ))}
       </div>
     </div>
@@ -81,59 +87,326 @@ function ProductCard({
   ) => void;
 }) {
   const [hovered, setHovered] = useState(false);
+  const { addToCart, openCart, totalPrice } = useCart();
 
-  return (
-    <div
-  className="relative group flex flex-col h-full"
-  onMouseEnter={() => setHovered(true)}
-  onMouseLeave={() => setHovered(false)}
->
 
-      <Link href={`/products/${product.slug}`}>
-        <div className="w-full aspect-square relative overflow-hidden flex-grow">
+  // --- NEW STATES FOR SELECT OPTIONS OVERLAY ---
+  const [showOptionsOverlay, setShowOptionsOverlay] = useState(false);
+  const [dropdownOpen, setDropdownOpen] = useState(false);
+  const [selectedOption, setSelectedOption] = useState<string | null>(null);
+  const hasOptions = (product.weights?.length || 0) + (product.seeds?.length || 0) > 0;
+
+
+  const [isMdUp, setIsMdUp] = useState(false);
+  useEffect(() => {
+    function checkScreen() {
+      setIsMdUp(window.innerWidth >= 768);
+    }
+    checkScreen();
+    window.addEventListener('resize', checkScreen);
+    return () => window.removeEventListener('resize', checkScreen);
+  }, []);
+
+  const showHoverEffect = isMdUp;
+
+  const handleAddToCart = () => {
+    if (totalPrice < 120) {
+      toast.error("Minimum order is $120", {
+        duration: 4000,
+        style: {
+          border: "1px solid #f87171",
+          padding: "16px",
+          color: "#b91c1c",
+        },
+        icon: "⚠️",
+      });
+      return;
+    }
+
+    if (product) {
+      addToCart({
+        slug: product.slug,
+        name: product.name,
+        price: product.discount
+          ? ((product.price - product.price * (product.discount / 100))).toFixed(2)
+          : product.price.toString(),
+        mainImage: product.mainImage,
+        quantity: 1,
+        option: null,
+      });
+
+      toast.success(`${product.name} added to cart!`, {
+        duration: 3000,
+        icon: "🛒",
+      });
+
+      openCart();
+    }
+  };
+return (
+  <div className="relative group flex-1">
+    <motion.div
+      whileHover={{ scale: 1.03 }}
+      initial={{ opacity: 0, y: 30 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.4 }}
+      className="bg-white rounded-2xl shadow-md overflow-hidden flex flex-col h-full"
+    >
+      {/* Discount Badge */}
+      {product.discount && (
+        <span className="absolute top-3 left-3 bg-red-500 text-white text-xs font-bold px-2 py-1 rounded-full z-10">
+          -{product.discount}%
+        </span>
+      )}
+
+      {/* Product Image */}
+      <div className="relative w-full aspect-square overflow-hidden">
+        <Link href={`/products/${product.slug}`}>
           <Image
             src={product.mainImage}
             alt={product.name}
             fill
             unoptimized
-            className="object-cover transition-transform duration-300 group-hover:scale-105"
-            sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 25vw"
-            priority
+            className="object-cover group-hover:scale-105 transition-transform duration-500"
           />
-          {/* Add to Cart button over image */}
-          {hovered && (
-            <div className="absolute inset-0 flex items-center justify-center">
-              <button className="bg-blue-400 text-white text-sm font-semibold px-4 py-2 rounded-full shadow-lg hover:bg-blue-500 transition-colors">
+        </Link>
+
+        {/* Hover Icons */}
+        <div className="absolute top-3 right-3 flex flex-col gap-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-10">
+          {/* Wishlist Icon */}
+          <div className="relative group/icon">
+            <motion.button
+              whileTap={{ scale: 0.9 }}
+              whileHover={{ rotate: -10 }}
+              onClick={() =>
+                handleAddToWishlist(
+                  product.id,
+                  product.slug,
+                  product.name,
+                  product.price,
+                  product.mainImage
+                )
+              }
+              className="bg-white p-2 rounded-full shadow hover:bg-gray-100 transition"
+            >
+              <AiOutlineHeart size={20} className="text-gray-700" />
+            </motion.button>
+            <span className="absolute right-full mr-2 top-1/2 -translate-y-1/2 bg-gray-800 text-white text-xs rounded px-2 py-1 opacity-0 group-hover/icon:opacity-100 transition whitespace-nowrap">
+              Add to Wishlist
+            </span>
+          </div>
+
+          {/* Search Icon */}
+          <div className="relative group/icon">
+            <motion.button
+              whileTap={{ scale: 0.9 }}
+              whileHover={{ rotate: 10 }}
+              className="bg-white p-2 rounded-full shadow hover:bg-gray-100 transition"
+            >
+              <FiSearch size={20} className="text-gray-700" />
+            </motion.button>
+            <span className="absolute right-full mr-2 top-1/2 -translate-y-1/2 bg-gray-800 text-white text-xs rounded px-2 py-1 opacity-0 group-hover/icon:opacity-100 transition whitespace-nowrap">
+              Quick View
+            </span>
+          </div>
+        </div>
+      </div>
+
+      {/* Product Details */}
+      <div className="p-4 flex flex-col flex-grow justify-between text-center relative">
+        <div>
+          <Link href={`/products/${product.slug}`}>
+            <h3 className="text-lg font-semibold hover:text-blue-500 transition-colors break-words">
+              {product.name}
+            </h3>
+          </Link>
+
+          <div className="mt-2">
+            {product.discount ? (
+              <div className="flex items-center justify-center gap-2">
+                <span className="text-gray-400 line-through">${product.price}</span>
+                <span className="text-red-500 font-bold">
+                  ${(product.price - (product.price * product.discount) / 100).toFixed(2)}
+                </span>
+              </div>
+            ) : (
+              <p className="text-gray-800 font-semibold">${product.price}</p>
+            )}
+          </div>
+        </div>
+
+        {/* Add to Cart Section */}
+        <div
+          onMouseEnter={() => showHoverEffect && setHovered(true)}
+          onMouseLeave={() => showHoverEffect && setHovered(false)}
+          className="mt-4 flex flex-col items-center relative"
+        >
+          {!hovered ? (
+            hasOptions ? (
+              <motion.button
+                whileTap={{ scale: 0.9 }}
+                whileHover={{ scale: 1.05 }}
+                onClick={() => setShowOptionsOverlay(true)}
+                className="bg-red-500 text-white px-4 py-2 rounded-lg shadow hover:bg-red-600 transition whitespace-nowrap"
+              >
                 Select Options
-              </button>
-            </div>
+              </motion.button>
+            ) : (
+              <motion.button
+                whileTap={{ scale: 0.9 }}
+                whileHover={{ scale: 1.05 }}
+                onClick={handleAddToCart}
+                className="bg-red-500 text-white px-4 py-2 rounded-lg shadow hover:bg-red-600 transition whitespace-nowrap"
+              >
+                Add to Cart
+              </motion.button>
+            )
+          ) : (
+            <motion.div className="relative flex flex-col items-center">
+              {hasOptions ? (
+                <motion.button
+                  whileTap={{ scale: 0.9 }}
+                  whileHover={{ scale: 1.05 }}
+                  onClick={() => setShowOptionsOverlay(true)}
+                  className="p-2 rounded-lg bg-red-500 hover:bg-red-600 text-white shadow transition"
+                >
+                  Select Options
+                </motion.button>
+              ) : (
+                <motion.button
+                  whileTap={{ scale: 0.9 }}
+                  whileHover={{ scale: 1.05 }}
+                  onClick={handleAddToCart}
+                  className="p-2 rounded-lg bg-red-500 hover:bg-red-600 text-white shadow transition"
+                >
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    className="h-6 w-6"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                    strokeWidth={2}
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13l-1.5-4.5M7 13L5.4 7H3m14 6a1 1 0 100 2 1 1 0 000-2zm-8 0a1 1 0 100 2 1 1 0 000-2z"
+                    />
+                  </svg>
+                </motion.button>
+              )}
+
+              {/* Floating SEO Description */}
+              <AnimatePresence>
+                {product.seoDescription && (
+                  <motion.div
+                    initial={{ opacity: 0, y: -10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -10 }}
+                    className="absolute bottom-full mb-2 left-1/2 transform -translate-x-1/2 w-64 bg-white shadow-lg rounded-lg p-3 text-sm text-gray-600 z-50"
+                  >
+                    {product.seoDescription}
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </motion.div>
           )}
         </div>
-      </Link>
-
-      {/* Product Info */}
-      <div className="mt-3 text-center">
-        <Link href={`/products/${product.slug}`}>
-          <h3 className="text-lg font-semibold hover:underline">{product.name}</h3>
-        </Link>
-        <p className="text-gray-600 mt-1">${product.price}</p>
-
-        {/* Wishlist button under price */}
-        <button
-          className="mt-2 bg-white border border-black text-black px-4 py-1 rounded-full shadow-sm hover:bg-black hover:text-white transition-colors"
-          onClick={() =>
-            handleAddToWishlist(
-              product.id,
-              product.slug,
-              product.name,
-              product.price,
-              product.mainImage
-            )
-          }
-        >
-          Add to Wishlist
-        </button>
       </div>
-    </div>
-  );
+    </motion.div>
+
+    {/* --- SELECT OPTIONS OVERLAY --- */}
+    <AnimatePresence>
+      {showOptionsOverlay && (
+        <motion.div
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: -20 }}
+          className="absolute top-0 left-0 w-full h-full flex flex-col items-center justify-center  rounded-2xl shadow-lg z-1 p-2"
+        >
+          {/* Close Button */}
+         {/* Close Button */}
+<button
+  onClick={() => {
+    setShowOptionsOverlay(false);
+    setDropdownOpen(false);
+    setSelectedOption(null);
+  }}
+  className="absolute top-0 right-8 flex items-center gap-1 text-gray-600 hover:text-gray-900 text-base font-semibold px-2 py-1 rounded"
+>
+  ✕ <span className="text-sm">Close</span>
+</button>
+
+
+          {/* Choose Options Button */}
+          <div className="w-48 relative mb-4">
+            <button
+              onClick={() => setDropdownOpen(!dropdownOpen)}
+              className="w-full border rounded-lg px-3 py-2 flex justify-between items-center bg-white shadow"
+            >
+              {selectedOption ? selectedOption : "Choose Options"}
+              <span className="ml-2">&#9662;</span>
+            </button>
+
+            {/* Dropdown */}
+            {dropdownOpen && (
+              <div className="absolute top-full left-0 w-full bg-white border rounded-lg shadow mt-1 max-h-48 overflow-y-auto z-50">
+                {product.weights?.map((opt, i) => (
+                  <div
+                    key={`weight-${i}-${opt.label}`}
+                    onClick={() => {
+                      setSelectedOption(`${opt.label} - $${opt.price}`);
+                      setDropdownOpen(false);
+                    }}
+                    className="px-3 py-2 hover:bg-gray-100 cursor-pointer"
+                  >
+                    {opt.label} - ${opt.price}
+                  </div>
+                ))}
+                {product.seeds?.map((opt, i) => (
+                  <div
+                    key={`seed-${i}-${opt.label}`}
+                    onClick={() => {
+                      setSelectedOption(`${opt.label}${opt.price ? ` - $${opt.price}` : ""}`);
+                      setDropdownOpen(false);
+                    }}
+                    className="px-3 py-2 hover:bg-gray-100 cursor-pointer"
+                  >
+                    {opt.label}
+                    {opt.price ? ` - $${opt.price}` : ""}
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+
+          {/* Add to Cart Button */}
+          <motion.button
+            onClick={() => {
+              if (!selectedOption) return;
+              addToCart({
+                slug: product.slug,
+                name: product.name,
+                price: product.discount
+                  ? (product.price - product.price * (product.discount / 100)).toFixed(2)
+                  : product.price.toString(),
+                mainImage: product.mainImage,
+                quantity: 1,
+                option: selectedOption,
+              });
+              toast.success(`${product.name} (${selectedOption}) added to cart!`, {
+                duration: 3000,
+                icon: "🛒",
+              });
+            }}
+            whileTap={{ scale: 0.95 }}
+            className="bg-red-500 text-white px-6 py-2 rounded-lg shadow hover:bg-red-600 transition  whitespace-nowrap"
+          >
+            Add to Cart
+          </motion.button>
+        </motion.div>
+      )}
+    </AnimatePresence>
+  </div>
+);
 }
