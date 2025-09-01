@@ -490,6 +490,7 @@ return (
     alt={product.name}
     fill
     className="object-cover"
+    unoptimized
   />
   <Link href={`/products/${product.slug}`} className="absolute bottom-4 left-1/2 transform -translate-x-1/2 md:block hidden w-full">
     <button className="bg-red-500 w-full text-white px-4 py-2 rounded shadow hover:bg-red-600 transition">

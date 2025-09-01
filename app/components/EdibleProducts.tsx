@@ -490,6 +490,7 @@ return (
     src={product.mainImage}
     alt={product.name}
     fill
+    unoptimized
     className="object-cover"
   />
   <Link href={`/products/${product.slug}`} className="absolute bottom-4 left-1/2 transform -translate-x-1/2 md:block hidden w-full">
