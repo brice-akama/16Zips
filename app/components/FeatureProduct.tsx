@@ -23,11 +23,14 @@ type Product = {
   seoDescription?: string;
   seeds?: { label: string; price?: number }[];   // ✅ array of objects
   weights?: { label: string; price?: number }[]; // ✅ array of objects
+  description: string;
 };
 
 export default function FeatureProduct() {
   const [products, setProducts] = useState<Product[]>([]);
   const { addToWishlist } = useWishlist();
+  const [showQuickView, setShowQuickView] = useState(false);
+
 
   useEffect(() => {
     async function fetchProducts() {
@@ -88,6 +91,8 @@ function ProductCard({
 }) {
   const [hovered, setHovered] = useState(false);
   const { addToCart, openCart, totalPrice } = useCart();
+  const [showQuickView, setShowQuickView] = useState(false);
+
 
 
   // --- NEW STATES FOR SELECT OPTIONS OVERLAY ---
@@ -95,6 +100,23 @@ function ProductCard({
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [selectedOption, setSelectedOption] = useState<string | null>(null);
   const hasOptions = (product.weights?.length || 0) + (product.seeds?.length || 0) > 0;
+const [quantity, setQuantity] = useState<number>(1);
+const [displayPrice, setDisplayPrice] = useState<number>(
+  product.discount ? (product.price - product.price * (product.discount / 100)) : product.price
+);
+
+// --- Update price whenever quantity or selected option changes ---
+useEffect(() => {
+  let optionPrice = 0;
+  if (selectedOption) {
+    const match = selectedOption.match(/\$([\d.]+)/);
+    if (match) optionPrice = parseFloat(match[1]);
+  }
+
+  const basePrice = product.discount ? (product.price - product.price * (product.discount / 100)) : product.price;
+  setDisplayPrice((basePrice + optionPrice) * quantity);
+}, [selectedOption, quantity, product.price, product.discount]);
+
 
 
   const [isMdUp, setIsMdUp] = useState(false);
@@ -199,12 +221,14 @@ return (
           {/* Search Icon */}
           <div className="relative group/icon">
             <motion.button
-              whileTap={{ scale: 0.9 }}
-              whileHover={{ rotate: 10 }}
-              className="bg-white p-2 rounded-full shadow hover:bg-gray-100 transition"
-            >
-              <FiSearch size={20} className="text-gray-700" />
-            </motion.button>
+  whileTap={{ scale: 0.9 }}
+  whileHover={{ rotate: 10 }}
+  onClick={() => setShowQuickView(true)}
+  className="bg-white p-2 rounded-full shadow hover:bg-gray-100 transition"
+>
+  <FiSearch size={20} className="text-gray-700" />
+</motion.button>
+
             <span className="absolute right-full mr-2 top-1/2 -translate-y-1/2 bg-gray-800 text-white text-xs rounded px-2 py-1 opacity-0 group-hover/icon:opacity-100 transition whitespace-nowrap">
               Quick View
             </span>
@@ -407,6 +431,137 @@ return (
         </motion.div>
       )}
     </AnimatePresence>
+    <AnimatePresence>
+  {showQuickView && (
+    <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      className="fixed inset-0 z-50 flex items-center justify-center  bg-opacity-50 p-4 md:p-10"
+      onClick={(e) => {
+        // ✅ Only close if the user clicked directly on the overlay, not inside the modal
+        if (e.target === e.currentTarget) {
+          setShowQuickView(false);
+        }
+      }}
+    >
+      <motion.div
+        initial={{ scale: 0.8 }}
+        animate={{ scale: 1 }}
+        exit={{ scale: 0.8 }}
+        className="bg-white rounded-2xl shadow-lg w-full max-w-4xl flex flex-col md:flex-row overflow-hidden relative"
+      >
+        {/* Close Button */}
+        <button
+          onClick={() => setShowQuickView(false)}
+          className="absolute top-4 right-4 text-gray-600 hover:text-gray-900 text-lg font-semibold flex items-center gap-1"
+        >
+          ✕ <span className="text-sm">Close</span>
+        </button>
+
+        {/* Left: Product Image */}
+       {/* Left: Product Image */}
+<div className="relative w-full md:w-1/2 h-64 md:h-auto">
+  <Image
+    src={product.mainImage}
+    alt={product.name}
+    fill
+    className="object-cover"
+  />
+  <Link href={`/products/${product.slug}`} className="absolute bottom-4 left-1/2 transform -translate-x-1/2 md:block hidden w-full">
+    <button className="bg-red-500 w-full text-white px-4 py-2 rounded shadow hover:bg-red-600 transition">
+      View Details
+    </button>
+  </Link>
+</div>
+
+
+        {/* Right: Info */}
+        <div className="p-6 md:w-1/2 flex flex-col justify-between">
+          <div>
+            <h3 className="text-2xl font-semibold">{product.name}</h3>
+            {/* Price */}
+<p className="text-red-500 font-bold text-xl mt-2">
+  ${displayPrice.toFixed(2)}
+</p>
+           <p className="text-gray-600 text-sm mt-4">
+      {product.description
+        ? (product.description.replace(/<[^>]+>/g, "").slice(0, 120) + "...")
+        : ""}
+    </p>
+
+            {/* Optional: Weight / Seeds dropdowns */}
+            {/* Options Dropdown */}
+{hasOptions && (
+  <select
+    className="w-full border rounded p-2 mt-2"
+    value={selectedOption || ""}
+    onChange={(e) => setSelectedOption(e.target.value)}
+  >
+    <option value="">Select...</option>
+    {product.weights?.map(opt => (
+      <option key={opt.label} value={`${opt.label} - $${opt.price}`}>
+        {opt.label} - ${opt.price}
+      </option>
+    ))}
+    {product.seeds?.map(opt => (
+      <option key={opt.label} value={`${opt.label}${opt.price ? ` - $${opt.price}` : ""}`}>
+        {opt.label}{opt.price ? ` - $${opt.price}` : ""}
+      </option>
+    ))}
+  </select>
+)}
+          </div>
+
+          {/* Quantity + Buttons */}
+          <div className="mt-6 flex flex-col gap-3">
+            {/* Quantity Input */}
+<input
+  type="number"
+  min={1}
+  value={quantity}
+  onChange={(e) => setQuantity(parseInt(e.target.value))}
+  className="w-24 border rounded p-2"
+/>
+            <button
+  className="bg-red-500 text-white px-4 py-2 rounded shadow hover:bg-red-600 transition"
+  onClick={() => {
+    if (hasOptions && !selectedOption) {
+      toast.error("Please select an option first", { duration: 3000, icon: "⚠️" });
+      return;
+    }
+
+    addToCart({
+      slug: product.slug,
+      name: product.name,
+      price: displayPrice.toFixed(2),   // ✅ total price including option + quantity
+      mainImage: product.mainImage,
+      quantity: quantity,               // ✅ quantity selected
+      option: selectedOption,           // ✅ selected weight or seed
+    });
+
+    toast.success(`${product.name}${selectedOption ? ` (${selectedOption})` : ""} added to cart!`, {
+      duration: 3000,
+      icon: "🛒",
+    });
+  }}
+>
+  Add to Cart
+</button>
+
+            <button
+              className="bg-gray-200 text-gray-700 px-4 py-2 rounded shadow hover:bg-gray-300 transition"
+              onClick={() => handleAddToWishlist(product.id, product.slug, product.name, product.price, product.mainImage)}
+            >
+              Add to Wishlist
+            </button>
+          </div>
+        </div>
+      </motion.div>
+    </motion.div>
+  )}
+</AnimatePresence>
+
   </div>
 );
 }
