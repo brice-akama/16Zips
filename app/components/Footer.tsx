@@ -90,7 +90,7 @@ const Footer: React.FC = () => {
   };
 
   return (
-    <footer className="bg-gray-100 text-black px-6 py-10">
+    <footer className="bg-gray-800 text-white px-6 py-10">
       <div className="container mx-auto grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 text-center md:text-left">
         {/* Company Info */}
         <div>
@@ -108,12 +108,12 @@ const Footer: React.FC = () => {
               placeholder={translatedTexts.placeholder}
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className="p-2 w-full rounded-l-md border border-gray-300 text-black"
+              className="p-2 w-full rounded-l-md border border-gray-300 text-white"
               required
             />
             <button
               type="submit"
-              className="bg-blue-600 px-4 rounded-r-md hover:bg-blue-700 transition"
+              className="bg-red-500 px-4 rounded-r-md hover:bg-red-700 transition"
             >
               {translatedTexts.subscribe}
             </button>
@@ -231,7 +231,7 @@ const Footer: React.FC = () => {
 
 
 {/* Copyright */}
-<div className="mt-4 text-center text-sm text-gray-800">
+<div className="mt-4 text-center text-sm text-white">
   {translatedTexts.copyright}
 </div>
 

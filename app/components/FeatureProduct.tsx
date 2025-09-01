@@ -29,7 +29,7 @@ type Product = {
 export default function FeatureProduct() {
   const [products, setProducts] = useState<Product[]>([]);
   const { addToWishlist } = useWishlist();
-  const [showQuickView, setShowQuickView] = useState(false);
+  
 
 
   useEffect(() => {
@@ -106,17 +106,27 @@ const [displayPrice, setDisplayPrice] = useState<number>(
 );
 
 // --- Update price whenever quantity or selected option changes ---
+
+
+
 useEffect(() => {
-  let optionPrice = 0;
+  // Parse the option price from the selected option
+  let optionPrice: number | null = null;
   if (selectedOption) {
     const match = selectedOption.match(/\$([\d.]+)/);
     if (match) optionPrice = parseFloat(match[1]);
   }
 
-  const basePrice = product.discount ? (product.price - product.price * (product.discount / 100)) : product.price;
-  setDisplayPrice((basePrice + optionPrice) * quantity);
-}, [selectedOption, quantity, product.price, product.discount]);
+  // Determine the price to display
+  const basePrice = product.discount
+    ? product.price - product.price * (product.discount / 100)
+    : product.price;
 
+  // ✅ If an option price exists, use it; otherwise use base price
+  const priceToUse = optionPrice !== null ? optionPrice : basePrice;
+
+  setDisplayPrice(priceToUse * quantity);
+}, [selectedOption, quantity, product.price, product.discount]);
 
 
   const [isMdUp, setIsMdUp] = useState(false);
@@ -132,39 +142,25 @@ useEffect(() => {
   const showHoverEffect = isMdUp;
 
   const handleAddToCart = () => {
-    if (totalPrice < 120) {
-      toast.error("Minimum order is $120", {
-        duration: 4000,
-        style: {
-          border: "1px solid #f87171",
-          padding: "16px",
-          color: "#b91c1c",
-        },
-        icon: "⚠️",
-      });
-      return;
-    }
+  if (product) {
+    addToCart({
+      slug: product.slug,
+      name: product.name,
+      price: displayPrice.toFixed(2),   // total price including options & quantity
+      mainImage: product.mainImage,
+      quantity: quantity,               // use selected quantity
+      option: selectedOption,           // selected weight or seed
+    });
 
-    if (product) {
-      addToCart({
-        slug: product.slug,
-        name: product.name,
-        price: product.discount
-          ? ((product.price - product.price * (product.discount / 100))).toFixed(2)
-          : product.price.toString(),
-        mainImage: product.mainImage,
-        quantity: 1,
-        option: null,
-      });
+    toast.success(`${product.name}${selectedOption ? ` (${selectedOption})` : ""} added to cart!`, {
+      duration: 3000,
+      icon: "🛒",
+    });
 
-      toast.success(`${product.name} added to cart!`, {
-        duration: 3000,
-        icon: "🛒",
-      });
+    openCart();
+  }
+};
 
-      openCart();
-    }
-  };
 return (
   <div className="relative group flex-1">
     <motion.div
@@ -219,20 +215,21 @@ return (
           </div>
 
           {/* Search Icon */}
-          <div className="relative group/icon">
-            <motion.button
-  whileTap={{ scale: 0.9 }}
-  whileHover={{ rotate: 10 }}
-  onClick={() => setShowQuickView(true)}
-  className="bg-white p-2 rounded-full shadow hover:bg-gray-100 transition"
->
-  <FiSearch size={20} className="text-gray-700" />
-</motion.button>
+         <div className="relative group/icon hidden md:flex">
+  <motion.button
+    whileTap={{ scale: 0.9 }}
+    whileHover={{ rotate: 10 }}
+    onClick={() => setShowQuickView(true)}
+    className="bg-white p-2 rounded-full shadow hover:bg-gray-100 transition"
+  >
+    <FiSearch size={20} className="text-gray-700" />
+  </motion.button>
 
-            <span className="absolute right-full mr-2 top-1/2 -translate-y-1/2 bg-gray-800 text-white text-xs rounded px-2 py-1 opacity-0 group-hover/icon:opacity-100 transition whitespace-nowrap">
-              Quick View
-            </span>
-          </div>
+  <span className="absolute right-full mr-2 top-1/2 -translate-y-1/2 bg-gray-800 text-white text-xs rounded px-2 py-1 opacity-0 group-hover/icon:opacity-100 transition whitespace-nowrap">
+    Quick View
+  </span>
+</div>
+
         </div>
       </div>
 
@@ -356,7 +353,7 @@ return (
     setDropdownOpen(false);
     setSelectedOption(null);
   }}
-  className="absolute top-0 right-8 flex items-center gap-1 text-gray-600 hover:text-gray-900 text-base font-semibold px-2 py-1 rounded"
+  className="absolute top-0 right-12 flex items-center gap-1 text-gray-600 hover:text-gray-900 text-base font-semibold px-2 py-1 rounded"
 >
   ✕ <span className="text-sm">Close</span>
 </button>
@@ -406,28 +403,36 @@ return (
 
           {/* Add to Cart Button */}
           <motion.button
-            onClick={() => {
-              if (!selectedOption) return;
-              addToCart({
-                slug: product.slug,
-                name: product.name,
-                price: product.discount
-                  ? (product.price - product.price * (product.discount / 100)).toFixed(2)
-                  : product.price.toString(),
-                mainImage: product.mainImage,
-                quantity: 1,
-                option: selectedOption,
-              });
-              toast.success(`${product.name} (${selectedOption}) added to cart!`, {
-                duration: 3000,
-                icon: "🛒",
-              });
-            }}
-            whileTap={{ scale: 0.95 }}
-            className="bg-red-500 text-white px-6 py-2 rounded-lg shadow hover:bg-red-600 transition  whitespace-nowrap"
-          >
-            Add to Cart
-          </motion.button>
+  onClick={() => {
+    // ✅ Validate if options exist but not selected
+    if (hasOptions && !selectedOption) {
+      toast.error("Please select an option first", { duration: 3000, icon: "⚠️" });
+      return;
+    }
+
+    // ✅ Add to cart with updated price, quantity, and option
+    addToCart({
+      slug: product.slug,
+      name: product.name,
+      price: displayPrice.toFixed(2), // use dynamic displayPrice
+      mainImage: product.mainImage,
+      quantity: quantity,             // use selected quantity
+      option: selectedOption,         // selected weight or seed
+    });
+
+    toast.success(`${product.name}${selectedOption ? ` (${selectedOption})` : ""} added to cart!`, {
+      duration: 3000,
+      icon: "🛒",
+    });
+
+    openCart(); // optional, if you want to open the cart panel
+  }}
+  whileTap={{ scale: 0.95 }}
+  className="bg-red-500 text-white px-6 py-2 rounded-lg shadow hover:bg-red-600 transition whitespace-nowrap"
+>
+  Add to Cart
+</motion.button>
+
         </motion.div>
       )}
     </AnimatePresence>

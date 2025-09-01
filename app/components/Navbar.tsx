@@ -266,12 +266,10 @@ const goBack = () => {
     <div className="w-full fixed top-0 z-20 left-0">
       <Toaster position="top-center" reverseOrder={false} />
       {/* Moving Text Bar */}
-      <div className="absolute top-0 left-0 w-full bg-gray-100 h-10 overflow-hidden flex items-center justify-center">
-        <p className="text-black text-sm font-semibold animate-marquee flex items-center gap-2">
-          🎉 {translatedTexts.specialOffer}
-          <Link href="/shop" className="text-blue-600 font-bold underline hover:text-blue-800 transition">
-            {translatedTexts.shopNow} →
-          </Link>
+      <div className="absolute top-0 left-0 w-full  bg-red-500 h-10 overflow-hidden flex items-center justify-center">
+        <p className="text-white text-sm font-bold uppercase animate-marquee flex items-center gap-2">
+           Premium Cannabis Products – Safe, Fast & Discreet
+         
         </p>
       </div>
 
@@ -313,7 +311,7 @@ const goBack = () => {
 
 </div>
         {/* Search Bar (Centered on Medium and Larger Devices) */}
-        <div className="flex items-center w-1/2 bg-gray-50 rounded-full shadow-inner px-6 py-3 mx-auto mt-3 hidden md:flex">
+        <div className=" items-center w-1/2 bg-gray-50 rounded-full shadow-inner px-6 py-3 mx-auto mt-3 hidden md:flex">
           <input
             type="text"
             value={searchQuery}

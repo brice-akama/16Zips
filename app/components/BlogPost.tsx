@@ -74,6 +74,7 @@ export default function BlogPost() {
                 unoptimized
                 className="w-full h-56 object-cover"
               />
+              
               <div className="p-6">
                 <h3 className="text-2xl font-semibold mb-3">{post.title}</h3>
                 <Link href={`/blog/${post.slug}`} className="inline-block mt-4">
