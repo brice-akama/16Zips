@@ -188,6 +188,24 @@ return (
             className="object-cover group-hover:scale-105 transition-transform duration-500"
           />
         </Link>
+       {/* ✅ Mobile & Medium: Always visible bottom-right */}
+  <div className="absolute bottom-3 right-3 flex sm:hidden z-10 mb-20">
+  <motion.button
+    whileTap={{ scale: 0.9 }}
+    onClick={() =>
+      handleAddToWishlist(
+        product.id,
+        product.slug,
+        product.name,
+        product.price,
+        product.mainImage
+      )
+    }
+    className="bg-white p-3 rounded-full shadow hover:bg-gray-100 transition"
+  >
+    <AiOutlineHeart size={22} className="text-gray-700" />
+  </motion.button>
+</div>
 
         {/* Hover Icons */}
         <div className="absolute top-3 right-3 flex flex-col gap-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-10">

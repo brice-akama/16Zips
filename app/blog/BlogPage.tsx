@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
-
+import { motion, AnimatePresence, Variants } from 'framer-motion';
 
 interface BlogPost {
   slug: string;
@@ -43,11 +43,8 @@ export default function BlogPage() {
           throw new Error('Unexpected API response format');
         }
       } catch (error: unknown) {
-        if (error instanceof Error) {
-          setError(error.message);
-        } else {
-          setError('An unknown error occurred');
-        }
+        if (error instanceof Error) setError(error.message);
+        else setError('An unknown error occurred');
       } finally {
         setLoading(false);
       }
@@ -61,15 +58,11 @@ export default function BlogPage() {
   const currentPosts = posts.slice(indexOfFirstPost, indexOfLastPost);
 
   const nextPage = () => {
-    if (currentPage < Math.ceil(posts.length / postsPerPage)) {
-      setCurrentPage(currentPage + 1);
-    }
+    if (currentPage < Math.ceil(posts.length / postsPerPage)) setCurrentPage(currentPage + 1);
   };
 
   const prevPage = () => {
-    if (currentPage > 1) {
-      setCurrentPage(currentPage - 1);
-    }
+    if (currentPage > 1) setCurrentPage(currentPage - 1);
   };
 
   if (loading)
@@ -77,46 +70,73 @@ export default function BlogPage() {
   if (error)
     return <p className="text-center mt-10 text-red-500 font-medium">Error: {error}</p>;
 
+  // Framer Motion Variants
+  const containerVariants: Variants = {
+    hidden: {},
+    visible: { transition: { staggerChildren: 0.2 } },
+  };
+
+  const cardVariants: Variants = {
+    hidden: { opacity: 0, y: 30 },
+    visible: { opacity: 1, y: 0, transition: { duration: 0.5, ease: 'easeOut' } },
+    hover: { scale: 1.03, transition: { duration: 0.3 } },
+  };
+
+  const imageVariants: Variants = {
+    hover: { scale: 1.05, transition: { duration: 0.5, ease: 'easeOut' } },
+  };
+
+  const buttonVariants: Variants = {
+    hover: { scale: 1.05, transition: { duration: 0.3 } },
+  };
+
   return (
     <div className="container mx-auto px-4 py-10 mt-20">
-<div
-  role="heading"
-  aria-level={1}
-  className="text-4xl font-bold text-center mt-10 md:mt-20"
->
-  Latest Blog Posts
-</div>
-
-      
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
-        {currentPosts.length > 0 ? (
-          currentPosts.map((post) => (
-            <div
-              key={post.slug}
-              className="bg-white rounded-xl overflow-hidden shadow-lg hover:shadow-2xl transition duration-300 mt-5"
-            >
-              <img
-  src={post.imageUrl}
-  alt={post.title}
-  className="w-full h-56 object-cover"
-/>
-
-              <div className="p-6">
-                   
-                <h2 className="text-2xl font-semibold mb-3">{post.title}</h2>
-                {/* Removed author, date, and content preview */}
-                <Link href={`/blog/${post.slug}`} className="inline-block mt-4">
-                  <span className="inline-block bg-blue-600 text-white px-5 py-2 rounded-lg text-sm font-medium hover:bg-blue-700 transition">
-                    Read More
-                  </span>
-                </Link>
-              </div>
-            </div>
-          ))
-        ) : (
-          <p className="text-center col-span-full text-gray-500">No blog posts available</p>
-        )}
+      <div role="heading" aria-level={1} className="text-4xl font-bold text-center mt-10 md:mt-20">
+        Latest Blog Posts
       </div>
+
+      <motion.div
+        className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 mt-5"
+        variants={containerVariants}
+        initial="hidden"
+        animate="visible"
+      >
+        <AnimatePresence>
+          {currentPosts.length > 0 ? (
+            currentPosts.map((post: BlogPost) => (
+              <motion.div
+                key={post.slug}
+                className="bg-white rounded-xl overflow-hidden shadow-lg cursor-pointer hover:shadow-2xl"
+                variants={cardVariants}
+                whileHover="hover"
+              >
+                <motion.div variants={imageVariants}>
+                  <img
+                    src={post.imageUrl}
+                    alt={post.title}
+                    className="w-full h-56 object-cover"
+                  />
+                </motion.div>
+                <div className="p-6">
+                  <h2 className="text-2xl font-semibold mb-3">{post.title}</h2>
+                  <Link href={`/blog/${post.slug}`}>
+                    <motion.span
+                      className="inline-block bg-blue-600 text-white px-5 py-2 rounded-lg text-sm font-medium hover:bg-blue-700 transition"
+                      variants={buttonVariants}
+                      whileHover="hover"
+                    >
+                      Read More
+                    </motion.span>
+                  </Link>
+                </div>
+              </motion.div>
+            ))
+          ) : (
+            <p className="text-center col-span-full text-gray-500">No blog posts available</p>
+          )}
+        </AnimatePresence>
+      </motion.div>
 
       <div className="flex justify-between items-center mt-8">
         <button

@@ -19,6 +19,7 @@ import { LanguageProvider } from "./context/LanguageContext";
 import { Toaster } from "react-hot-toast";
 import ScrollToTop from "./components/ScrollToTop";
 import SalesNotification from "./components/SalesNotification";
+import BottomNav from "./components/BottomNav";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -118,6 +119,8 @@ export default function RootLayout({
               {!isAdminRoute && !isResetPasswordPage && <Footer />}
               {!isAdminRoute && !isResetPasswordPage && <SlideContact />}
               {!isAdminRoute && !isResetPasswordPage && <CookieConsent />}
+               {/* Bottom navigation for mobile */}
+    {!isAdminRoute && !isResetPasswordPage && <BottomNav />}
             </LanguageProvider>
           </CartProvider>
         </WishlistProvider>

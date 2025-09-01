@@ -3,6 +3,7 @@ import parse from 'html-react-parser';
 import Image from 'next/image';
 import Head from 'next/head';
 import Link from 'next/link';
+import BlogPostAbout from '@/app/components/BlogPostAbout';
 
 interface BlogPost {
   title: string;
@@ -114,6 +115,7 @@ export default function BlogDetails({ post }: { post: BlogPost }) {
   },
 })}
 
+<BlogPostAbout />
       </div>
     </div>
   );
