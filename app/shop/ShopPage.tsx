@@ -1,120 +1,71 @@
 "use client";
-import { useState, useEffect, useRef } from "react";
+
+import React, { useEffect, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useWishlist } from "@/app/context/WishlistContext";
-import { useSearchParams } from 'next/navigation';
-import { useRouter } from 'next/navigation';
-import Head from 'next/head';
+import Head from "next/head";
 
-type Props = {
-  category?: string;
+type Product = {
+  _id: string;
+  name: string;
+  price: string;
+  mainImage: string;
+  slug: string;
+  category: string;
 };
 
+type CategorySEO = {
+  name: string;
+  metaTitle?: string;
+  metaDescription?: string;
+  imageUrl?: string;
+};
 
+type Props = {
+  categorySlug?: string;
+  products: Product[];
+  categorySEO?: CategorySEO | null;
+};
 
-const ShopPage = ({ category }: Props) => {
+// Helper to normalize category string to slug
+function categoryToSlug(category: string) {
+  return category.trim().toLowerCase().replace(/\s+/g, "-");
+}
+
+export default function ShopPage({ categorySlug, products, categorySEO }: Props) {
   const [selectedCategory, setSelectedCategory] = useState("All");
   const [sortOrder, setSortOrder] = useState("default");
   const [currentPage, setCurrentPage] = useState(1);
-  const [hoveredProduct, setHoveredProduct] = useState<string | number | null>(null);
-  const productsRef = useRef<HTMLDivElement>(null);
-
-  
-  const { addToWishlist } = useWishlist();
-  const [products, setProducts] = useState<any[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [showCategories, setShowCategories] = useState(false);
   const productsPerPage = 12;
+  const router = useRouter();
   const searchParams = useSearchParams();
-const categoryFromURL = searchParams.get("category");
-const router = useRouter();
-const [categorySEO, setCategorySEO] = useState<any | null>(null);
 
+  // Extract unique categories
+  const categories = ["All", ...Array.from(new Set(products.map((p) => p.category)))];
 
-  const handleCategoryChange = (category: string) => {
-    setSelectedCategory(category);
-    setCurrentPage(1);
-    setShowCategories(false);
-    // Update the URL with the selected category
-    const newUrl = new URL(window.location.href);
-    if (category === "All") {
-      newUrl.searchParams.delete("category");
-    } else {
-      newUrl.searchParams.set("category", category.toLowerCase().replace(/\s+/g, "-"));
+  // Determine selected category from URL query or prop
+  useEffect(() => {
+    let matched: string | undefined;
+
+    const categoryQuery = searchParams.get("category");
+    if (categoryQuery) {
+      matched = categories.find((c) => categoryToSlug(c) === categoryQuery.toLowerCase());
     }
-    router.push(newUrl.toString());
-  };
-  
-  
 
-  // Fetch products from the API
-  useEffect(() => {
-    const fetchProducts = async () => {
-      try {
-        const response = await fetch('/api/products');
-        const data = await response.json();
-        const productList = Array.isArray(data.data) ? data.data : [];
-        setProducts(productList);
-      } catch (error) {
-        console.error('Error fetching products:', error);
-      } finally {
-        setLoading(false);
-      }
-    };
-  
-    // Fetch only once on mount, not every time categoryFromURL changes
-    fetchProducts();
-  }, []);
-
-  useEffect(() => {
-    const fetchCategorySEO = async () => {
-      if (!categoryFromURL) return;
-  
-      try {
-        const response = await fetch(`/api/category?slug=${categoryFromURL}`);
-        const data = await response.json();
-  
-        if (data?.data) {
-          setCategorySEO(data.data);
-        }
-      } catch (error) {
-        console.error('Error fetching category SEO:', error);
-      }
-    };
-  
-    fetchCategorySEO();
-  }, [categoryFromURL]);
-  
-
-  // Set selected category after products are loaded
-  useEffect(() => {
-    if (categoryFromURL && products.length > 0) {
-      const uniqueCategories = ["All", ...new Set(products.map(p => p.category))];
-  
-      const matchedCategory =
-        uniqueCategories.find(
-          (cat) =>
-            cat.toLowerCase().replace(/\s+/g, "-") === categoryFromURL.toLowerCase()
-        ) || "All";
-  
-      setSelectedCategory(matchedCategory);
+    if (!matched && categorySlug) {
+      matched = categories.find((c) => categoryToSlug(c) === categorySlug.toLowerCase());
     }
-  }, [categoryFromURL, products]);
-  
-  useEffect(() => {
-    if (productsRef.current) {
-      productsRef.current.scrollIntoView({ behavior: 'smooth' });
-    }
-  }, [currentPage]);
-  
 
-  const categories = ["All", ...new Set(products.map((product) => product.category))];
+    if (matched) setSelectedCategory(matched);
+  }, [searchParams, categorySlug, categories]);
 
+  // Filter products by selected category
   const filteredProducts =
     selectedCategory === "All"
       ? products
-      : products.filter((product) => product.category === selectedCategory);
+      : products.filter((p) => categoryToSlug(p.category) === categoryToSlug(selectedCategory));
 
   const sortedProducts = [...filteredProducts].sort((a, b) => {
     if (sortOrder === "low-to-high") return Number(a.price) - Number(b.price);
@@ -128,220 +79,150 @@ const [categorySEO, setCategorySEO] = useState<any | null>(null);
     currentPage * productsPerPage
   );
 
-  // Handle quantity changes
-  
+  const { addToWishlist } = useWishlist();
 
-  
-  
-  
   const handleAddToWishlist = (_id: string, slug: string, name: string, price: string, mainImage: string) => {
-    addToWishlist({ _id, name, price, mainImage, slug });
+    addToWishlist({ _id, slug, name, price, mainImage });
   };
 
+  const handleCategoryClick = (subCategory: string) => {
+    const formatted = categoryToSlug(subCategory);
+    router.push(`/shop?category=${formatted}`);
+    setCurrentPage(1);
+  };
 
   return (
-    <div className="max-w-7xl mx-auto px-4 py-10 mt-10">
-
-     
-<nav
-  className="block text-sm text-gray-600  mt-20 lg:mt-20"
-  aria-label="Breadcrumb"
->
-  <ol className="inline-flex items-center space-x-2">
-    <li>
-      <Link href="/" className="text-blue-600 hover:underline">Home</Link>
-    </li>
-    <li>/</li>
-    <li className="text-gray-900 font-medium">Shop</li>
-  </ol>
-</nav>
+    <div>
+      {/* Hero Section */}
+      <div className="w-full h-64 md:h-96 bg-black flex flex-col items-center justify-center relative mt-10">
+        <h1 className="text-white text-5xl md:text-6xl font-bold ">
+  {selectedCategory === "All" ? "Shop" : selectedCategory}
+</h1>
 
 
-
-    
-    <Head>
-    <title>{categorySEO?.metaTitle || "Shop"}</title>
-    <meta name="description" content={categorySEO?.metaDescription || "Browse our shop"} />
-  
-    <meta property="og:title" content={categorySEO?.metaTitle || "Shop"} />
-    <meta property="og:description" content={categorySEO?.metaDescription || "Browse our shop"} />
-    <meta property="og:image" content={categorySEO?.imageUrl || "/default-og-image.jpg"} />
-  
-    <script
-      type="application/ld+json"
-      dangerouslySetInnerHTML={{
-        __html: JSON.stringify({
-          "@context": "https://schema.org",
-          "@type": "CollectionPage",
-          "name": categorySEO?.name || "Shop",
-          "description": categorySEO?.metaDescription || "Shop category",
-          "image": categorySEO?.imageUrl || "/default-og-image.jpg",
-        }),
-      }}
-    />
-  </Head>
-  
-  
-        
-    
-      {/* Mobile View - Sorting & Categories */}
-      <div className="lg:hidden flex flex-col space-y-4 mb-6">
-
-        <button
-          className="bg-blue-600 text-white p-2 rounded"
-          onClick={() => setShowCategories(!showCategories)}
-        >
-          Select Categories
-        </button>
-        {showCategories && (
-          <ul className="bg-white shadow-lg rounded p-4">
-            {categories.map((category) => (
-              <li
-                key={category}
-                className={`cursor-pointer py-2 px-4 rounded-lg ${
-                  selectedCategory === category ? "bg-blue-600 text-white" : "hover:bg-gray-200"
-                }`}
-                onClick={() => handleCategoryChange(category ?? "All")}
-
-              >
-                {category}
-              </li>
-            ))}
-          </ul>
-        )}
-
-        <select
-          className="border p-2 rounded"
-          value={sortOrder}
-          onChange={(e) => setSortOrder(e.target.value)}
-        >
-          <option value="default">Default Sorting</option>
-          <option value="low-to-high">Price: Low to High</option>
-          <option value="high-to-low">Price: High to Low</option>
-        </select>
-      </div>
-
-      {/* Desktop View - Sorting on the Left */}
-      {/* Desktop View - Sorting on the Right */}
-      <div className="hidden lg:flex justify-end items-center ">
-        <select
-          className="border p-2 rounded w-40"
-          value={sortOrder}
-          onChange={(e) => setSortOrder(e.target.value)}
-        >
-          <option value="default">Default Sorting</option>
-          <option value="low-to-high">Price: Low to High</option>
-          <option value="high-to-low">Price: High to Low</option>
-        </select>
-      </div>
-     
-
-      {/* Desktop Layout */}
-      <div className="grid grid-cols-1 lg:grid-cols-4 gap-6 mt-2">
-
-        {/* Left Sidebar - Categories */}
-        <div className="hidden lg:block">
-
-                 <div
-  role="heading"
-  aria-level={2}
-   className="text-xl font-bold mb-8"
->
-  Categories
-</div>
-           
-          <ul>
-            {categories.map((category) => (
-              <li
-                key={category}
-                className={`cursor-pointer py-2 px-4 rounded-lg ${
-                  selectedCategory === category ? "bg-blue-600 text-white" : "hover:bg-gray-200"
-                }`}
-                onClick={() => handleCategoryChange(category ?? "All")}
-
-              >
-                {category}
-              </li>
-            ))}
-          </ul>
-        </div>
-
-        {/* Middle Section - Product Grid */}
-        <div ref={productsRef} className="md:col-span-3 grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-
-          {loading ? (
-            <div>Loading products...</div>
-          ) : (
-            displayedProducts.map(({ _id, name, price, mainImage, slug }) => (
-              <div
-  key={_id}
-  className="bg-gray-100 rounded-lg shadow-lg overflow-hidden relative group self-start"
-  onMouseEnter={() => setHoveredProduct(_id)}
-  onMouseLeave={() => setHoveredProduct(null)}
->
-
-  <Link href={`/products/${slug}`} className="block">
-    <div className="relative w-full h-40 sm:h-48 md:h-60 lg:h-72 bg-white">
-      <Image
-        src={mainImage}
-        alt={name}
-        fill
-        unoptimized
-        sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, (max-width: 1280px) 33vw, 25vw"
-        className="object-cover transition-transform duration-300 transform group-hover:scale-105"
-      />
-
-      {/* Select Options Overlay */}
-      {hoveredProduct === _id && (
-  <div className="absolute inset-0 bg-opacity-0 flex items-center justify-center transition-opacity duration-300">
-    <span className="bg-blue-500 text-white text-lg font-semibold rounded-full p-2">
-      Select Options
-    </span>
-  </div>
-)}
-
-    </div>
-  </Link>
-
-<div className="p-4 text-center">
-<Link href={`/products/${slug}`}>
-  <div className="h-12 flex items-center justify-center">
-    <h3 className="text-lg font-semibold line-clamp-2">{name}</h3>
-  </div>
-  <p className="text-gray-700">${price}</p>
-</Link>
-<button
-  className="mt-2 px-4 py-2 bg-transparent border border-gray-700 text-gray-700 rounded-lg hover:bg-gray-700 hover:text-white transition whitespace-nowrap"
-  onClick={() => handleAddToWishlist(_id, slug, name, price, mainImage)}
->
-  Add to Wishlist
-</button>
-</div>
-
-</div>
-
-            ))
-          )}
+        <div className="flex flex-wrap justify-center gap-6">
+          {[
+            { name: "Flowers", subMenu: ["Hybrid", "Sativa", "Indica"] },
+            { name: "Seeds", subMenu: ["Autoflower Seeds", "Feminized Seeds", "Regular Seeds"] },
+            { name: "Pre Rolls", subMenu: ["Hybrid Pre Rolls", "Sativa Pre Rolls", "Indica Pre Rolls"] },
+            { name: "Vapes", subMenu: ["Disposables Vapes", "Vape Cartridges", "Vape Pods"] },
+            { name: "Capsules", subMenu: ["CBD Capsules", "THC Capsules"] },
+            { name: "Edibles", subMenu: ["Edibles Gummies", "Chocolates Edibles"] },
+            { name: "Concentrates", subMenu: ["Moon Rock", "Live Resin", "Distillate", "Budder", "Crumble"] },
+            { name: "Shrooms", subMenu: ["Dried Mushrooms", "Chocolate Bars", "Gummies"] },
+          ].map((item) => (
+            <div key={item.name} className="relative group">
+              <span className="cursor-pointer px-4 py-2 text-1xl text-white font-bold uppercase rounded inline-block">
+                {item.name}
+              </span>
+              <div className="absolute left-0 mt-2 w-48 bg-white shadow-lg rounded-md opacity-0 group-hover:opacity-100 invisible group-hover:visible transition-all duration-200 z-50">
+                {item.subMenu.map((sub) => (
+                  <button
+                    key={sub}
+                    onClick={() => handleCategoryClick(sub)}
+                    className="block w-full text-left px-4 py-2 text-gray-700 hover:bg-gray-100"
+                  >
+                    {sub}
+                  </button>
+                ))}
+              </div>
+            </div>
+          ))}
         </div>
       </div>
 
-      {/* Pagination Controls */}
-     <div className="flex justify-center flex-wrap mt-6 gap-2 max-w-[90%] mx-auto">
+      {/* Main Container */}
+      <div className="max-w-7xl mx-auto px-4 py-10">
+        {/* Breadcrumb */}
+        <nav className="block text-sm text-gray-600" aria-label="Breadcrumb">
+          <ol className="inline-flex items-center space-x-2">
+            <li>
+              <Link href="/" className="text-blue-600 hover:underline">Home</Link>
+            </li>
+            <li>/</li>
+            <li className="text-gray-900 font-medium">Shop</li>
+          </ol>
+        </nav>
 
-        {Array.from({ length: totalPages }, (_, index) => (
-          <button
-            key={index}
-            className={`px-4 py-2 mx-1 border rounded ${
-              currentPage === index + 1 ? "bg-blue-600 text-white" : "hover:bg-gray-200"
-            }`}
-            onClick={() => setCurrentPage(index + 1)}
-          >
-            {index + 1}
-          </button>
-        ))}
+        {/* SEO */}
+        <Head>
+          <title>{categorySEO?.metaTitle || "Shop"}</title>
+          <meta name="description" content={categorySEO?.metaDescription || "Browse our shop"} />
+          <meta property="og:title" content={categorySEO?.metaTitle || "Shop"} />
+          <meta property="og:description" content={categorySEO?.metaDescription || "Browse our shop"} />
+          <meta property="og:image" content={categorySEO?.imageUrl || "/default-og-image.jpg"} />
+        </Head>
+
+        {/* Products Grid */}
+        <div className="grid grid-cols-1 lg:grid-cols-4 gap-6 mt-2">
+          {/* Categories Sidebar */}
+          <div className="hidden lg:block">
+            <h2 className="text-xl font-bold mb-8">Categories</h2>
+            <ul>
+              {categories.map((category) => (
+                <li
+                  key={category}
+                  className={`cursor-pointer py-2 px-4 rounded-lg ${
+                    selectedCategory === category ? "bg-blue-600 text-white" : "hover:bg-gray-200"
+                  }`}
+                >
+                  {category}
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          {/* Product Grid */}
+          <div className="md:col-span-3 grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            {displayedProducts.map(({ _id, name, price, mainImage, slug }) => (
+              <div key={_id} className="bg-gray-100 rounded-lg shadow-lg overflow-hidden relative group self-start">
+                <Link href={`/products/${slug}`} className="block">
+                  <div className="relative w-full h-40 sm:h-48 md:h-60 lg:h-72 bg-white">
+                    <Image
+                      src={mainImage}
+                      alt={name}
+                      fill
+                      unoptimized
+                      sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, (max-width: 1280px) 33vw, 25vw"
+                      className="object-cover transition-transform duration-300 transform group-hover:scale-105"
+                    />
+                  </div>
+                </Link>
+
+                <div className="p-4 text-center">
+                  <Link href={`/products/${slug}`}>
+                    <div className="h-12 flex items-center justify-center">
+                      <h3 className="text-lg font-semibold line-clamp-2">{name}</h3>
+                    </div>
+                    <p className="text-gray-700">${price}</p>
+                  </Link>
+                  <button
+                    className="mt-2 px-4 py-2 bg-transparent border border-gray-700 text-gray-700 rounded-lg hover:bg-gray-700 hover:text-white transition whitespace-nowrap"
+                    onClick={() => handleAddToWishlist(_id, slug, name, price, mainImage)}
+                  >
+                    Add to Wishlist
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Pagination */}
+        <div className="flex justify-center flex-wrap mt-6 gap-2 max-w-[90%] mx-auto">
+          {Array.from({ length: totalPages }, (_, index) => (
+            <button
+              key={index}
+              className={`px-4 py-2 mx-1 border rounded ${
+                currentPage === index + 1 ? "bg-blue-600 text-white" : "hover:bg-gray-200"
+              }`}
+              onClick={() => setCurrentPage(index + 1)}
+            >
+              {index + 1}
+            </button>
+          ))}
+        </div>
       </div>
     </div>
   );
-};
-
-export default ShopPage;
+}

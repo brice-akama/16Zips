@@ -5,144 +5,179 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import Image from 'next/image';
 import { IoTrashBinOutline } from 'react-icons/io5';
-import { FaFacebookF, FaInstagram, FaTwitter } from 'react-icons/fa';
-import { useWishlist } from '@/app/context/WishlistContext'; // Import Wishlist Context
+import { useWishlist } from '@/app/context/WishlistContext';
 import { useCart } from "@/app/context/CartContext";
 
-const WishlistPage: React.FC = () => {
-  const { wishlist, removeFromWishlist } = useWishlist(); // Get wishlist and remove function from context
-  const router = useRouter();
-    const { addToCart, openCart } = useCart();
-    const [quantities, setQuantities] = useState<{ [key: string]: number }>({});
+interface WishlistItem {
+  slug: string;
+  name: string;
+  price: string;
+  mainImage: string;
+}
 
-  // Navigate to product detail page
+const WishlistPage: React.FC = () => {
+  const { wishlist, removeFromWishlist } = useWishlist() as {
+    wishlist: WishlistItem[];
+    removeFromWishlist: (slug: string) => void;
+  };
+  const { addToCart, openCart } = useCart();
+  const router = useRouter();
+
+  const [quantities, setQuantities] = useState<{ [key: string]: number }>({});
+
   const handleViewProduct = (slug: string) => {
     router.push(`/products/${slug}`);
   };
 
-  // Handle quantity changes
   const updateQuantity = (slug: string, value: number) => {
     setQuantities((prev) => ({
       ...prev,
-      [slug]: Math.max(1, (Number(prev[slug]) || 1) + value),
+      [slug]: Math.max(1, (prev[slug] || 1) + value),
     }));
   };
-  
 
- // Handle adding to cart and redirecting
- const handleAddToCart = (id: string, name: string, price: string,  slug: string, mainImage: string) => {
-  const quantity = quantities[id] || 1;
-  addToCart({ slug, name, price, mainImage, quantity });
-  openCart(); // Open cart drawer
-};
+  const handleAddToCart = (item: WishlistItem) => {
+    const quantity = quantities[item.slug] || 1;
+    addToCart({
+      slug: item.slug,
+      name: item.name,
+      price: item.price,
+      mainImage: item.mainImage,
+      quantity,
+    });
+    openCart();
+  };
 
   return (
-    <section className="max-w-6xl mx-auto px-4 py-10 mt-20">
+    <section className="max-w-6xl mx-auto px-4 py-10 mt-40">
       <div className="text-center mb-10">
-        <div
-  role="heading"
-  aria-level={1}
-   className="text-3xl sm:text-4xl font-bold text-gray-900 mt-20">
-   Your Wishlist
-</div>
-         
+        <h1 className="text-3xl sm:text-4xl font-bold text-gray-900">Your Wishlist</h1>
         <p className="text-lg mt-3 text-gray-600">Here are the products you've added to your wishlist.</p>
       </div>
 
-      {/* Wishlist Products Grid */}
       {wishlist.length > 0 ? (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
-          {wishlist.map((product) => (
-            <div key={product.slug} className="bg-white shadow-lg rounded-lg p-4 flex flex-col items-center">
-              {/* Product Image */}
-              <Link href={`/products/${product.slug}`} className="block relative w-full h-48 sm:h-60 md:h-72 lg:h-48">
-                <Image
-                  src={product.mainImage}
-                  alt={product.name}
-                  layout="fill"
-                  objectFit="cover"
-                  className="rounded-lg mb-4 md:h-72 lg:h-48 h-48 sm:h-60"
-                />
-              </Link>
+        <>
+          {/* Desktop / Tablet */}
+          <div className="hidden md:block">
+            <table className="w-full table-auto border-collapse">
+              <thead>
+                <tr className="border-b border-gray-300">
+                  <th className="text-left py-3 px-4">Product</th>
+                  <th className="text-left py-3 px-4">Price</th>
+                  <th className="text-left py-3 px-4">Quantity</th>
+                  <th className="text-left py-3 px-4">Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                {wishlist.map((item, idx) => (
+                  <tr key={`${item.slug}-${idx}`} className="border-b border-gray-200 hover:bg-gray-50">
+                    <td className="flex items-center py-4 px-4 gap-4 cursor-pointer" onClick={() => handleViewProduct(item.slug)}>
+                      <Image
+                        src={item.mainImage}
+                        alt={item.name}
+                        width={80}
+                        height={80}
+                        className="rounded"
+                      />
+                      <span className="text-blue-600 font-medium underline">{item.name}</span>
+                    </td>
+                    <td className="py-4 px-4">${item.price}</td>
+                    <td className="py-4 px-4">
+                      <div className="flex items-center gap-2">
+                        <button
+                          className="bg-gray-200 rounded px-2 py-1"
+                          onClick={() => updateQuantity(item.slug, -1)}
+                        >-</button>
+                        <span className="text-center w-6">{quantities[item.slug] || 1}</span>
+                        <button
+                          className="bg-gray-200 rounded px-2 py-1"
+                          onClick={() => updateQuantity(item.slug, 1)}
+                        >+</button>
+                      </div>
+                    </td>
+                    <td className="py-4 px-4 flex gap-2">
+                      <button
+                        onClick={() => removeFromWishlist(item.slug)}
+                        className="bg-red-600 text-white px-3 py-1 rounded hover:bg-red-700 whitespace-nowrap"
+                      >
+                        Remove
+                      </button>
+                      <button
+                        onClick={() => handleAddToCart(item)}
+                        className="bg-green-600 text-white px-3 py-1 rounded hover:bg-green-700 whitespace-nowrap"
+                      >
+                        Add to Cart
+                      </button>
+                      <button
+                        onClick={() => handleViewProduct(item.slug)}
+                        className="bg-blue-600 text-white px-3 py-1 rounded hover:bg-blue-700 whitespace-nowrap"
+                      >
+                        View Details
+                      </button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
 
-              {/* Product Name */}
-              <h3 className="text-lg font-semibold text-gray-800 mb-2">{product.name}</h3>
-              <p className="text-xl text-blue-600 mb-4">${product.price}</p>
-
-              {/* Quantity Selector */}
-<div className="mt-3 flex justify-center items-center space-x-3">
-  <button
-    className="bg-gray-200 rounded px-3 py-1"
-    onClick={() => updateQuantity(product.slug, -1)} 
-  >
-    -
-  </button>
-  <span className="text-lg font-bold">{quantities[product.slug] || 1}</span> {/* Access the quantity by product.slug */}
-  <button
-    className="bg-gray-200 rounded px-3 py-1"
-    onClick={() => updateQuantity(product.slug, 1)} 
-  >
-    +
-  </button>
-</div>
-
-
-
-
-
-              {/* View Product Button */}
-              <button
-                onClick={() => handleViewProduct(product.slug)}
-                className="text-blue-600 mb-4 hover:underline"
+          {/* Mobile */}
+          <div className="block md:hidden space-y-4">
+            {wishlist.map((item, idx) => (
+              <div
+                key={`${item.slug}-${idx}`}
+                className="border border-gray-200 rounded-lg p-4 flex flex-col items-start gap-4"
               >
-                View Product
-              </button>
-
-              {/* Add to Cart Button */}
-              <button
-  onClick={() => handleAddToCart(product.slug, product.name, product.price, product.slug, product.mainImage)}
-  className="bg-black text-white font-semibold py-2 px-4 rounded w-full mb-4"
->
-  Add to Cart
-</button>
-
-
-
-              {/* Remove from Wishlist Button */}
-              <button
-                onClick={() => removeFromWishlist(product.slug)}
-                className="text-red-600 flex items-center gap-2 hover:text-red-700"
-              >
-                <IoTrashBinOutline />
-                Remove from Wishlist
-              </button>
-
-              {/* Social Media Share Icons */}
-         <div className="flex space-x-3 mt-4">
-  <a
-    href={`https://www.facebook.com/profile.php?id=100091838611593`}
-    target="_blank"
-    rel="noopener noreferrer"
-  >
-    <FaFacebookF className="text-blue-600 text-2xl hover:text-blue-800" />
-  </a>
-
-  <a
-    href={`https://t.me/+KA6CTymnCfsxNTJk`}
-    target="_blank"
-    rel="noopener noreferrer"
-  >
-    <FaTwitter className="text-blue-400 text-2xl hover:text-blue-600" />
-  </a>
-</div>
-
-            </div>
-          ))}
-        </div>
+                <div className="flex items-center gap-4 cursor-pointer" onClick={() => handleViewProduct(item.slug)}>
+                  <Image
+                    src={item.mainImage}
+                    alt={item.name}
+                    width={80}
+                    height={80}
+                    className="rounded"
+                  />
+                  <span className="text-blue-600 font-medium underline">{item.name}</span>
+                </div>
+                <p className="text-gray-800 font-semibold">${item.price}</p>
+                <div className="flex items-center gap-2">
+                  <button
+                    className="bg-gray-200 rounded px-2 py-1"
+                    onClick={() => updateQuantity(item.slug, -1)}
+                  >-</button>
+                  <span className="w-6 text-center">{quantities[item.slug] || 1}</span>
+                  <button
+                    className="bg-gray-200 rounded px-2 py-1"
+                    onClick={() => updateQuantity(item.slug, 1)}
+                  >+</button>
+                </div>
+                <div className="flex gap-2 flex-wrap w-full">
+                  <button
+                    onClick={() => removeFromWishlist(item.slug)}
+                    className="bg-red-600 text-white px-3 py-1 rounded hover:bg-red-700 flex-1"
+                  >
+                    Remove
+                  </button>
+                  <button
+                    onClick={() => handleAddToCart(item)}
+                    className="bg-green-600 text-white px-3 py-1 rounded hover:bg-green-700 flex-1"
+                  >
+                    Add to Cart
+                  </button>
+                  <button
+                    onClick={() => handleViewProduct(item.slug)}
+                    className="bg-blue-600 text-white px-3 py-1 rounded hover:bg-blue-700 flex-1"
+                  >
+                    View Details
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
+        </>
       ) : (
-        <div className="text-center text-gray-600">
+        <div className="text-center text-gray-600 mt-10">
           <p>Your wishlist is empty.</p>
-          <Link href="/shop" className="text-blue-600 font-semibold hover:underline mt-4">
+          <Link href="/shop" className="text-blue-600 font-semibold hover:underline mt-4 inline-block">
             Start shopping now!
           </Link>
         </div>

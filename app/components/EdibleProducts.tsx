@@ -63,7 +63,7 @@ export default function EdibleProducts() {
       </div>
 
       {/* Products Grid */}
-      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-3 md:gap-4 lg:gap-6">
+      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5 sm:gap-5 md:gap-4 lg:gap-6">
         {products.map(product => (
           <div key={product.id} className="h-full flex">
             <ProductCard

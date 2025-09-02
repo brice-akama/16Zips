@@ -65,6 +65,7 @@ async function translateText(text: string, source: string, target: string) {
   return data.translatedText || text;
 }
 
+
 // Handle Product Creation (POST request)
 export async function POST(req: NextRequest) {
   try {
@@ -350,6 +351,16 @@ if (pageParam && perPageParam) {
     if (popularProduct) filter.popularProduct = true;
 
     const totalCount = await db.collection("products").countDocuments(filter);
+
+    // --- Handle category filtering ---
+const categoryQuery = searchParams.get("category");
+if (categoryQuery) {
+  // Convert URL slug to DB category match (ignore case)
+  const formattedCategory = categoryQuery.replace(/-/g, " "); // vape-cartridges → vape cartridges
+  filter.category = { $regex: new RegExp(`^${formattedCategory}$`, "i") };
+}
+
+
 
     // Build query
     const query = db.collection("products").find(filter).sort({ [sortField]: sortOrder });
