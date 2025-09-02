@@ -31,7 +31,7 @@ export default function BottomNav() {
 
   return (
     <div className="fixed bottom-0 left-0 w-full bg-white border-t border-gray-200 shadow-lg z-50 md:hidden">
-      <div className="flex justify-around items-center py-2 px-1 safe-area-inset-bottom mt5">
+      <div className="flex justify-around items-center py-2 px-1 safe-area-inset-bottom">
         {navItems.map((item) => {
           const isActive = pathname === item.href;
           const isCart = item.label === "Cart";
