@@ -114,13 +114,14 @@ export default function RootLayout({
                  <ScrollToTop /> {/* ✅ Add this here */}
                 {children}
                 {!isAdminRoute && !isResetPasswordPage && <BackToTop />}
+                {!isAdminRoute && !isResetPasswordPage && <BottomNav />}
               </main>
 
               {!isAdminRoute && !isResetPasswordPage && <Footer />}
               {!isAdminRoute && !isResetPasswordPage && <SlideContact />}
               {!isAdminRoute && !isResetPasswordPage && <CookieConsent />}
                {/* Bottom navigation for mobile */}
-    {!isAdminRoute && !isResetPasswordPage && <BottomNav />}
+    
             </LanguageProvider>
           </CartProvider>
         </WishlistProvider>

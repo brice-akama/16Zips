@@ -50,3 +50,8 @@ ul, ol {
 li {
   margin-bottom: 0.5rem;
 }
+
+/* Prevent horizontal scrollbar */
+html, body {
+  overflow-x: hidden;
+}
