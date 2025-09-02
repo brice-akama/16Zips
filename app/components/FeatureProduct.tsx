@@ -32,18 +32,33 @@ export default function FeatureProduct() {
   
 
 
+ 
+
+
   useEffect(() => {
-    async function fetchProducts() {
-      try {
-        const res = await fetch('/api/products?popularProduct=true');
-        const { data } = await res.json();
-        setProducts(data);
-      } catch (error) {
-        console.error('Failed to fetch products:', error);
-      }
+  async function fetchProducts() {
+    try {
+   const res = await fetch('/api/products?popularProduct=true');
+      const { data } = await res.json();
+
+      // ✅ Add random discount to some products
+      const dataWithDiscount = data.map((product: Product) => {
+        const hasDiscount = Math.random() < 0.5; // 50% chance
+        if (hasDiscount) {
+          const discount = Math.floor(Math.random() * 21) + 5; // 5% to 25%
+          return { ...product, discount }; // only add discount if it exists
+        }
+        return product; // no discount property added
+      });
+
+      setProducts(dataWithDiscount);
+    } catch (error) {
+      console.error('Failed to fetch products:', error);
     }
-    fetchProducts();
-  }, []);
+  }
+  fetchProducts();
+}, []);
+
 
   const handleAddToWishlist = (
     id: string, slug: string, name: string, price: number, mainImage: string

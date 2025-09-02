@@ -36,6 +36,7 @@ type Props = {
   categorySlug?: string;
   products: Product[];
   categorySEO?: CategorySEO | null;
+  bestSellingProducts: Product[];
 };
 
 type Option = {
@@ -49,7 +50,7 @@ function categoryToSlug(category: string) {
   return category.trim().toLowerCase().replace(/\s+/g, "-");
 }
 
-export default function ShopPage({ categorySlug, products, categorySEO }: Props) {
+export default function ShopPage({ categorySlug, products, categorySEO, bestSellingProducts }: Props) {
   const [selectedCategory, setSelectedCategory] = useState("All");
   const [sortOrder, setSortOrder] = useState("default");
   const [currentPage, setCurrentPage] = useState(1);
@@ -66,6 +67,9 @@ export default function ShopPage({ categorySlug, products, categorySEO }: Props)
   const [quickViewProduct, setQuickViewProduct] = useState<Product | null>(null);
   const [selectedOption, setSelectedOption] = useState<Option | null>(null);
   const [quantity, setQuantity] = useState(1);
+
+
+
 
   
 const hasDiscount = Math.random() < 0.4; // 40% chance to have discount
@@ -89,7 +93,6 @@ useEffect(() => {
 
   return () => window.removeEventListener("resize", updateProductsPerPage);
 }, []);
-
 
 
 
@@ -380,6 +383,24 @@ useEffect(() => {
                   )}
                 </li>
               ))}
+               {/* Add Best Selling Section */}
+            <h2 className="text-xl font-bold mt-10">Best Selling</h2>
+<ul>
+  {bestSellingProducts.map((product: Product) => (
+    <li key={product._id} className="flex items-center mb-4">
+      <img
+        src={product.mainImage}
+        alt={product.name}
+        className="w-12 h-12 object-cover mr-3"
+      />
+      <div>
+        <p className="text-gray-800 text-sm font-semibold">{product.name}</p>
+        <p className="text-red-600 text-sm">${product.price}</p>
+      </div>
+    </li>
+  ))}
+</ul>
+
             </ul>
           </div>
 
@@ -456,6 +477,24 @@ useEffect(() => {
                         )}
                       </li>
                     ))}
+
+                     {/* Add Best Selling Section */}
+            <h2 className="text-xl font-bold mt-10">Best Selling</h2>
+<ul>
+  {bestSellingProducts.map((product: Product) => (
+    <li key={product._id} className="flex items-center mb-4">
+      <img
+        src={product.mainImage}
+        alt={product.name}
+        className="w-12 h-12 object-cover mr-3"
+      />
+      <div>
+        <p className="text-gray-800 text-sm font-semibold">{product.name}</p>
+        <p className="text-red-600 text-sm">${product.price}</p>
+      </div>
+    </li>
+  ))}
+</ul>
                   </ul>
                 </div>
               </div>

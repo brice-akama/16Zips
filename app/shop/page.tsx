@@ -24,17 +24,31 @@ async function fetchCategorySEO(slug: string) {
   return data?.data || null;
 }
 
-// Server-side rendering page
+// **New helper: fetch Best Selling products (4 only)**
+async function fetchBestSellingProducts() {
+  const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/products?popularProduct=true`);
+  const data = await res.json();
+  return Array.isArray(data.data) ? data.data.slice(0, 4) : []; // only 4 products
+}
+
 // Server-side rendering page
 export default async function Page({ searchParams }: { searchParams?: { category?: string } }) {
   const categorySlug = searchParams?.category;
 
-  // Fetch products filtered by category if present
-  const [products, categorySEO] = await Promise.all([
-    fetchProducts(categorySlug), // pass category slug to backend
-    categorySlug ? fetchCategorySEO(categorySlug) : Promise.resolve(null),
+  // Fetch products filtered by category + SEO + best selling products
+  const [products, categorySEO, bestSellingProducts] = await Promise.all([
+    fetchProducts(categorySlug), // category products
+    categorySlug ? fetchCategorySEO(categorySlug) : Promise.resolve(null), // SEO info
+    fetchBestSellingProducts(), // best selling products
   ]);
 
-  return <ShopPage categorySlug={categorySlug} products={products} categorySEO={categorySEO} />;
+  // Pass bestSellingProducts as a prop to ShopPage
+  return (
+    <ShopPage
+      categorySlug={categorySlug}
+      products={products}
+      categorySEO={categorySEO}
+      bestSellingProducts={bestSellingProducts} // ✅ added
+    />
+  );
 }
-
