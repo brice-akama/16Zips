@@ -353,12 +353,26 @@ if (pageParam && perPageParam) {
     const totalCount = await db.collection("products").countDocuments(filter);
 
     // --- Handle category filtering ---
+// --- Handle category filtering ---
+// --- Handle category filtering ---
 const categoryQuery = searchParams.get("category");
 if (categoryQuery) {
   // Convert URL slug to DB category match (ignore case)
-  const formattedCategory = categoryQuery.replace(/-/g, " "); // vape-cartridges → vape cartridges
-  filter.category = { $regex: new RegExp(`^${formattedCategory}$`, "i") };
+  const formattedCategory = categoryQuery.replace(/-/g, " "); // e.g. vape-cartridges → vape cartridges
+
+  // Special handling for known exceptions
+  let regexString = formattedCategory;
+
+  // If category is 'disposables vapes', allow matching 'disposables' or 'disposables vapes'
+  if (formattedCategory === "disposables vapes") {
+    regexString = "disposables( vapes)?";
+  }
+
+  // Use a loose regex match
+  filter.category = { $regex: new RegExp(regexString, "i") };
 }
+
+
 
 
 

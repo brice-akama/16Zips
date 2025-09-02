@@ -53,7 +53,6 @@ export default function ShopPage({ categorySlug, products, categorySEO }: Props)
   const [selectedCategory, setSelectedCategory] = useState("All");
   const [sortOrder, setSortOrder] = useState("default");
   const [currentPage, setCurrentPage] = useState(1);
-  const productsPerPage = 12;
   const router = useRouter();
   const searchParams = useSearchParams();
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -66,9 +65,30 @@ export default function ShopPage({ categorySlug, products, categorySEO }: Props)
   const [mobileCategoriesOpen, setMobileCategoriesOpen] = useState(false);
   const [quickViewProduct, setQuickViewProduct] = useState<Product | null>(null);
   const [selectedOption, setSelectedOption] = useState<Option | null>(null);
+  const [quantity, setQuantity] = useState(1);
+
   
+const hasDiscount = Math.random() < 0.4; // 40% chance to have discount
+const discount = hasDiscount ? Math.floor(Math.random() * 16) + 5 : 0; // 5% to 20%
 
 
+const [productsPerPage, setProductsPerPage] = useState(12);
+
+// Update productsPerPage on resize
+useEffect(() => {
+  const updateProductsPerPage = () => {
+    if (window.innerWidth < 640) { // mobile
+      setProductsPerPage(6);
+    } else { // tablet & desktop
+      setProductsPerPage(12);
+    }
+  };
+
+  updateProductsPerPage();
+  window.addEventListener("resize", updateProductsPerPage);
+
+  return () => window.removeEventListener("resize", updateProductsPerPage);
+}, []);
 
 
 
@@ -444,7 +464,8 @@ export default function ShopPage({ categorySlug, products, categorySEO }: Props)
 
 
           {/* Product Grid */}
-          <div className="md:col-span-3 grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="md:col-span-3 grid grid-cols-1 md:grid-cols-3 lg:grid-cols-3 gap-6">
+
             {displayedProducts.map((product) => {
               const hasOptions = (product.weights?.length || 0) + (product.seeds?.length || 0) > 0;
 
@@ -458,12 +479,11 @@ export default function ShopPage({ categorySlug, products, categorySEO }: Props)
                     className="bg-white rounded-2xl shadow-md overflow-hidden flex flex-col h-full"
                   >
                     {/* --- Discount Badge --- */}
-                    {product.discount && (
-                      <span className="absolute top-3 left-3 bg-red-500 text-white text-xs font-bold px-2 py-1 rounded-full z-10">
-                        -{product.discount}%
-                      </span>
-                    )}
-
+                   {discount > 0 && (
+  <span className="absolute top-3 left-3 bg-red-500 text-white text-xs font-bold px-2 py-1 rounded-full z-10">
+    -{discount}%
+  </span>
+)}
                     {/* --- Product Image --- */}
                     <div className="relative w-full aspect-square overflow-hidden">
                       <Link href={`/products/${product.slug}`}>
@@ -477,7 +497,7 @@ export default function ShopPage({ categorySlug, products, categorySEO }: Props)
                       </Link>
 
                       {/* --- Wishlist Icon (mobile always visible) --- */}
-                      <div className="absolute bottom-3 right-3 flex sm:hidden z-10">
+                      <div className="absolute  right-3 flex sm:hidden z-10">
                         <motion.button
                           whileTap={{ scale: 0.9 }}
                           onClick={() =>
@@ -614,112 +634,60 @@ export default function ShopPage({ categorySlug, products, categorySEO }: Props)
         </div>
 
         {/* Pagination */}
-        <div className="flex justify-center flex-wrap mt-6 gap-2 max-w-[90%] mx-auto">
-          {Array.from({ length: totalPages }, (_, index) => (
-            <button
-              key={index}
-              className={`px-4 py-2 mx-1 border rounded ${currentPage === index + 1 ? "bg-blue-600 text-white" : "hover:bg-gray-200"
-                }`}
-              onClick={() => setCurrentPage(index + 1)}
-            >
-              {index + 1}
-            </button>
-          ))}
-        </div>
+        <div className="flex justify-center items-center flex-wrap mt-6 gap-2 max-w-[90%] mx-auto">
+  {/* Previous button */}
+  <button
+    onClick={() => {
+      if (currentPage > 1) setCurrentPage(currentPage - 1);
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }}
+    className={`px-3 py-2 border rounded ${currentPage === 1 ? "opacity-50 cursor-not-allowed" : "hover:bg-gray-200"}`}
+  >
+    &lt;
+  </button>
+
+  {/* Calculate sliding pages */}
+  {(() => {
+    const pageWindow = 3; // number of pages to show at a time
+    let startPage = Math.max(currentPage - 1, 1);
+    let endPage = Math.min(startPage + pageWindow - 1, totalPages);
+
+    if (endPage - startPage + 1 < pageWindow) {
+      startPage = Math.max(endPage - pageWindow + 1, 1);
+    }
+
+    const visiblePages = [];
+    for (let i = startPage; i <= endPage; i++) visiblePages.push(i);
+
+    return visiblePages.map((page, idx) => (
+      <button
+        key={page}
+        onClick={() => {
+          setCurrentPage(page);
+          window.scrollTo({ top: 0, behavior: "smooth" });
+        }}
+        className={`px-4 py-2 mx-1 border rounded ${currentPage === page ? "bg-blue-600 text-white" : "hover:bg-gray-200"}`}
+      >
+        {page}
+      </button>
+    ));
+  })()}
+
+  {/* Next button */}
+  <button
+    onClick={() => {
+      if (currentPage < totalPages) setCurrentPage(currentPage + 1);
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }}
+    className={`px-3 py-2 border rounded ${currentPage === totalPages ? "opacity-50 cursor-not-allowed" : "hover:bg-gray-200"}`}
+  >
+    &gt;
+  </button>
+</div>
+
       </div>
-      <AnimatePresence>
-        {quickViewProduct && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
-          >
-            <motion.div
-              initial={{ scale: 0.8 }}
-              animate={{ scale: 1 }}
-              exit={{ scale: 0.8 }}
-              className="bg-white rounded-2xl w-11/12 md:w-3/4 lg:w-2/3 max-h-[90vh] overflow-y-auto flex relative"
-            >
-              {/* Close button */}
-              <button
-                onClick={() => setQuickViewProduct(null)}
-                className="absolute top-4 right-4 text-xl font-bold text-gray-600"
-              >
-                &times;
-              </button>
-
-              {/* Left: Image */}
-              <div className="w-1/2 relative group">
-                <Image
-                  src={quickViewProduct.mainImage}
-                  alt={quickViewProduct.name}
-                  width={500}
-                  height={500}
-                  className="object-cover w-full h-full rounded-l-2xl"
-                />
-                <motion.button
-                  initial={{ opacity: 0 }}
-                  whileHover={{ opacity: 1 }}
-                  className="absolute bottom-4 left-1/2 transform -translate-x-1/2 bg-red-500 text-white px-4 py-2 rounded-lg"
-                >
-                  View Details
-                </motion.button>
-              </div>
-
-
-              {/* Right: Info */}
-              <div className="w-1/2 p-6 flex flex-col gap-4">
-                <h2 className="text-2xl font-bold">{quickViewProduct.name}</h2>
-                <p className="text-xl text-red-500 font-semibold">${quickViewProduct.price}</p>
-
-                {/* Options */}
-                {/* Options */}
-                {quickViewProduct && (
-                  <select className="border rounded p-2">
-                    {(quickViewProduct.seeds ?? []).map((o) => (
-                      <option key={o.label} value={o.label}>
-                        {o.label} {o.price ? `(+${o.price})` : ""}
-                      </option>
-                    ))}
-                    {(quickViewProduct.weights ?? []).map((o) => (
-                      <option key={o.label} value={o.label}>
-                        {o.label} {o.price ? `(+${o.price})` : ""}
-                      </option>
-                    ))}
-                  </select>
-                )}
-
-
-                <div className="flex gap-2 mt-4">
-                  <button
-                    onClick={() => handleAddToCart(quickViewProduct)}
-                    className="bg-red-500 text-white px-4 py-2 rounded-lg shadow hover:bg-red-600 transition"
-                  >
-                    Add to Cart
-                  </button>
-                  <button
-                    onClick={() =>
-                      handleAddToWishlist(
-                        quickViewProduct._id,
-                        quickViewProduct.slug,
-                        quickViewProduct.name,
-                        quickViewProduct.price,
-                        quickViewProduct.mainImage
-                      )
-                    }
-                    className="bg-gray-200 px-4 py-2 rounded-lg shadow hover:bg-gray-300 transition"
-                  >
-                    Add to Wishlist
-                  </button>
-                </div>
-
-                <p className="text-gray-700 line-clamp-3">{quickViewProduct.seoDescription}</p>
-              </div>
-            </motion.div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+      
+        
       <AnimatePresence>
         {showOptionsOverlay && (
           <motion.div
@@ -788,10 +756,12 @@ export default function ShopPage({ categorySlug, products, categorySEO }: Props)
           </motion.div>
         )}
       </AnimatePresence>
-            <AnimatePresence>
+           
+
+ <AnimatePresence>
   {quickViewProduct && (
     <motion.div
-      initial={{ opacity: 0 }}
+      initial={{ opacity: 1 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
       className="fixed inset-0 flex items-center justify-center z-50"
@@ -848,6 +818,26 @@ export default function ShopPage({ categorySlug, products, categorySEO }: Props)
             </select>
           )}
 
+           {/* Quantity Selector */}
+  <div className="flex items-center gap-2 mt-2">
+    <span>Quantity:</span>
+    <div className="flex items-center border rounded">
+      <button
+        className="px-3 py-1 bg-gray-200 hover:bg-gray-300"
+        onClick={() => setQuantity((prev) => Math.max(prev - 1, 1))}
+      >
+        -
+      </button>
+      <span className="px-4">{quantity}</span>
+      <button
+        className="px-3 py-1 bg-gray-200 hover:bg-gray-300"
+        onClick={() => setQuantity((prev) => prev + 1)}
+      >
+        +
+      </button>
+    </div>
+  </div>
+
           <div className="flex gap-2 mt-4">
             <button className="bg-red-500 text-white px-4 py-2 rounded-lg shadow hover:bg-red-600 transition">
               Add to Cart
@@ -863,8 +853,6 @@ export default function ShopPage({ categorySlug, products, categorySEO }: Props)
     </motion.div>
   )}
 </AnimatePresence>
-
-
 
     </div>
   );

@@ -25,6 +25,7 @@ async function fetchCategorySEO(slug: string) {
 }
 
 // Server-side rendering page
+// Server-side rendering page
 export default async function Page({ searchParams }: { searchParams?: { category?: string } }) {
   const categorySlug = searchParams?.category;
 
@@ -36,3 +37,4 @@ export default async function Page({ searchParams }: { searchParams?: { category
 
   return <ShopPage categorySlug={categorySlug} products={products} categorySEO={categorySEO} />;
 }
+
