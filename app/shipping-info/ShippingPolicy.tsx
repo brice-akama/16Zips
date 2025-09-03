@@ -5,7 +5,13 @@ import Head from "next/head";
 
 const ShippingPolicy = () => {
   return (
-    <main className="max-w-4xl mx-auto p-6 mt-20">
+        <div className="mt-20 lg:mt-40">
+      {/* Full-width black section */}
+      <div className="bg-black text-white py-8 text-center w-full">
+        <h1 className="text-4xl font-black">Shipping Policy</h1>
+        
+      </div>
+    <main className="max-w-4xl mx-auto p-6 ">
       <Head>
         <title>Shipping Policy | 16Zips</title>
         <meta
@@ -13,13 +19,7 @@ const ShippingPolicy = () => {
           content="Learn about our shipping methods, delivery timelines, and policies for 16Zips cannabis products."
         />
       </Head>
-      <div
-  role="heading"
-  aria-level={1}
-  className="text-3xl font-bold text-gray-900 mt-8 sm:mt-10 md:mt-20 lg:mt-20"
->
-Shipping Policy
-</div>
+     
 
 
        
@@ -81,6 +81,7 @@ Shipping Policy
         </p>
       </section>
     </main>
+    </div>
   );
 };
 

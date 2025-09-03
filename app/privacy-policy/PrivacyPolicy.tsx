@@ -6,7 +6,13 @@ import Head from "next/head";
 
 const PrivacyPolicy = () => {
   return (
-    <main className="max-w-4xl mx-auto p-6 mt-20">
+     <div className="mt-20 lg:mt-40">
+      {/* Full-width black section */}
+      <div className="bg-black text-white py-8 text-center w-full">
+        <h1 className="text-4xl font-black">Privacy Policy</h1>
+        
+      </div>
+    <main className="max-w-4xl mx-auto p-6 ">
       <Head>
         <title>Privacy Policy | 16Zips</title>
         <meta
@@ -14,13 +20,7 @@ const PrivacyPolicy = () => {
           content="Read our Privacy Policy to understand how 16Zips handles your data and protects your privacy when purchasing cannabis products."
         />
       </Head>
-      <div
-  role="heading"
-  aria-level={1}
-   className="text-3xl font-bold text-gray-900 mt-8 sm:mt-10 md:mt-20 lg:mt-20"
->
-  Privacy Policy
-</div>
+      
 
 
      
@@ -81,6 +81,7 @@ const PrivacyPolicy = () => {
         </p>
       </section>
     </main>
+    </div>
   );
 };
 

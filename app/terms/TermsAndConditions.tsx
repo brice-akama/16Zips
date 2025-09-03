@@ -5,20 +5,23 @@ import Link from "next/link";
 
 const TermsAndConditions = () => {
   return (
-    <main className="max-w-4xl mx-auto p-6 mt-20">
+
+    <div className="mt-20 lg:mt-40">
+      {/* Full-width black section */}
+      <div className="bg-black text-white py-8 text-center w-full">
+        <h1 className="text-4xl font-black">Terms & Conditions</h1>
+        
+      </div>
+    <main className="max-w-4xl mx-auto p-6 ">
       <Head>
         <title>Terms & Conditions | 16Zips</title>
         <meta name="description" content="Read the Terms and Conditions for using 16Zips' cannabis products and website." />
       </Head>
 
-      <div
-  role="heading"
-  aria-level={1}
-  className="text-3xl font-bold text-gray-900 mt-8 sm:mt-10 md:mt-20 lg:mt-20"
->
-  Terms & Conditions
-</div>
 
+
+
+      
 
        
       <p className="text-gray-600 mt-4">
@@ -63,6 +66,8 @@ const TermsAndConditions = () => {
         </p>
       </section>
     </main>
+    </div>
+    
   );
 };
 

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { FaSearch, FaUser, FaBars, FaTimes, FaShoppingCart, FaHeart } from "react-icons/fa";
 import { useCart } from "../context/CartContext";
@@ -12,12 +12,35 @@ import { useLanguage } from "../context/LanguageContext";
 import { useWishlist } from "../context/WishlistContext";
 
 
+
+
 type MenuItem = {
   name: string;
   link: string;
   subLinks?: (string | { name: string; subMenu?: string[] })[];
   customDropdownType?: "category" | "default";
 };
+
+interface Product {
+  slug: string;
+  name: string;
+  mainImage?: string;
+  price?: number;
+}
+
+interface Blog {
+  slug: string;
+  title: string;
+}
+
+interface DropdownResults {
+  products: Product[];
+  blogs: Blog[];
+}
+
+
+
+
 
 
 
@@ -34,13 +57,29 @@ const Navbar = () => {
   const router = useRouter();
   const [hoverTimeout, setHoverTimeout] = useState<NodeJS.Timeout | null>(null);
   const [expandedCategoryIndex, setExpandedCategoryIndex] = useState<number | null>(null);
+   const dropdownRef = useRef<HTMLDivElement>(null);
+  const [activeSubmenu, setActiveSubmenu] = useState<number | null>(null);
+  const [dropdownResults, setDropdownResults] = useState<DropdownResults>({
+  products: [],
+  blogs: [],
+});
+
 
   
-  const [activeSubmenu, setActiveSubmenu] = useState<number | null>(null);
 
 
 
 
+useEffect(() => {
+  const handleClickOutside = (event: MouseEvent) => {
+    if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+      setDropdownResults({ products: [], blogs: [] });
+    }
+  };
+  
+  document.addEventListener("mousedown", handleClickOutside);
+  return () => document.removeEventListener("mousedown", handleClickOutside);
+}, [dropdownRef]);
 
 
   // State for translations
@@ -170,59 +209,93 @@ const handleCategoryClick = (index: number) => {
     translateTexts(); // Call the function to translate texts
   }, [translate]);
 
-  const handleSearch = async () => {
-    if (!searchQuery.trim()) return;
-
-    // Define a list of known paths to handle directly
-    const knownPaths = [
-      "/privacy-policy",
-      "/terms",
-      "/support",
-      "/about-us", 
-      "/refund-policy",
-      "/shipping-info",
-      "/faqs",
-       "/contact-us",
-    ];
-
-    try {
-      // Check if the search query partially matches any known path
-      const matchedPath = knownPaths.find((path) =>
-        path.toLowerCase().includes(searchQuery.trim().toLowerCase())
-      );
-
-      if (matchedPath) {
-        router.push(matchedPath); // Redirect to the matched path
-        setSearchQuery(''); // Clear the search input after redirect
-
-        return;
-      }
-
-      // Proceed with the search functionality for products or categories
-      const res = await fetch(`/api/search?search=${encodeURIComponent(searchQuery.trim())}`);
-      const { redirectTo } = await res.json();
-
-      if (redirectTo) {
-        router.push(redirectTo); // Redirect to the URL returned by the backend
-        setSearchQuery(''); // Clear the search input after redirect
-
-      } else {
-        toast.error("No matching results found.");
-        setSearchQuery(''); // Clear the search input after no results
-
-      }
-    } catch (error) {
-      console.error("Error during search:", error);
-      toast.error("Something went wrong. Please try again.");
-      setSearchQuery(''); // Clear the search input after error
-
-    }
-  };
   
 
 
+/**
+ * 🔍 Live search while typing (for dropdown)
+ */
+useEffect(() => {
+  if (!searchQuery.trim()) {
+    setDropdownResults({ products: [], blogs: [] });
+    return;
+  }
 
+  const fetchResults = async () => {
+    try {
+      const res = await fetch(
+        `/api/search?search=${encodeURIComponent(searchQuery.trim())}`
+      );
+      const { products, blogs } = await res.json();
+      setDropdownResults({ products, blogs });
+    } catch (error) {
+      console.error("Dropdown search error:", error);
+      setDropdownResults({ products: [], blogs: [] });
+    }
+  };
 
+  const delayDebounce = setTimeout(() => {
+    fetchResults();
+  }, 300); // wait 300ms before calling API
+
+  return () => clearTimeout(delayDebounce);
+}, [searchQuery]);
+
+/**
+ * 🔎 Manual search trigger (Enter or button click)
+ */
+const handleSearch = async () => {
+  if (!searchQuery.trim()) return;
+
+  // Static routes
+  const knownPaths = [
+    "/privacy-policy",
+    "/terms",
+    "/support",
+    "/about-us",
+    "/refund-policy",
+    "/shipping-info",
+    "/faqs",
+    "/contact-us",
+  ];
+
+  try {
+    // Check static path
+    const matchedPath = knownPaths.find((path) =>
+      path.toLowerCase().includes(searchQuery.trim().toLowerCase())
+    );
+
+    if (matchedPath) {
+      router.push(matchedPath);
+      setSearchQuery("");
+      setDropdownResults({ products: [], blogs: [] });
+      return;
+    }
+
+    // Query backend
+    const res = await fetch(
+      `/api/search?search=${encodeURIComponent(searchQuery.trim())}`
+    );
+    const { products, blogs } = await res.json();
+
+    // Handle search results
+    if (products.length === 1 && blogs.length === 0) {
+      router.push(`/products/${products[0].slug}`);
+    } else if (products.length > 1 || blogs.length > 0) {
+      router.push(`/search?query=${encodeURIComponent(searchQuery.trim())}`);
+    } else {
+      toast.error("No matching results found.");
+    }
+
+    setSearchQuery("");
+    setDropdownResults({ products: [], blogs: [] });
+  } catch (error) {
+    console.error("Error during search:", error);
+    toast.error("Something went wrong. Please try again.");
+    setSearchQuery("");
+    setDropdownResults({ products: [], blogs: [] });
+  }
+};
 
   useEffect(() => {
     const handleResize = () => {
@@ -266,15 +339,43 @@ const goBack = () => {
     <div className="w-full fixed top-0 z-20 left-0">
       <Toaster position="top-center" reverseOrder={false} />
       {/* Moving Text Bar */}
-      <div className="absolute top-0 left-0 w-full  bg-red-500 h-10 overflow-hidden flex items-center justify-center">
-        <p className="text-white text-sm font-bold uppercase animate-marquee flex items-center gap-2">
-           Premium Cannabis Products – Safe, Fast & Discreet
-         
-        </p>
-      </div>
+      
+    {/* Top Bar (responsive layout) */}
+<div className="absolute top-0 left-0 w-full bg-red-500 h-10 flex items-center justify-between px-6 md:px-16 z-50">
+  {/* Left side - Special Offer */}
+  <div className="w-full md:w-auto flex justify-center md:justify-start">
+    <p className="text-white whitespace-nowrap text-sm font-bold  flex items-center gap-2">
+      Premium Cannabis Products – Safe, Fast & Discreet
+    </p>
+  </div>
+
+  {/* Right side - Warranty & Track Order */}
+  <div className="hidden md:flex items-center gap-6">
+    <Link
+      href="/how-to-order"
+      className="text-white text-sm font-bold uppercase flex items-center gap-2"
+    >
+      How To Order
+    </Link>
+
+    <Link
+      href="/track-order"
+      className="text-white text-sm font-bold uppercase flex items-center gap-2"
+    >
+      Track Order
+    </Link>
+
+    <Link
+      href="/refund-policy"
+      className="text-white text-sm font-bold uppercase flex items-center gap-2"
+    >
+      Refund Policy
+    </Link>
+  </div>
+</div>
 
       {/* Secondary Navbar */}
-      <div className="bg-white shadow-md py-4 px-6 flex justify-between items-center h-20 mt-8">
+      <div className="bg-white shadow-md py-4 px-16 flex justify-between items-center h-20 mt-8">
 
 
           <div className="flex items-center space-x-4 bg-transparent">
@@ -311,18 +412,72 @@ const goBack = () => {
 
 </div>
         {/* Search Bar (Centered on Medium and Larger Devices) */}
-        <div className=" items-center w-1/2 bg-gray-50 rounded-full shadow-inner px-6 py-3 mx-auto mt-3 hidden md:flex">
-          <input
-            type="text"
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder="Search..."
-            className="flex-grow bg-transparent outline-none text-gray-800 text-lg"
-          />
-          <button onClick={handleSearch} className="flex-shrink-0 ml-3">
-            <FaSearch className="text-gray-500 text-xl" />
-          </button>
+       {/* Search Bar with Dropdown */}
+<div className="relative w-1/2 mx-auto mt-3 hidden md:block" ref={dropdownRef}>
+  <div className="flex items-center bg-gray-50 rounded-full shadow-inner px-6 py-3">
+    <input
+      type="text"
+      value={searchQuery}
+      onChange={(e) => setSearchQuery(e.target.value)}
+      placeholder="Search..."
+      className="flex-grow bg-transparent outline-none text-gray-800 text-lg"
+      onKeyDown={(e) => e.key === "Enter" && handleSearch()}
+    />
+
+    <button onClick={handleSearch} className="flex-shrink-0 ml-3">
+      <FaSearch className="text-gray-500 text-xl" />
+    </button>
+  </div>
+
+  {/* Dropdown */}
+  {(dropdownResults.products.length || dropdownResults.blogs.length) > 0 && (
+    <div
+      ref={dropdownRef}
+      className="absolute left-0 top-full mt-2 w-full bg-white rounded-lg shadow-lg border border-gray-100 z-50"
+    >
+      {/* Close X Icon */}
+      <button
+        onClick={() => setDropdownResults({ products: [], blogs: [] })}
+        className="absolute top-2 right-2 text-gray-400 hover:text-gray-600 z-10"
+        aria-label="Close"
+      >
+        <FaTimes className="w-5 h-5" />
+      </button>
+
+      {/* PRODUCTS HEADER */}
+      {dropdownResults.products.length > 0 && (
+        <div className="border-b px-4 py-2 font-semibold text-xs text-gray-500 tracking-widest">
+          PRODUCTS
         </div>
+      )}
+
+      {/* Products Grid */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 px-4 py-4 max-h-[320px] overflow-y-auto">
+        {dropdownResults.products.map((product, index) => (
+          <div
+            key={`${product.slug}-${index}`}
+            className="flex flex-col items-center bg-gray-50 rounded-md p-3 cursor-pointer hover:bg-gray-100 transition shadow"
+            onClick={() => {
+              router.push(`/products/${product.slug}`);
+              setDropdownResults({ products: [], blogs: [] });
+              setSearchQuery("");
+            }}
+          >
+            <img
+              src={product.mainImage || "/placeholder.jpg"}
+              alt={product.name}
+              className="w-20 h-20 object-cover rounded border mb-2"
+            />
+            <div className="font-semibold text-center text-gray-800 text-sm">{product.name}</div>
+            <div className="text-rose-500 font-semibold">
+              {product.price ? `$${product.price}` : ""}
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  )}
+</div>
 
         <div className="flex items-center space-x-2 ">
           <Link href="/wishlist" className="relative">

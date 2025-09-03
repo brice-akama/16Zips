@@ -75,8 +75,14 @@ const LoginPage: React.FC = () => {
   };
   
   return (
-    <div className="container mx-auto px-6 py-16 mt-20">
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-12 mt-16">
+    <div className="mt-20 lg:mt-40">
+      {/* Full-width black section */}
+      <div className="bg-black text-white py-8 text-center w-full">
+        <h1 className="text-4xl font-black uppercase">My account</h1>
+        
+      </div>
+    <div className="container mx-auto px-6 py-16 ">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-12 ">
         {/* New Customer Section */}
         <div className="bg-gray-100 p-6 rounded-lg shadow-md">
           <h2 className="text-2xl font-semibold text-gray-800 mb-4">New Customer</h2>
@@ -89,7 +95,7 @@ const LoginPage: React.FC = () => {
               </p>
               <button
                 onClick={handleContinueClick}
-                className="w-full bg-blue-600 text-white py-3 rounded-lg hover:bg-blue-700"
+                className="w-full bg-red-500 text-white py-3 rounded-lg hover:bg-red-700"
               >
                 Continue
               </button>
@@ -124,7 +130,7 @@ const LoginPage: React.FC = () => {
               </div>
               <button
                 type="submit"
-                className="w-full bg-blue-600 text-white py-3 rounded-lg hover:bg-orange-700"
+                className="w-full bg-red-500 text-white py-3 rounded-lg hover:bg-orange-700"
               >
                 Create Account
               </button>
@@ -165,7 +171,7 @@ const LoginPage: React.FC = () => {
             </div>
             <button
               type="submit"
-              className="w-full bg-blue-600 text-white py-3 rounded-lg hover:bg-orange-700"
+              className="w-full bg-red-500 text-white py-3 rounded-lg hover:bg-red-700"
             >
               Login
             </button>
@@ -173,6 +179,7 @@ const LoginPage: React.FC = () => {
         </div>
       </div>
       {/* Toast Notifications */}
+    </div>
     </div>
   );
 };

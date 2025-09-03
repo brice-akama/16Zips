@@ -43,9 +43,15 @@ const SupportPage = () => {
   };
 
   return (
-    <div className="max-w-7xl mx-auto px-4 py-8 mt-20 ">
+    <div className="mt-20 lg:mt-40">
+      {/* Full-width black section */}
+      <div className="bg-black text-white py-8 text-center w-full">
+        <h1 className="text-4xl font-black uppercase">support</h1>
+        
+      </div>
+    <div className="max-w-7xl mx-auto px-4 py-8 ">
       {/* Hero Section */}
-      <section className="text-center mt-10 md:mt-20 lg:mt-20 mb-12">
+      <section className="text-center ">
         <h1 className="text-3xl font-bold text-gray-900">How can we assist you?</h1>
         <p className="text-lg text-gray-600">
           Find answers to your questions or learn more about payment methods, order tracking, returns, and account management.
@@ -161,6 +167,7 @@ const SupportPage = () => {
           <p className="mt-4 text-center text-green-600 font-medium">{statusMessage}</p>
         )}
       </section>
+    </div>
     </div>
   );
 };

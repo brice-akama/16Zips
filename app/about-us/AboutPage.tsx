@@ -36,7 +36,13 @@ export default function AboutPage() {
   };
 
   return (
-    <div className="px-4 py-10 space-y-16 mt-20">
+    <div className="mt-20 lg:mt-40">
+      {/* Full-width black section */}
+      <div className="bg-black text-white py-8 text-center w-full">
+        <h1 className="text-4xl font-black uppercase">About Us</h1>
+        
+      </div>
+    <div className="px-4 py-10 space-y-16">
       {/* About Us Section */}
       <section className="grid grid-cols-1 md:grid-cols-1 lg:grid-cols-2 gap-8 items-center">
         <div className="w-full h-80 md:h-96 lg:h-[400px] xl:h-[500px] relative">
@@ -45,7 +51,7 @@ export default function AboutPage() {
             alt="About 16Zips"
             fill
             sizes="(max-width: 768px) 100vw, 50vw"
-            className="object-cover rounded-2xl mt-5 md:mt-20"
+            className="object-cover rounded-2xl "
           />
         </div>
 
@@ -53,7 +59,7 @@ export default function AboutPage() {
           <div
             role="heading"
             aria-level={1}
-            className="text-3xl font-bold text-green-700 mb-4 md:mt-20"
+            className="text-3xl font-bold text-green-700 "
           >
             About 16Zips
           </div>
@@ -107,6 +113,7 @@ export default function AboutPage() {
         </form>
         <BlogPostAbout />
       </section>
+    </div>
     </div>
   );
 }

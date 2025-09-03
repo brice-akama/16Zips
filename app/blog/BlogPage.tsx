@@ -91,7 +91,13 @@ export default function BlogPage() {
   };
 
   return (
-    <div className="container mx-auto px-4 py-10 mt-20">
+    <div className="mt-20 lg:mt-40">
+      {/* Full-width black section */}
+      <div className="bg-black text-white py-8 text-center w-full">
+        <h1 className="text-4xl font-black uppercase">Blog Posts</h1>
+        
+      </div>
+    <div className="container mx-auto px-4 py-10">
       <div role="heading" aria-level={1} className="text-4xl font-bold text-center mt-10 md:mt-20">
         Latest Blog Posts
       </div>
@@ -154,6 +160,7 @@ export default function BlogPage() {
           Next
         </button>
       </div>
+    </div>
     </div>
   );
 }

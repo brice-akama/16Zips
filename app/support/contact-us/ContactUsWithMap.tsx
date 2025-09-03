@@ -2,15 +2,15 @@
 
 export default function ContactUsWithMap() {
   return (
-    <div className="px-4 py-10 mt-20">
+     <div className="mt-20 lg:mt-40">
+      {/* Full-width black section */}
+      <div className="bg-black text-white py-8 text-center w-full">
+        <h1 className="text-4xl font-black uppercase">Contact Us</h1>
+        
+      </div>
+    <div className="px-4 py-10 ">
 
-      <div
-  role="heading"
-  aria-level={1}
-  className="text-3xl font-bold text-center text-green-700 mt-8 sm:mt-10 md:mt-20 lg:mt-20"
->
-Contact Us
-</div>
+    
 
       
 
@@ -44,6 +44,7 @@ Contact Us
 
         </div>
       </div>
+    </div>
     </div>
   );
 }

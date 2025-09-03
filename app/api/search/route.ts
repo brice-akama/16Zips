@@ -1,75 +1,58 @@
 import { NextResponse } from "next/server";
 import clientPromise from "../../lib/mongodb";
-import he from 'he'; // Import the 'he' package
+import he from "he";
 
-// Decode HTML entities using 'he' library
+// Decode HTML entities
 function decodeHtmlEntities(input: string): string {
-  return he.decode(input); // Decodes HTML entities
+  return he.decode(input);
 }
 
-// Sanitize user input to prevent malicious characters
+// Sanitize user input (allow letters, numbers, spaces, hyphens, and accented chars)
 function sanitizeInput(input: string): string {
-  return input.replace(/[^\w\s-]/gi, "").trim(); // Only allow letters, numbers, spaces, hyphens
+  return input.replace(/[^\p{L}\p{N}\s-]/gu, "").trim();
 }
 
-// Escape regex special characters to prevent regex injection
+// Escape regex special characters
 function escapeRegExp(str: string): string {
-  return str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  return str.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 }
 
 export async function GET(req: Request) {
   try {
-    // Extract and decode, then sanitize search parameter
-    const rawSearch = Object.fromEntries(new URL(req.url).searchParams).search;
-    const decodedSearch = decodeHtmlEntities(rawSearch);
-    const search = sanitizeInput(decodedSearch);
+    const url = new URL(req.url);
+    const rawSearch = url.searchParams.get("search") || "";
 
-    // Return empty results if no search query is provided
-    if (!search || search.trim() === "") {
-      return NextResponse.json({ results: [] });
+    const decodedSearch = decodeHtmlEntities(rawSearch);
+    const sanitizedSearch = sanitizeInput(decodedSearch);
+
+    if (!sanitizedSearch) {
+      return NextResponse.json({ products: [] });
     }
 
-    // Limit query size and time (advanced security)
     const client = await clientPromise;
-    const db = client.db("school-project");
+    const db = client.db("school-project"); // ✅ your DB name
     const productsCollection = db.collection("products");
 
-    // Escape the search string to safely use it in regex
-    const escapedSearch = escapeRegExp(search);
+    // Escape for safe regex
+    const escapedSearch = escapeRegExp(sanitizedSearch);
 
-    // Check if the search matches a product by slug
-    const productBySlug = await productsCollection.findOne({
-      slug: { $regex: `^${escapedSearch}$`, $options: "i" },
-    });
+    // Search products by name, slug, or category
+    const products = await productsCollection
+      .find({
+        $or: [
+          { name: { $regex: escapedSearch, $options: "i" } },
+          { slug: { $regex: escapedSearch, $options: "i" } },
+          { category: { $regex: escapedSearch, $options: "i" } },
+        ],
+      })
+      .toArray();
 
-    if (productBySlug) {
-      return NextResponse.json({ redirectTo: `/products/${productBySlug.slug}` });
-    }
-
-    // Check if the search matches a category
-    const category = await productsCollection.findOne({
-      category: { $regex: escapedSearch, $options: "i" },
-    });
-
-    if (category) {
-      return NextResponse.json({
-        redirectTo: `/shop?category=${encodeURIComponent(category.category)}`,
-      });
-    }
-
-    // Check if the search matches a product name
-    const productByName = await productsCollection.findOne({
-      name: { $regex: escapedSearch, $options: "i" },
-    });
-
-    if (productByName) {
-      return NextResponse.json({ redirectTo: `/products/${productByName.slug}` });
-    }
-
-    // If no matches are found, return no results
-    return NextResponse.json({ redirectTo: null });
+    return NextResponse.json({ products });
   } catch (error) {
     console.error("Search error:", error);
-    return NextResponse.json({ error: "Failed to fetch search results" }, { status: 500 });
+    return NextResponse.json(
+      { error: "Failed to fetch search results" },
+      { status: 500 }
+    );
   }
 }
