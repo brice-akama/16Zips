@@ -67,7 +67,7 @@ const CartDrawerPage: React.FC = () => {
       <div className="bg-black text-white py-8 text-center w-screen">
         <h1 className="text-4xl font-black">Shopping Cart</h1>
         <p className="text-sm mb-2">
-    <Link href="/" className="underline hover:text-gray-300">Home</Link> 
+     
   </p>
       </div>
 

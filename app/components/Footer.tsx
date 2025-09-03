@@ -94,7 +94,7 @@ const Footer: React.FC = () => {
       <div className="container mx-auto grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 text-center md:text-left">
         {/* Company Info */}
         <div>
-          <h2 className="text-lg font-bold">{translatedTexts.companyName}</h2>
+          <h2 className=" text-3xl font-bold">{translatedTexts.companyName}</h2>
           <p className="text-sm mt-2 leading-relaxed">{translatedTexts.description}</p>
         </div>
 
@@ -124,11 +124,7 @@ const Footer: React.FC = () => {
         <div>
           <h3 className="font-semibold text-lg">{translatedTexts.quickLinks}</h3>
           <ul className="mt-2 space-y-2 text-sm">
-            <li>
-              <Link href="/" className="hover:underline">
-                {translatedTexts.home}
-              </Link>
-            </li>
+            
             <li>
               <Link href="/shop" className="hover:underline">
                 {translatedTexts.shop}
@@ -154,6 +150,31 @@ const Footer: React.FC = () => {
               <Link href="/refund-policy" className="hover:underline">
                 {translatedTexts.refundPolicy}
               </Link>
+            </li>
+            <li>
+              <Link
+                    href="/how-to-order"
+                  className="hover:underline"
+                  >
+                    How To Order
+                  </Link>.
+            </li>
+
+            <li>
+                                <Link
+                    href="/track-order"
+                    className="hover:underline"
+                  >
+                    Track Order
+                  </Link>
+            </li>
+                        <li>
+                                <Link
+                    href="/reviews"
+                    className="hover:underline"
+                  >
+                    Reviews
+                  </Link>
             </li>
             
           </ul>

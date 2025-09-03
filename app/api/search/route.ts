@@ -26,17 +26,18 @@ export async function GET(req: Request) {
     const sanitizedSearch = sanitizeInput(decodedSearch);
 
     if (!sanitizedSearch) {
-      return NextResponse.json({ products: [] });
+      return NextResponse.json({ products: [], blogs: [] });
     }
 
     const client = await clientPromise;
-    const db = client.db("school-project"); // ✅ your DB name
-    const productsCollection = db.collection("products");
+    const db = client.db("school-project"); // Your DB name
 
-    // Escape for safe regex
+    const productsCollection = db.collection("products");
+    const blogsCollection = db.collection("news"); // Add blogs collection
+
     const escapedSearch = escapeRegExp(sanitizedSearch);
 
-    // Search products by name, slug, or category
+    // Search products
     const products = await productsCollection
       .find({
         $or: [
@@ -47,7 +48,17 @@ export async function GET(req: Request) {
       })
       .toArray();
 
-    return NextResponse.json({ products });
+    // Search blogs
+    const blogs = await blogsCollection
+      .find({
+        $or: [
+          { title: { $regex: escapedSearch, $options: "i" } },
+          { slug: { $regex: escapedSearch, $options: "i" } },
+        ],
+      })
+      .toArray();
+
+    return NextResponse.json({ products, blogs });
   } catch (error) {
     console.error("Search error:", error);
     return NextResponse.json(

@@ -189,6 +189,7 @@ const handleCategoryClick = (index: number) => {
         { name: await translate("BLOG"), link: "/blog" },
 
         { name: await translate("SUPPORT"), link: "/support", subLinks: [await translate("FAQS"), await translate("Contact Us"),] },
+         { name: await translate("REVIEWS"), link: "/reviews" },
 
 
       ];
@@ -343,14 +344,15 @@ const goBack = () => {
     {/* Top Bar (responsive layout) */}
 <div className="absolute top-0 left-0 w-full bg-red-500 h-10 flex items-center justify-between px-6 md:px-16 z-50">
   {/* Left side - Special Offer */}
-  <div className="w-full md:w-auto flex justify-center md:justify-start">
-    <p className="text-white whitespace-nowrap text-sm font-bold  flex items-center gap-2">
-      Premium Cannabis Products – Safe, Fast & Discreet
-    </p>
-  </div>
+  <div className="w-full lg:w-auto flex justify-center lg:justify-start">
+  <p className="text-white whitespace-nowrap text-sm font-bold flex items-center gap-2">
+    Premium Cannabis Products – Safe, Fast & Discreet
+  </p>
+</div>
+
 
   {/* Right side - Warranty & Track Order */}
-  <div className="hidden md:flex items-center gap-6">
+  <div className="hidden lg:flex items-center gap-6">
     <Link
       href="/how-to-order"
       className="text-white text-sm font-bold uppercase flex items-center gap-2"
@@ -375,7 +377,7 @@ const goBack = () => {
 </div>
 
       {/* Secondary Navbar */}
-      <div className="bg-white shadow-md py-4 px-16 flex justify-between items-center h-20 mt-8">
+      <div className="bg-white shadow-md py-4 px-12 flex justify-between items-center h-20 mt-8">
 
 
           <div className="flex items-center space-x-4 bg-transparent">
@@ -480,14 +482,24 @@ const goBack = () => {
 </div>
 
         <div className="flex items-center space-x-2 ">
-          <Link href="/wishlist" className="relative">
-            <FaHeart className="text-2xl cursor-pointer text-black hover:text-red-700 mt-3" />
 
-            <span className="absolute -top-2 -right-2 bg-red-600 text-white text-xs font-bold w-5 h-5 flex items-center justify-center rounded-full mt-3">
-              {wishlist.length}
-            </span>
+          
+  {/* Search Icon - visible only on phones */}
+<div className="block md:hidden">
+  <FaSearch
+    className="text-2xl cursor-pointer text-black hover:text-gray-600 mt-3"
+    onClick={() => setIsSidebarOpen(true)} // ✅ open sidebar
+  />
+</div>
 
-          </Link>
+          {/* Wishlist (Heart) - hidden on phones, visible on md+ */}
+  <Link href="/wishlist" className="relative hidden md:block">
+    <FaHeart className="text-2xl cursor-pointer text-black hover:text-red-700 mt-3" />
+    <span className="absolute -top-2 -right-2 bg-red-600 text-white text-xs font-bold w-5 h-5 flex items-center justify-center rounded-full mt-3">
+      {wishlist.length}
+    </span>
+  </Link>
+          
           <Link href="/profile">
             <FaUser className="text-2xl cursor-pointer hidden md:block mt-3" />
           </Link>
@@ -590,31 +602,71 @@ const goBack = () => {
       {isSidebarOpen && isMobile && (
         <div className="fixed inset-0 z-30 bg-opacity-50">
           <div className="fixed inset-0 z-40 bg-white w-64">
-            <div className="flex justify-end p-4">
+            <div className="flex justify-end p-4 mt-10">
               <button onClick={() => setIsSidebarOpen(false)}>
                 <FaTimes className="text-xl" />
               </button>
             </div>
             <div className="flex flex-col space-y-4 p-4">
-              <div className="relative w-full mb-4">
-                <input
-                  type="text"
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  placeholder="Search..."
-                  className="w-full py-2 pl-4 pr-16 border border-gray-300 rounded-md focus:outline-none focus:ring-0"
-                />
-                <button
-                  onClick={() => {
-                    handleSearch();  // Call search function
-                    setIsSidebarOpen(false); // Close sidebar
-                  }}
-                  className="absolute right-0 top-0 h-full bg-gray-500 w-12 flex items-center justify-center rounded-r-md"
-                >
-                  <FaSearch className="text-white text-lg" />
-                </button>
+<div className="relative w-full mb-4">
+  <input
+    type="text"
+    value={searchQuery}
+    onChange={(e) => setSearchQuery(e.target.value)}
+    placeholder="Search..."
+    className="w-full py-2 pl-4 pr-12 border border-gray-300 rounded-md focus:outline-none focus:ring-0"
+    onKeyDown={(e) => e.key === "Enter" && handleSearch()}
+  />
+  <button
+    onClick={handleSearch}
+    className="absolute right-0 top-0 h-full bg-gray-500 w-12 flex items-center justify-center rounded-r-md"
+  >
+    <FaSearch className="text-white text-lg" />
+  </button>
 
-              </div>
+  {/* Dropdown for search results */}
+  {(dropdownResults.products.length || dropdownResults.blogs.length) > 0 && (
+    <div
+      ref={dropdownRef} // Only here
+      className="absolute left-0 top-full mt-2 w-full bg-white rounded-lg shadow-lg border border-gray-100 z-50 max-h-[320px] overflow-y-auto"
+    >
+      {/* Close X Icon */}
+      <button
+        onClick={() => setDropdownResults({ products: [], blogs: [] })}
+        className="absolute top-2 right-2 text-gray-400 hover:text-gray-600 z-10"
+        aria-label="Close"
+      >
+        <FaTimes className="w-5 h-5" />
+      </button>
+
+      {/* Products Grid */}
+      <div className="grid grid-cols-1 gap-4 px-4 py-4">
+        {dropdownResults.products.map((product, index) => (
+          <button
+            key={`${product.slug}-${index}`}
+            onClick={() => {
+              router.push(`/products/${product.slug}`);
+              setDropdownResults({ products: [], blogs: [] });
+              setSearchQuery("");
+              setIsSidebarOpen(false);
+            }}
+            className="flex flex-col items-center bg-gray-50 rounded-md p-3 cursor-pointer hover:bg-gray-100 transition shadow text-left"
+          >
+            <img
+              src={product.mainImage || "/placeholder.jpg"}
+              alt={product.name}
+              className="w-20 h-20 object-cover rounded border mb-2"
+            />
+            <div className="font-semibold text-gray-800 text-sm">{product.name}</div>
+            <div className="text-rose-500 font-semibold">
+              {product.price ? `$${product.price}` : ""}
+            </div>
+          </button>
+        ))}
+      </div>
+    </div>
+  )}
+</div>
 
              {/* === TOP LEVEL MENU === */}
 {mode === "top" && (
