@@ -372,6 +372,16 @@ if (categoryQuery) {
   filter.category = { $regex: new RegExp(regexString, "i") };
 }
 
+// --- Handle price filtering ---
+const minPrice = searchParams.get("minPrice");
+const maxPrice = searchParams.get("maxPrice");
+
+if (minPrice || maxPrice) {
+  filter.price = {};
+  if (minPrice) filter.price.$gte = Number(minPrice);
+  if (maxPrice) filter.price.$lte = Number(maxPrice);
+}
+
 
 
 

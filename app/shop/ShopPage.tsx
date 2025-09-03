@@ -9,6 +9,9 @@ import Head from "next/head";
 import { motion, AnimatePresence } from "framer-motion";
 import { AiOutlineHeart } from "react-icons/ai";
 import { FiSearch } from "react-icons/fi";
+import { ChevronDown, ChevronRight } from "lucide-react";
+import toast from "react-hot-toast";
+import { useCart } from "../context/CartContext";
 
 
 
@@ -67,6 +70,11 @@ export default function ShopPage({ categorySlug, products, categorySEO, bestSell
   const [quickViewProduct, setQuickViewProduct] = useState<Product | null>(null);
   const [selectedOption, setSelectedOption] = useState<Option | null>(null);
   const [quantity, setQuantity] = useState(1);
+  const [priceRange, setPriceRange] = useState<[number, number]>([20, 180]); // default min/max
+  const { addToCart, openCart } = useCart();
+
+  
+
 
 
 
@@ -142,16 +150,13 @@ useEffect(() => {
   }, [searchParams, categorySlug, categories]);
 
   // Filter products by selected category
-  const filteredProducts =
-    selectedCategory === "All"
-      ? products
-      : products.filter((p) => categoryToSlug(p.category) === categoryToSlug(selectedCategory));
+  // ✅ just sort the products already filtered by server
+const sortedProducts = [...products].sort((a, b) => {
+  if (sortOrder === "low-to-high") return Number(a.price) - Number(b.price);
+  if (sortOrder === "high-to-low") return Number(b.price) - Number(a.price);
+  return 0;
+});
 
-  const sortedProducts = [...filteredProducts].sort((a, b) => {
-    if (sortOrder === "low-to-high") return Number(a.price) - Number(b.price);
-    if (sortOrder === "high-to-low") return Number(b.price) - Number(a.price);
-    return 0;
-  });
 
   const totalPages = Math.ceil(sortedProducts.length / productsPerPage);
   const displayedProducts = sortedProducts.slice(
@@ -162,23 +167,39 @@ useEffect(() => {
   const { addToWishlist } = useWishlist();
 
 
+function handleAddToCart(product: Product, option?: { label: string; price?: number }) {
+  const displayPrice = option?.price ? Number(option.price) : Number(product.price);
 
-  function handleAddToCart(product: Product, option?: { label: string; price?: number }) {
-    console.log("Adding to cart:", product.name, option);
-    // Add your cart logic here
-  }
+  addToCart({
+    slug: product.slug,
+    name: product.name,
+    price: displayPrice.toFixed(2),
+    mainImage: product.mainImage,
+    quantity: quantity,
+    option: option?.label || selectedOption?.label,
+  });
+
+  toast.success(
+    `${product.name}${option?.label || selectedOption?.label ? ` (${option?.label || selectedOption?.label})` : ""} added to cart!`,
+    { duration: 3000, icon: "🛒" }
+  );
+
+  openCart();
+}
+
+const handleAddToWishlist = (
+  id: string,
+  slug: string,
+  name: string,
+  price: number,
+  mainImage: string
+) => {
+  addToWishlist({ _id: id, name, price: price.toString(), mainImage, slug });
+  toast.success(`${name} added to wishlist!`, { duration: 2000, icon: "💖" });
+};
 
 
-  const handleAddToWishlist = (
-    id: string,
-    slug: string,
-    name: string,
-    price: number,
-    image?: string
-  ) => {
-    // TODO: Replace with your wishlist logic
-    console.log("Add to wishlist:", name);
-  };
+  
 
 
   const handleCategoryClick = (subCategory: string) => {
@@ -186,6 +207,17 @@ useEffect(() => {
     router.push(`/shop?category=${formatted}`);
     setCurrentPage(1);
   };
+
+  const handleFilter = () => {
+  let url = `/shop?minPrice=${priceRange[0]}&maxPrice=${priceRange[1]}`;
+
+  if (selectedCategory && selectedCategory !== "All") {
+    url += `&category=${encodeURIComponent(selectedCategory)}`;
+  }
+
+  router.push(url);
+};
+
 
   return (
     <div>
@@ -360,12 +392,13 @@ useEffect(() => {
                     }
                   >
                     <span>{item.name}</span>
-                    <span
-                      className={`transform transition-transform ${openCategory === item.name ? "rotate-90" : ""
-                        }`}
-                    >
-                      &#9654;
-                    </span>
+                    <ChevronDown
+  className={`w-4 h-4 transition-transform duration-200 ${
+    openCategory === item.name ? "-rotate-90" : "rotate-0"
+  }`}
+/>
+
+
                   </div>
                   {openCategory === item.name && (
                     <ul className="ml-4 mt-1">
@@ -383,8 +416,47 @@ useEffect(() => {
                   )}
                 </li>
               ))}
-               {/* Add Best Selling Section */}
-            <h2 className="text-xl font-bold mt-10">Best Selling</h2>
+              {/* Separator Line */}
+<hr className="my-8 border-gray-300" />
+
+
+              {/* --- Price Filter --- */}
+<h2 className="text-xl font-bold mt-10 ">Filter by Price</h2>
+<div className="flex flex-col gap-2">
+  <input
+    type="range"
+    min={0}
+    max={500}
+    value={priceRange[0]}
+    onChange={(e) => setPriceRange([Number(e.target.value), priceRange[1]])}
+    className="w-full"
+  />
+  <input
+    type="range"
+    min={0}
+    max={500}
+    value={priceRange[1]}
+    onChange={(e) => setPriceRange([priceRange[0], Number(e.target.value)])}
+    className="w-full"
+  />
+
+  <p className="text-sm">
+    Price: ${priceRange[0]} — ${priceRange[1]}
+  </p>
+
+  <button
+    onClick={handleFilter}
+    className="mt-2 bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600"
+  >
+    Filter
+  </button>
+</div>
+
+{/* Separator Line */}
+<hr className="my-8 border-gray-300" />
+
+{/* --- Best Selling Section --- */}
+<h2 className="text-xl font-bold mb-4">Best Selling</h2>
 <ul>
   {bestSellingProducts.map((product: Product) => (
     <li key={product._id} className="flex items-center mb-4">
@@ -394,8 +466,13 @@ useEffect(() => {
         className="w-12 h-12 object-cover mr-3"
       />
       <div>
-        <p className="text-gray-800 text-sm font-semibold">{product.name}</p>
-        <p className="text-red-600 text-sm">${product.price}</p>
+        {/* Link for product name and price */}
+        <Link href={`/products/${product.slug}`}>
+          <p className="text-gray-800 text-sm font-semibold hover:underline">
+            {product.name}
+          </p>
+          <p className="text-red-600 text-sm">${product.price}</p>
+        </Link>
       </div>
     </li>
   ))}
@@ -450,12 +527,12 @@ useEffect(() => {
                           }
                         >
                           <span>{item.name}</span>
-                          <span
-                            className={`transform transition-transform ${openCategory === item.name ? "rotate-90" : ""
-                              }`}
-                          >
-                            &#9654;
-                          </span>
+                         <ChevronDown
+  className={`w-4 h-4 transition-transform duration-200 ${
+    openCategory === item.name ? "-rotate-90" : "rotate-0"
+  }`}
+/>
+
                         </div>
                         {openCategory === item.name && (
                           <ul className="ml-4 mt-1">
@@ -477,9 +554,47 @@ useEffect(() => {
                         )}
                       </li>
                     ))}
+                    {/* Separator Line */}
+<hr className="my-8 border-gray-300" />
 
-                     {/* Add Best Selling Section */}
-            <h2 className="text-xl font-bold mt-10">Best Selling</h2>
+
+{/* --- Price Filter --- */}
+<h2 className="text-xl font-bold mt-10 mb-4">Filter by Price</h2>
+<div className="flex flex-col gap-2">
+  <input
+    type="range"
+    min={0}
+    max={500}
+    value={priceRange[0]}
+    onChange={(e) => setPriceRange([Number(e.target.value), priceRange[1]])}
+    className="w-full"
+  />
+  <input
+    type="range"
+    min={0}
+    max={500}
+    value={priceRange[1]}
+    onChange={(e) => setPriceRange([priceRange[0], Number(e.target.value)])}
+    className="w-full"
+  />
+
+  <p className="text-sm">
+    Price: ${priceRange[0]} — ${priceRange[1]}
+  </p>
+
+  <button
+    onClick={handleFilter}
+    className="mt-2 bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600"
+  >
+    Filter
+  </button>
+</div>
+
+{/* Separator Line */}
+<hr className="my-8 border-gray-300" />
+
+{/* --- Best Selling Section --- */}
+<h2 className="text-xl font-bold mb-4">Best Selling</h2>
 <ul>
   {bestSellingProducts.map((product: Product) => (
     <li key={product._id} className="flex items-center mb-4">
@@ -489,17 +604,40 @@ useEffect(() => {
         className="w-12 h-12 object-cover mr-3"
       />
       <div>
-        <p className="text-gray-800 text-sm font-semibold">{product.name}</p>
-        <p className="text-red-600 text-sm">${product.price}</p>
+        {/* Link for product name and price */}
+        <Link href={`/products/${product.slug}`}>
+          <p className="text-gray-800 text-sm font-semibold hover:underline">
+            {product.name}
+          </p>
+          <p className="text-red-600 text-sm">${product.price}</p>
+        </Link>
       </div>
     </li>
   ))}
 </ul>
+
                   </ul>
                 </div>
               </div>
             )}
           </div>
+
+
+          {/* --- Sorting + Grid Wrapper --- */}
+<div className="md:col-span-3 flex flex-col">
+
+  {/* Sort by Price Dropdown */}
+  <div className="flex justify-end mb-4">
+    <select
+      value={sortOrder}
+      onChange={(e) => setSortOrder(e.target.value)}
+      className="border rounded-lg px-4 py-2 bg-white shadow text-gray-700 hover:border-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
+    >
+      <option value="">Sort by Price</option>
+      <option value="low-to-high">Low to High</option>
+      <option value="high-to-low">High to Low</option>
+    </select>
+  </div>
 
 
           {/* Product Grid */}
@@ -648,7 +786,7 @@ useEffect(() => {
                         ) : (
                           <div className="relative flex flex-col items-center group">
                             <button
-                              onClick={() => handleAddToCart(product)}
+                               onClick={() => handleAddToCart(product, selectedOption ?? undefined)}
                               className="bg-red-500 text-white px-4 py-2 rounded-lg shadow hover:bg-red-600 transition"
                             >
                               Add to Cart
@@ -670,9 +808,7 @@ useEffect(() => {
             })}
 
           </div>
-        </div>
-
-        {/* Pagination */}
+          {/* Pagination */}
         <div className="flex justify-center items-center flex-wrap mt-6 gap-2 max-w-[90%] mx-auto">
   {/* Previous button */}
   <button
@@ -724,6 +860,9 @@ useEffect(() => {
   </button>
 </div>
 
+        </div>
+
+       
       </div>
       
         
@@ -878,12 +1017,26 @@ useEffect(() => {
   </div>
 
           <div className="flex gap-2 mt-4">
-            <button className="bg-red-500 text-white px-4 py-2 rounded-lg shadow hover:bg-red-600 transition">
-              Add to Cart
-            </button>
-            <button className="bg-gray-200 px-4 py-2 rounded-lg shadow hover:bg-gray-300 transition">
-              Add to Wishlist
-            </button>
+            <button
+    onClick={() => handleAddToCart(quickViewProduct, selectedOption ?? undefined)}
+    className="bg-red-500 text-white px-4 py-2 rounded-lg shadow hover:bg-red-600 transition"
+  >
+    Add to Cart
+  </button>
+<button
+    onClick={() =>
+      handleAddToWishlist(
+        quickViewProduct._id,
+        quickViewProduct.slug,
+        quickViewProduct.name,
+        Number(quickViewProduct.price),
+        quickViewProduct.mainImage
+      )
+    }
+    className="bg-gray-200 px-4 py-2 rounded-lg shadow hover:bg-gray-300 transition"
+  >
+    Add to Wishlist
+  </button>
           </div>
 
           <p className="text-gray-700 line-clamp-3">{quickViewProduct.seoDescription}</p>
@@ -893,6 +1046,7 @@ useEffect(() => {
   )}
 </AnimatePresence>
 
+    </div>
     </div>
   );
 }
