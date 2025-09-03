@@ -1,18 +1,20 @@
 // CartContext.tsx
 "use client";
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-import { usePathname } from 'next/navigation'; // Import usePathname
+import { usePathname } from 'next/navigation';
 
-interface CartItem {
-  slug: string; // Ensure slug is the identifier
+export interface ShippingOption {
+  label: string;
+  cost: number;
+}
+
+export interface CartItem {
+  slug: string;
   name: string;
   price: string;
   quantity: number;
   mainImage: string;
   option?: string | null;
-
-  
-  
 }
 
 interface CartContextType {
@@ -20,9 +22,11 @@ interface CartContextType {
   totalPrice: number;
   cartCount: number;
   isCartOpen: boolean;
+  selectedShipping: ShippingOption | null;
+  setSelectedShipping: (shipping: ShippingOption | null) => void;
   addToCart: (item: CartItem) => void;
-  updateQuantity: (slug: string, quantity: number) => void;  // Use slug instead of id
-  removeFromCart: (slug: string) => void;  // Use slug instead of id
+  updateQuantity: (slug: string, quantity: number) => void;
+  removeFromCart: (slug: string) => void;
   openCart: () => void;
   closeCart: () => void;
   fetchCart: () => void;
@@ -33,15 +37,11 @@ const CartContext = createContext<CartContextType | undefined>(undefined);
 export const CartProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const [cartItems, setCartItems] = useState<CartItem[]>([]);
   const [isCartOpen, setIsCartOpen] = useState(false);
-  const [isClient, setIsClient] = useState(false);
+  const [selectedShipping, setSelectedShipping] = useState<ShippingOption | null>(null);
 
   const pathname = usePathname();
 
-  useEffect(() => {
-    setIsClient(true);
-  }, []);
-
-  const totalPrice = cartItems.reduce((total, item) => total + (parseFloat(item.price) * item.quantity), 0);
+  const totalPrice = cartItems.reduce((total, item) => total + parseFloat(item.price) * item.quantity, 0);
 
   const fetchCart = async () => {
     try {
@@ -60,12 +60,11 @@ export const CartProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   }, []);
 
   const addToCart = async (item: CartItem) => {
-    // Use slug to identify items in the cart
     setCartItems((prevItems) => {
-      const existingItem = prevItems.find((i) => i.slug === item.slug); // Use slug, not _id
+      const existingItem = prevItems.find((i) => i.slug === item.slug);
       if (existingItem) {
         return prevItems.map((i) =>
-          i.slug === item.slug ? { ...i, quantity: i.quantity + item.quantity } : i // Use slug here as well
+          i.slug === item.slug ? { ...i, quantity: i.quantity + item.quantity } : i
         );
       }
       return [...prevItems, item];
@@ -74,9 +73,7 @@ export const CartProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     try {
       const res = await fetch('/api/cart', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           slug: item.slug,
           quantity: item.quantity,
@@ -85,12 +82,9 @@ export const CartProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
           name: item.name,
           mainImage: item.mainImage,
         }),
-        
       });
       const data = await res.json();
-      if (data.cart) {
-        setCartItems(data.cart.items);
-      }
+      if (data.cart) setCartItems(data.cart.items);
     } catch (error) {
       console.error('Error adding item to cart:', error);
     }
@@ -102,43 +96,33 @@ export const CartProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     if (quantity <= 0) return;
 
     setCartItems((prevItems) =>
-      prevItems.map((item) =>
-        item.slug === slug ? { ...item, quantity } : item // Use slug instead of _id
-      )
+      prevItems.map((item) => (item.slug === slug ? { ...item, quantity } : item))
     );
 
     try {
       const res = await fetch('/api/cart', {
         method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ slug, quantity }), // Use slug instead of _id
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ slug, quantity }),
       });
       const data = await res.json();
-      if (data.cart) {
-        setCartItems(data.cart.items);
-      }
+      if (data.cart) setCartItems(data.cart.items);
     } catch (error) {
       console.error('Error updating item quantity:', error);
     }
   };
 
   const removeFromCart = async (slug: string) => {
-    setCartItems((prevItems) => prevItems.filter((item) => item.slug !== slug)); // Use slug instead of _id
+    setCartItems((prevItems) => prevItems.filter((item) => item.slug !== slug));
 
     try {
       const res = await fetch('/api/cart', {
         method: 'DELETE',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ slug }), // Use slug instead of _id
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ slug }),
       });
       const data = await res.json();
-      if (data.cart) {
-        setCartItems(data.cart.items);
-      }
+      if (data.cart) setCartItems(data.cart.items);
     } catch (error) {
       console.error('Error removing item from cart:', error);
     }
@@ -157,15 +141,27 @@ export const CartProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       }
     };
 
-    if (isCartOpen) {
-      document.addEventListener('click', handleClickOutside);
-    }
-
+    if (isCartOpen) document.addEventListener('click', handleClickOutside);
     return () => document.removeEventListener('click', handleClickOutside);
   }, [isCartOpen]);
 
   return (
-    <CartContext.Provider value={{ cartItems, totalPrice, isCartOpen, addToCart, cartCount, removeFromCart, openCart, closeCart, fetchCart, updateQuantity }}>
+    <CartContext.Provider
+      value={{
+        cartItems,
+        totalPrice,
+        cartCount,
+        isCartOpen,
+        selectedShipping,
+        setSelectedShipping,
+        addToCart,
+        updateQuantity,
+        removeFromCart,
+        openCart,
+        closeCart,
+        fetchCart,
+      }}
+    >
       {children}
     </CartContext.Provider>
   );
@@ -173,8 +169,6 @@ export const CartProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
 export const useCart = () => {
   const context = useContext(CartContext);
-  if (!context) {
-    throw new Error('useCart must be used within a CartProvider');
-  }
+  if (!context) throw new Error('useCart must be used within a CartProvider');
   return context;
 };

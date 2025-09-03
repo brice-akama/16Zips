@@ -18,7 +18,6 @@ import BackToTop from "./components/BackToTop";
 import { LanguageProvider } from "./context/LanguageContext";
 import { Toaster } from "react-hot-toast";
 import ScrollToTop from "./components/ScrollToTop";
-import SalesNotification from "./components/SalesNotification";
 import BottomNav from "./components/BottomNav";
 
 const geistSans = Geist({
@@ -108,7 +107,7 @@ export default function RootLayout({
               {!isAdminRoute && !isResetPasswordPage && <Navbar />}
               <CartDrawer />
               {/* Add SalesNotification here */}
-        {!isAdminRoute && !isResetPasswordPage && <SalesNotification />}
+        
 
               <main>
                  <ScrollToTop /> {/* ✅ Add this here */}
