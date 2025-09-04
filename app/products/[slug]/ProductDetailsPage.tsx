@@ -11,6 +11,7 @@ import ReviewList from "./ReviewList";
 import RelatedProducts from "./RelatedProduct";
 import { useReviewCount } from "./ReviewList";
 import Link from "next/link";
+import StickyBottomBar from "@/app/components/StickyBottomBar";
 
 
 const stripHtmlTags = (html: string): string => {
@@ -421,6 +422,21 @@ const ProductDetailsPage: React.FC<Props> = ({ product }) => {
           {showReviewForm && <ReviewForm productName={product.name} slug={product.slug} />}
           <RelatedProducts currentProductSlug={product.slug} />
       </section>
+<StickyBottomBar
+  product={product}
+  totalPrice={totalPrice}
+  quantity={quantity}
+  handleQuantityChange={handleQuantityChange}
+  getEffectiveUnitPrice={getEffectiveUnitPrice}
+  selectedWeight={selectedWeight}
+  selectedSeed={selectedSeed}
+  lastOptionType={lastOptionType}
+  setSelectedWeight={setSelectedWeight}
+  setSelectedSeed={setSelectedSeed}
+  setLastOptionType={setLastOptionType}
+/>
+
+
     </>
   );
 };

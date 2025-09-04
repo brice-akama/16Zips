@@ -46,6 +46,11 @@ import OrderIcon from "@mui/icons-material/ShoppingBasket"; // or any icon you l
 import Dashboard from "./Dashboard";
 import AnalyticsDashboard from "./AnalyticsDashboard";
 import AnalyticsIcon from "@mui/icons-material/Analytics"; // or any icon you like
+import CouponCreate from "./CouponCreate";
+import CouponEdit from "./CouponEdit";
+import CouponList from "./CouponList";
+import CouponShow from "./CouponShow";
+import ConfirmationNumberIcon from "@mui/icons-material/ConfirmationNumber";
 
 
 
@@ -110,6 +115,15 @@ const AdminPage = () => {
         list={AnalyticsDashboard}
         icon={() => <AnalyticsIcon sx={{ color: "green" }} />}
       />
+
+        <Resource
+  name="coupons"
+  create={CouponCreate}
+  show={CouponShow}
+  list={CouponList}
+  edit={CouponEdit}
+    icon={() => <ConfirmationNumberIcon sx={{ color: "blue" }} />}
+/>
        
     </Admin>
   );

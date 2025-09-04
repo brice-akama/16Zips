@@ -838,8 +838,8 @@ const handlePlaceOrder = async () => {
       <li>Tap “Pay.”</li>
       <li>
         Get in touch with us through our live chat or email: 
-        <a href="mailto:support@drivecoreauto.com" className="text-blue-600 underline">
-         support@drivecoreauto.com
+        <a href="mailto:info@16zip.com" className="text-blue-600 underline">
+         info@16zip.com
         </a> 
         for our cashtag.
       </li>
@@ -869,7 +869,7 @@ const handlePlaceOrder = async () => {
       <li>
         After placing your order, please contact us via live chat or email to receive our PayPal payment details.
         <br />
-        Email: <a href="mailto:support@drivecoreauto.com" className="text-blue-600 underline">support@drivecoreauto.com</a>
+        Email: <a href="mailto:info@16zip.com" className="text-blue-600 underline">info@16zip.com</a>
       </li>
     </ol>
   </div>
@@ -884,14 +884,14 @@ const handlePlaceOrder = async () => {
       <li>Download the Zelle App to get started!</li>
       <li>All you need to send money with Zelle is the preferred email address or mobile number of the trusted recipient.</li>
       <li>Please kindly get in touch with us via live chat or email: 
-        <a href="mailto:support@drivecoreauto.com" className="text-blue-600 underline">support@drivecoreauto.com</a> for our Zelle details.
+        <a href="mailto:info@16zip.com" className="text-blue-600 underline">info@16zip.com</a> for our Zelle details.
       </li>
       <li>After making payment, take a screenshot and send it to our live chat or email: 
-        <a href="mailto:support@drivecoreauto.com" className="text-blue-600 underline">support@drivecoreauto.com</a> for confirmation.
+        <a href="mailto:info@16zip.com" className="text-blue-600 underline">info@16zip.com</a> for confirmation.
       </li>
       <li>Your order is considered valid once we receive details of your payment, which should be pictures or screenshots showing transaction details alongside your Order ID.</li>
       <li>Contact our live chat or email: 
-        <a href="mailto:support@drivecoreauto.com" className="text-blue-600 underline">support@drivecoreauto.com</a> for assistance regarding the Zelle payment.
+        <a href="mailto:info@16zip.com" className="text-blue-600 underline">info@16zip.com</a> for assistance regarding the Zelle payment.
       </li>
     </ol>
     <p className="text-red-600 font-medium mt-2">
@@ -909,7 +909,7 @@ const handlePlaceOrder = async () => {
       <li>
         Kindly contact us via live chat or email after placing your order to receive our Apple Pay information.
         <br />
-        Email: <a href="mailto:support@drivecoreauto.com" className="text-blue-600 underline">support@drivecoreauto.com</a>
+        Email: <a href="mailto:info@16zip.com" className="text-blue-600 underline">info@16zip.com</a>
       </li>
     </ol>
   </div>
@@ -924,7 +924,7 @@ const handlePlaceOrder = async () => {
       <li>
         Kindly contact us via live chat or email after placing your order to receive our Venmo payment details.
         <br />
-        Email: <a href="mailto:support@drivecoreauto.com" className="text-blue-600 underline">support@drivecoreauto.com</a>
+        Email: <a href="mailto:info@16zip.com" className="text-blue-600 underline">info@16zip.com</a>
       </li>
     </ol>
   </div>

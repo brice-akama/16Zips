@@ -3,6 +3,7 @@
 import React, { useState } from "react";
 import toast from "react-hot-toast"; // Import toast
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 
 const LoginPage: React.FC = () => {
   const [showRegistration, setShowRegistration] = useState(false);
@@ -169,6 +170,15 @@ const LoginPage: React.FC = () => {
                 required
               />
             </div>
+            {/* Forgot Password link */}
+              <div className="text-right mt-2">
+                <Link
+                  href="/forgot-password"
+                  className="text-red-500 hover:underline text-sm"
+                >
+                  forgot Password
+                </Link>
+              </div>
             <button
               type="submit"
               className="w-full bg-red-500 text-white py-3 rounded-lg hover:bg-red-700"

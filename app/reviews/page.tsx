@@ -289,7 +289,7 @@ const paginate = (pageNumber: number) => {
         <h1 className="text-4xl font-black">Reviews</h1>
       </div>
 
-      <section id="reviews-section" className="w-full py-14 px-2 bg-gray-50">
+      <section id="reviews-section" className="w-full py-14 px-2">
         <div className="max-w-5xl mx-auto text-center mb-10">
           <h2 className="text-2xl font-bold mb-4">
             What Our Customers Are Saying – Trusted Reviews from Across Canada, the US, and the UK
