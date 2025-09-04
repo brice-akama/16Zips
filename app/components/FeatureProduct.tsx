@@ -108,6 +108,8 @@ function ProductCard({
   const { addToCart, openCart, totalPrice } = useCart();
   const [showQuickView, setShowQuickView] = useState(false);
 
+  
+
 
 
   // --- NEW STATES FOR SELECT OPTIONS OVERLAY ---

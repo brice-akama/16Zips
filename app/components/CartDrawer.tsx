@@ -75,7 +75,7 @@ const CartDrawer: React.FC = () => {
           <p>Your cart is empty, continue shopping.</p>
           <Link
             href="/shop"
-            className="block bg-blue-600 text-white text-center py-2 rounded mt-4"
+            className="block bg-red-500 text-white text-center py-2 rounded mt-4"
             onClick={handleLinkClick}
           >
             Continue Shopping

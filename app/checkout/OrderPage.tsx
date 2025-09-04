@@ -937,27 +937,16 @@ const handlePlaceOrder = async () => {
 
 
 
-          {paymentMethod === 'crypto' && (
-            <div className="bg-blue-100 p-4 rounded-md text-sm text-gray-700 space-y-3">
-              <p><strong>Send BTC to:</strong></p>
-              <div className="flex items-center justify-between bg-white p-2 rounded border">
-                <span className="break-all font-mono text-gray-800">
-                  bc1qv8wl5n9pe89qv9hptvnhljc0cg57c4j63nrynm
-                </span>
-                <button
-                  onClick={handleCopy}
-                  className="ml-3 px-2 py-1 bg-blue-600 text-white rounded text-xs hover:bg-blue-700"
-                >
-                  {copied ? 'Copied!' : 'Copy'}
-                </button>
-              </div>
-              <p>Or scan QR code:</p>
-              <QRCodeWrapper
-                value="bc1qv8wl5n9pe89qv9hptvnhljc0cg57c4j63nrynm"
-                size={160}
-              />
-            </div>
-          )}
+{paymentMethod === 'crypto' && (
+  <div className="bg-blue-100 p-4 rounded-md text-sm text-gray-700 space-y-3">
+    <p>Scan QR code to pay:</p>
+    <QRCodeWrapper
+      value="bc1qv8wl5n9pe89qv9hptvnhljc0cg57c4j63nrynm"
+      size={160}
+    />
+  </div>
+)}
+
           {orderStatus === 'success' && (
             <p className="text-sm text-green-700 bg-green-100 p-2 rounded-md">
               ✅ Your order has been successfully placed and is pending payment via <strong>{paymentMethod}</strong>.
