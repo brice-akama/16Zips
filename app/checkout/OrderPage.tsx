@@ -851,7 +851,7 @@ const handlePlaceOrder = async () => {
     </ol>
     <p className="text-red-600 font-medium mt-2">
       NB: Please don’t make the Cash App payment to our website email 
-      <strong>support@drivecoreauto.com</strong>. Kindly get in touch via live chat or email for our Cash App info.  
+      <strong>info@16zip.com</strong>. Kindly get in touch via live chat or email for our Cash App info.  
       Payments made to our website email won’t be validated nor confirmed.
     </p>
   </div>
@@ -895,7 +895,7 @@ const handlePlaceOrder = async () => {
       </li>
     </ol>
     <p className="text-red-600 font-medium mt-2">
-      NB: Please don’t make the Zelle payment to our website email ”support@drivecoreauto.com”. Kindly get in touch via live chat or email for our Zelle info. Payments made to our website email won’t be validated nor confirmed.
+      NB: Please don’t make the Zelle payment to our website email ”info@16zip.com”. Kindly get in touch via live chat or email for our Zelle info. Payments made to our website email won’t be validated nor confirmed.
     </p>
   </div>
 )}
