@@ -20,6 +20,9 @@ import { Toaster } from "react-hot-toast";
 import ScrollToTop from "./components/ScrollToTop";
 import BottomNav from "./components/BottomNav";
 
+// ✅ Framer Motion
+import { AnimatePresence, motion } from "framer-motion";
+
 const geistSans = Geist({
   variable: "--font-geist-sans",
   subsets: ["latin"],
@@ -78,22 +81,14 @@ export default function RootLayout({
           }}
         />
 
-          {/* Conditionally load JivoChat only if NOT admin and NOT reset-password */}
-
+        {/* Conditionally load JivoChat only if NOT admin and NOT reset-password */}
         {!isAdminRoute && !isResetPasswordPage && !isAdminLoginPage && (
-
           <Script
-
             src="https://code.jivosite.com/widget/YO0AKY0r12"
-
             strategy="afterInteractive"
-
             async
-
           />
-
         )}
-
       </head>
 
       <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
@@ -106,12 +101,22 @@ export default function RootLayout({
               {/* Show only if not admin or reset-password */}
               {!isAdminRoute && !isResetPasswordPage && <Navbar />}
               <CartDrawer />
-              {/* Add SalesNotification here */}
-        
 
               <main>
-                 <ScrollToTop /> {/* ✅ Add this here */}
-                {children}
+                <ScrollToTop />
+
+                {/* ✅ Animate page transitions (fade-in only) */}
+                <AnimatePresence mode="wait">
+                  <motion.div
+                    key={pathname} // 🔑 Important for triggering animation on route change
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.4, ease: "easeInOut" }}
+                  >
+                    {children}
+                  </motion.div>
+                </AnimatePresence>
+
                 {!isAdminRoute && !isResetPasswordPage && <BackToTop />}
                 {!isAdminRoute && !isResetPasswordPage && <BottomNav />}
               </main>
@@ -119,14 +124,9 @@ export default function RootLayout({
               {!isAdminRoute && !isResetPasswordPage && <Footer />}
               {!isAdminRoute && !isResetPasswordPage && <SlideContact />}
               {!isAdminRoute && !isResetPasswordPage && <CookieConsent />}
-               {/* Bottom navigation for mobile */}
-    
             </LanguageProvider>
           </CartProvider>
         </WishlistProvider>
-
-        
-
       </body>
     </html>
   );

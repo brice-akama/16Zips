@@ -12,6 +12,8 @@ import RelatedProducts from "./RelatedProduct";
 import { useReviewCount } from "./ReviewList";
 import Link from "next/link";
 import StickyBottomBar from "@/app/components/StickyBottomBar";
+import { motion } from "framer-motion";
+
 
 
 const stripHtmlTags = (html: string): string => {
@@ -229,15 +231,26 @@ const ProductDetailsPage: React.FC<Props> = ({ product }) => {
         <div className="flex flex-col md:flex-row gap-10">
           {/* Left: Main Image and Thumbnails */}
           <div className="w-full md:w-1/2">
-           <div className="relative cursor-zoom-in overflow-hidden" onClick={() => setIsImagePopupOpen(true)}>
-  <Image
-    src={selectedThumbnail === 0 ? product.mainImage : product.thumbnails[selectedThumbnail - 1]}
-    alt={product.name}
-    width={500}
-    height={500}
-    unoptimized
-    className="rounded-lg transition-transform duration-300 ease-in-out hover:scale-110"
-  />
+           <div
+  className="relative cursor-zoom-in overflow-hidden"
+  onClick={() => setIsImagePopupOpen(true)}
+>
+  <motion.div
+    key={selectedThumbnail} // triggers animation when thumbnail changes
+    initial={{ opacity: 0, scale: 0.95 }}
+    animate={{ opacity: 1, scale: 1 }}
+    exit={{ opacity: 0 }}
+    transition={{ duration: 0.4 }}
+  >
+    <Image
+      src={selectedThumbnail === 0 ? product.mainImage : product.thumbnails[selectedThumbnail - 1]}
+      alt={product.name}
+      width={500}
+      height={500}
+      unoptimized
+      className="rounded-lg"
+    />
+  </motion.div>
 </div>
 
 
@@ -312,18 +325,24 @@ const ProductDetailsPage: React.FC<Props> = ({ product }) => {
             <div className="border-t border-gray-300 my-4"></div>
 
             {/* Add to Cart and Wishlist buttons */}
-            <button
-              className="bg-black text-white py-3 mt-4 w-full rounded-md"
-              onClick={handleAddToCart}
-            >
-              Add to Cart
-            </button>
-            <button
-              className="mt-3 w-full block text-blue-600 font-semibold border border-blue-600 rounded px-4 py-2 hover:bg-blue-600 hover:text-white transition"
-              onClick={handleAddToWishlist}
-            >
-              Add to Wishlist
-            </button>
+<motion.button
+  whileTap={{ scale: 0.9 }}
+  whileHover={{ scale: 1.05 }}
+  className="bg-black text-white py-3 mt-4 w-full rounded-md"
+  onClick={handleAddToCart}
+>
+  Add to Cart
+</motion.button>
+
+            <motion.button
+  whileTap={{ scale: 0.9 }}
+  whileHover={{ scale: 1.05 }}
+  className="mt-3 w-full block text-blue-600 font-semibold border border-blue-600 rounded px-4 py-2 hover:bg-blue-600 hover:text-white transition"
+  onClick={handleAddToWishlist}
+>
+  Add to Wishlist
+</motion.button>
+
 
             
 
