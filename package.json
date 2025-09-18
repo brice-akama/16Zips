@@ -10,6 +10,7 @@
   },
   "dependencies": {
     "@smastrom/react-rating": "^1.5.0",
+    "@supabase/supabase-js": "^2.57.4",
     "@tiptap/starter-kit": "^2.11.5",
     "@types/jsonwebtoken": "^9.0.9",
     "@upstash/ratelimit": "^2.0.5",
