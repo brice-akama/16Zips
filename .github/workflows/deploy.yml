@@ -18,9 +18,11 @@ jobs:
           username: ${{ secrets.SSH_USER }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           port: ${{ secrets.SSH_PORT || 22 }}
+          debug: true           # 👈 SHOW DETAILED LOGS
+          sync: true            # 👈 AUTO-ACCEPT HOST KEY
           script: |
             echo "🚀 Starting deployment..."
-            cd /root/16Zips  # ← CONFIRMED PATH!
+            cd /root/16Zips
 
             echo "🔄 Pulling latest code..."
             git pull origin main
