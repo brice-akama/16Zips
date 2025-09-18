@@ -7,6 +7,7 @@ on:
 jobs:
   deploy:
     runs-on: ubuntu-latest
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -18,33 +19,34 @@ jobs:
           username: ${{ secrets.SSH_USER }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           port: ${{ secrets.SSH_PORT || 22 }}
-          debug: true           # 👈 SHOW DETAILED LOGS
-          sync: true            # 👈 AUTO-ACCEPT HOST KEY
           script: |
             echo "🚀 Starting deployment..."
-            cd /root/16Zips
+            cd /root/16Zips  # Your project path
 
             echo "🔄 Pulling latest code..."
             git pull origin main
 
-            echo "🛑 Stopping services..."
-            docker-compose down
+            echo "🛑 Stopping existing containers..."
+            sudo docker compose down
 
-            echo "🏗️ Building and starting services..."
-            docker-compose up -d --build
+            echo "🏗️ Building new Docker images..."
+            sudo docker compose build
 
-            echo "🔍 Checking if app is responding..."
+            echo "⬆️ Starting containers..."
+            sudo docker compose up -d
+
+            echo "🔍 Checking if app is live..."
             sleep 15
             if curl -f http://localhost:3000 > /dev/null 2>&1; then
               echo "✅ App is live and responding!"
             else
-              echo "❌ App failed to start!" >&2
+              echo "❌ App failed to start!"
               echo "📄 Last 20 logs from container:"
-              docker logs nextjs-app | tail -20
+              sudo docker logs nextjs-app | tail -20
               exit 1
             fi
 
             echo "🧹 Cleaning up unused Docker images..."
-            docker image prune -f
+            sudo docker image prune -f
 
             echo "🎉 Deployment completed successfully!"
