@@ -133,14 +133,15 @@ function ProductCard({
   }, [selectedOption, quantity, product.price, product.discount]);
 
   const [isMdUp, setIsMdUp] = useState(false);
-  useEffect(() => {
-    function checkScreen() {
-      setIsMdUp(window.innerWidth >= 768);
-    }
-    checkScreen();
-    window.addEventListener('resize', checkScreen);
-    return () => window.removeEventListener('resize', checkScreen);
-  }, []);
+
+useEffect(() => {
+  function checkScreen() {
+    setIsMdUp(window.innerWidth >= 768);
+  }
+  checkScreen();
+  window.addEventListener('resize', checkScreen);
+  return () => window.removeEventListener('resize', checkScreen);
+}, []);
 
   const showHoverEffect = isMdUp;
 
@@ -339,113 +340,210 @@ function ProductCard({
       </motion.div>
 
       {/* --- SELECT OPTIONS OVERLAY --- */}
-      <AnimatePresence>
-        {showOptionsOverlay && (
-          <motion.div
-            initial={{ opacity: 0, scale: 0.95 }}
-            animate={{ opacity: 1, scale: 1 }}
-            exit={{ opacity: 0, scale: 0.95 }}
-            className="absolute inset-0 flex flex-col items-center justify-center bg-white/95 backdrop-blur-sm rounded-2xl shadow-2xl z-2 p-6" // 🎨 Backdrop blur, better shadow, padding
-            onClick={(e) => e.stopPropagation()}
+     {/* --- SELECT OPTIONS OVERLAY --- */}
+<AnimatePresence>
+  {/* 📱 MOBILE POPUP */}
+  {showOptionsOverlay && !isMdUp && (
+    <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4"
+      onClick={(e) => e.target === e.currentTarget && setShowOptionsOverlay(false)}
+    >
+      <motion.div
+        initial={{ scale: 0.95, opacity: 0 }}
+        animate={{ scale: 1, opacity: 1 }}
+        exit={{ scale: 0.95, opacity: 0 }}
+        className="bg-white w-full max-w-md rounded-2xl shadow-2xl p-6 relative"
+      >
+        {/* Close button */}
+        <button
+          onClick={() => setShowOptionsOverlay(false)}
+          className="absolute top-4 right-4 text-gray-500 hover:text-gray-800 text-2xl font-bold"
+        >
+          ✕
+        </button>
+
+        {/* Product name */}
+        <h3 className="text-xl font-bold text-gray-800 mb-4 text-center">
+          {product.name}
+        </h3>
+
+        {/* Option Selector */}
+        <div className="relative mb-4">
+          <label className="block text-gray-700 text-sm font-medium mb-1">Select Option</label>
+          <select
+            className="w-full border border-gray-300 rounded-lg px-3 py-3 text-gray-700 focus:ring-2 focus:ring-red-300 focus:border-transparent"
+            value={selectedOption || ""}
+            onChange={(e) => setSelectedOption(e.target.value)}
           >
-            <button
-              onClick={() => {
-                setShowOptionsOverlay(false);
-                setDropdownOpen(false);
-                setSelectedOption(null);
-              }}
-              className="absolute top-4 right-4 text-gray-500 hover:text-gray-800 text-lg font-medium flex items-center gap-1"
-            >
-              ✕ <span className="text-sm font-normal">Close</span>
-            </button>
+            <option value="">Select an option</option>
+            {product.weights?.map((opt, i) => (
+              <option key={`weight-${i}`} value={`${opt.label} - $${opt.price}`}>
+                {opt.label} - ${opt.price?.toFixed(2)}
+              </option>
+            ))}
+            {product.seeds?.map((opt, i) => (
+              <option key={`seed-${i}`} value={`${opt.label}${opt.price ? ` - $${opt.price}` : ""}`}>
+                {opt.label}{opt.price ? ` - $${opt.price.toFixed(2)}` : ""}
+              </option>
+            ))}
+          </select>
+        </div>
 
-            <div className="w-full max-w-xs">
-            
-              <div className="relative">
-                <button
-                  onClick={() => setDropdownOpen(!dropdownOpen)}
-                  className="w-full border border-gray-300 rounded-xl px-4 py-3 bg-white shadow-sm hover:shadow flex justify-between items-center text-left transition"
+        {/* Quantity Selector */}
+        <div className="mb-6">
+          <label className="block text-gray-700 text-sm font-medium mb-1">Quantity</label>
+          <input
+            type="number"
+            min={1}
+            value={quantity}
+            onChange={(e) => setQuantity(parseInt(e.target.value) || 1)}
+            className="w-full border border-gray-300 rounded-lg px-3 py-3 text-center text-gray-700"
+          />
+        </div>
+
+        {/* Add to Cart Button */}
+        <motion.button
+          onClick={() => {
+            if (!selectedOption) {
+              toast.error("Please select an option first", { duration: 3000, icon: "⚠️" });
+              return;
+            }
+
+            addToCart({
+              slug: product.slug,
+              name: product.name,
+              price: displayPrice.toFixed(2),
+              mainImage: product.mainImage,
+              quantity,
+              option: selectedOption,
+            });
+
+            toast.success(`${product.name} (${selectedOption}) added to cart!`, {
+              duration: 3000,
+              icon: "🛒",
+            });
+
+            setShowOptionsOverlay(false);
+            setSelectedOption(null);
+          }}
+          whileTap={{ scale: 0.98 }}
+          className="w-full bg-red-500 text-white py-4 rounded-xl shadow-md hover:bg-red-600 transition font-bold text-lg"
+        >
+          Add to Cart — ${displayPrice.toFixed(2)}
+        </motion.button>
+      </motion.div>
+    </motion.div>
+  )}
+
+  {/* 💻 DESKTOP OVERLAY */}
+  {showOptionsOverlay && isMdUp && (
+    <motion.div
+      initial={{ opacity: 0, scale: 0.95 }}
+      animate={{ opacity: 1, scale: 1 }}
+      exit={{ opacity: 0, scale: 0.95 }}
+      className="absolute inset-0 flex flex-col items-center justify-center bg-white/95 backdrop-blur-sm rounded-2xl shadow-2xl z-2 p-6"
+      onClick={(e) => e.stopPropagation()}
+    >
+      <button
+        onClick={() => {
+          setShowOptionsOverlay(false);
+          setDropdownOpen(false);
+          setSelectedOption(null);
+        }}
+        className="absolute top-4 right-4 text-gray-500 hover:text-gray-800 text-lg font-medium flex items-center gap-1"
+      >
+        ✕ <span className="text-sm font-normal">Close</span>
+      </button>
+
+      <div className="w-full max-w-xs">
+        <div className="relative">
+          <button
+            onClick={() => setDropdownOpen(!dropdownOpen)}
+            className="w-full border border-gray-300 rounded-xl px-4 py-3 bg-white shadow-sm hover:shadow flex justify-between items-center text-left transition"
+          >
+            <span className="text-gray-700 whitespace-nowrap">{selectedOption ? selectedOption : "Select an option"}</span>
+            <span className={`transform transition-transform ${dropdownOpen ? "rotate-180" : ""}`}>&#9660;</span>
+          </button>
+
+          {dropdownOpen && (
+            <div className="absolute top-full left-0 w-full bg-white border border-gray-300 rounded-xl shadow-lg mt-1 max-h-48 overflow-y-auto z-50">
+              {product.weights?.map((opt, i) => (
+                <div
+                  key={`weight-${i}-${opt.label}`}
+                  onClick={() => {
+                    setSelectedOption(`${opt.label} - $${opt.price}`);
+                    setDropdownOpen(false);
+                  }}
+                  className="px-4 py-2.5 hover:bg-gray-50 cursor-pointer text-gray-700 border-b border-gray-50 last:border-0"
                 >
-                  <span className="text-gray-700 whitespace-nowrap">{selectedOption ? selectedOption : "Choose option"}</span>
-                  <span className={`transform transition-transform ${dropdownOpen ? "rotate-180" : ""}`}>&#9660;</span>
-                </button>
-
-                {dropdownOpen && (
-                  <div className="absolute top-full left-0 w-full bg-white border border-gray-300 rounded-xl shadow-lg mt-1 max-h-48 overflow-y-auto z-50">
-                    {product.weights?.map((opt, i) => (
-                      <div
-                        key={`weight-${i}-${opt.label}`}
-                        onClick={() => {
-                          setSelectedOption(`${opt.label} - $${opt.price}`);
-                          setDropdownOpen(false);
-                        }}
-                        className="px-4 py-2.5 hover:bg-gray-50 cursor-pointer text-gray-700 border-b border-gray-50 last:border-0"
-                      >
-                        {opt.label} - ${opt.price?.toFixed(2)}
-                      </div>
-                    ))}
-                    {product.seeds?.map((opt, i) => (
-                      <div
-                        key={`seed-${i}-${opt.label}`}
-                        onClick={() => {
-                          setSelectedOption(`${opt.label}${opt.price ? ` - $${opt.price}` : ""}`);
-                          setDropdownOpen(false);
-                        }}
-                        className="px-4 py-2.5 hover:bg-gray-50 cursor-pointer text-gray-700 border-b border-gray-50 last:border-0"
-                      >
-                        {opt.label}
-                        {opt.price ? ` - $${opt.price.toFixed(2)}` : ""}
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </div>
-
-              <div className="mt-5">
-                <label className="block text-gray-700 text-sm font-medium mb-2">Quantity</label>
-                <input
-                  type="number"
-                  min={1}
-                  value={quantity}
-                  onChange={(e) => setQuantity(parseInt(e.target.value) || 1)}
-                  className="w-24 border border-gray-300 rounded-lg px-3 py-2 text-center"
-                />
-              </div>
-
-              <motion.button
-                onClick={() => {
-                  if (hasOptions && !selectedOption) {
-                    toast.error("Please select an option first", { duration: 3000, icon: "⚠️" });
-                    return;
-                  }
-
-                  addToCart({
-                    slug: product.slug,
-                    name: product.name,
-                    price: displayPrice.toFixed(2),
-                    mainImage: product.mainImage,
-                    quantity,
-                    option: selectedOption,
-                  });
-
-                  toast.success(`${product.name}${selectedOption ? ` (${selectedOption})` : ""} added to cart!`, {
-                    duration: 3000,
-                    icon: "🛒",
-                  });
-
-                  setShowOptionsOverlay(false);
-                  setDropdownOpen(false);
-                  setSelectedOption(null);
-                }}
-                whileTap={{ scale: 0.98 }}
-                className="mt-6 w-full bg-red-500 text-white py-3 rounded-xl shadow-md hover:bg-red-600 transition font-medium"
-              >
-                Add to Cart — ${displayPrice.toFixed(2)}
-              </motion.button>
+                  {opt.label} - ${opt.price?.toFixed(2)}
+                </div>
+              ))}
+              {product.seeds?.map((opt, i) => (
+                <div
+                  key={`seed-${i}-${opt.label}`}
+                  onClick={() => {
+                    setSelectedOption(`${opt.label}${opt.price ? ` - $${opt.price}` : ""}`);
+                    setDropdownOpen(false);
+                  }}
+                  className="px-4 py-2.5 hover:bg-gray-50 cursor-pointer text-gray-700 border-b border-gray-50 last:border-0"
+                >
+                  {opt.label}
+                  {opt.price ? ` - $${opt.price.toFixed(2)}` : ""}
+                </div>
+              ))}
             </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+          )}
+        </div>
+
+        <div className="mt-5">
+          <label className="block text-gray-700 text-sm font-medium mb-2">Quantity</label>
+          <input
+            type="number"
+            min={1}
+            value={quantity}
+            onChange={(e) => setQuantity(parseInt(e.target.value) || 1)}
+            className="w-24 border border-gray-300 rounded-lg px-3 py-2 text-center"
+          />
+        </div>
+
+        <motion.button
+          onClick={() => {
+            if (hasOptions && !selectedOption) {
+              toast.error("Please select an option first", { duration: 3000, icon: "⚠️" });
+              return;
+            }
+
+            addToCart({
+              slug: product.slug,
+              name: product.name,
+              price: displayPrice.toFixed(2),
+              mainImage: product.mainImage,
+              quantity,
+              option: selectedOption,
+            });
+
+            toast.success(`${product.name}${selectedOption ? ` (${selectedOption})` : ""} added to cart!`, {
+              duration: 3000,
+              icon: "🛒",
+            });
+
+            setShowOptionsOverlay(false);
+            setDropdownOpen(false);
+            setSelectedOption(null);
+          }}
+          whileTap={{ scale: 0.98 }}
+          className="mt-6 w-full bg-red-500 text-white py-3 rounded-xl shadow-md hover:bg-red-600 transition font-medium"
+        >
+          Add to Cart — ${displayPrice.toFixed(2)}
+        </motion.button>
+      </div>
+    </motion.div>
+  )}
+</AnimatePresence>
 
       {/* --- QUICK VIEW MODAL --- */}
       <AnimatePresence>
@@ -470,14 +568,19 @@ function ProductCard({
                 ✕ <span className="text-xs">Close</span>
               </button>
 
-              <div className="relative w-full md:w-1/2 h-64 md:h-auto bg-gray-50">
+              <div className="relative w-full md:w-1/2 h-64 md:h-auto">
                 <Image
                   src={product.mainImage}
                   alt={product.name}
                   fill
-                  unoptimized
                   className="object-cover"
+                  unoptimized
                 />
+                <Link href={`/products/${product.slug}`} className="absolute bottom-4 left-1/2 transform -translate-x-1/2 md:block hidden w-full">
+                  <button className="bg-red-500 w-full text-white px-4 py-2 rounded shadow hover:bg-red-600 transition">
+                    View Details
+                  </button>
+                </Link>
               </div>
 
               <div className="p-6 md:w-1/2 flex flex-col justify-between">

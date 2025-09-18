@@ -126,12 +126,7 @@ setOrder({
           >
             Continue Shopping
           </Link>
-          <Link
-            href={`/order-confirmation?id=${order.id}`}
-            className="bg-gray-100 text-gray-800 px-6 py-2 rounded-lg shadow hover:bg-gray-200"
-          >
-            View Order
-          </Link>
+          
         </div>
       </div>
     </div>

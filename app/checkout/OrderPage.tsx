@@ -235,7 +235,7 @@ const CheckOutPage = () => {
 
 
 
-const freeShippingThreshold = 4000;
+const freeShippingThreshold = 400;
 const remaining = freeShippingThreshold - totalPrice;
 
 const salesTaxAmount = subtotal * 0.07;
@@ -407,11 +407,17 @@ const handlePlaceOrder = async () => {
   }
 
   const orderData = {
-    cartItems,
-    totalPrice,
-    paymentMethod,
-    billingDetails,
-  };
+  cartItems,
+  subtotal,
+  discount,
+  shippingCost: effectiveShippingCost, // 👈 Add shipping
+  salesTax: salesTaxAmount,            // 👈 Add tax
+  grandTotal: subtotal + effectiveShippingCost + salesTaxAmount - discount, // 👈 Add grand total
+  paymentMethod,
+  billingDetails,
+  // 👇 Also send shipping method if needed
+  shippingMethod: selectedShipping?.label || "Standard Shipping",
+};
 
   try {
     const response = await fetch('/api/orders', {

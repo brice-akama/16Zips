@@ -7,7 +7,6 @@ on:
 jobs:
   deploy:
     runs-on: ubuntu-latest
-
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -21,32 +20,44 @@ jobs:
           port: ${{ secrets.SSH_PORT || 22 }}
           script: |
             echo "🚀 Starting deployment..."
-            cd /root/16Zips  # Your project path
+            cd /root/16Zips
 
             echo "🔄 Pulling latest code..."
             git pull origin main
 
             echo "🛑 Stopping existing containers..."
-            sudo docker compose down
+            docker-compose down --remove-orphans
 
-            echo "🏗️ Building new Docker images..."
-            sudo docker compose build
+            echo "🏗️ Building new images..."
+            docker-compose build
 
-            echo "⬆️ Starting containers..."
-            sudo docker compose up -d
+            echo "🚀 Starting containers..."
+            docker-compose up -d
 
-            echo "🔍 Checking if app is live..."
-            sleep 15
-            if curl -f http://localhost:3000 > /dev/null 2>&1; then
+            echo "⏳ Waiting 20 seconds for app to start..."
+            sleep 20
+
+            echo "🔍 Checking if app is responding..."
+            if curl -f --connect-timeout 10 http://localhost:3000 > /dev/null 2>&1; then
               echo "✅ App is live and responding!"
             else
-              echo "❌ App failed to start!"
+              echo "❌ App failed to start!" >&2
               echo "📄 Last 20 logs from container:"
-              sudo docker logs nextjs-app | tail -20
-              exit 1
+              docker logs nextjs-app | tail -20
+              echo "🔄 Restarting container one more time..."
+              docker-compose restart
+              sleep 10
+              if curl -f --connect-timeout 10 http://localhost:3000 > /dev/null 2>&1; then
+                echo "✅ App recovered after restart!"
+              else
+                echo "❌ App still not responding after restart!" >&2
+                echo "📄 Final logs:"
+                docker logs nextjs-app | tail -20
+                exit 1
+              fi
             fi
 
             echo "🧹 Cleaning up unused Docker images..."
-            sudo docker image prune -f
+            docker image prune -f
 
             echo "🎉 Deployment completed successfully!"

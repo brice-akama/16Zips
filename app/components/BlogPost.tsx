@@ -97,7 +97,7 @@ export default function BlogPost() {
               className="relative bg-white rounded-xl overflow-hidden shadow-md hover:shadow-2xl transition cursor-pointer"
             >
               {/* Date badge (always visible now) */}
-              <span className="absolute top-3 left-3 bg-green-600 text-white text-xs px-3 py-1 rounded-full shadow z-20">
+              <span className="absolute top-3 left-3 bg-green-600 text-white text-xs px-3 py-1 rounded-full shadow z-10">
                 {post.createdAt}
               </span>
 

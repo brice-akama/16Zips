@@ -485,7 +485,7 @@ const handleAddToWishlist = (
           <div className="lg:hidden">
             {/* Toggle Button */}
             <button
-              className="flex items-center px-4 py-2 bg-blue-600 text-white rounded mb-4"
+              className="flex items-center px-4 py-2 bg-red-500 text-white rounded mb-4"
               onClick={() => setSidebarOpen(true)}
             >
               <span className="mr-2">&#9776;</span> Show Sidebar
