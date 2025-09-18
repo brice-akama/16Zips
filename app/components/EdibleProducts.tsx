@@ -112,6 +112,7 @@ function ProductCard({
   const [selectedOption, setSelectedOption] = useState<string | null>(null);
   const hasOptions = (product.weights?.length || 0) + (product.seeds?.length || 0) > 0;
   const [quantity, setQuantity] = useState<number>(1);
+  
   const [displayPrice, setDisplayPrice] = useState<number>(
     product.discount ? (product.price - product.price * (product.discount / 100)) : product.price
   );
@@ -192,7 +193,7 @@ function ProductCard({
           </Link>
 
           {/* Mobile Wishlist */}
-          <div className="absolute top-10 right-3 flex sm:hidden z-10">
+          <div className="absolute top-2 right-3 flex sm:hidden z-10">
             <motion.button
               whileTap={{ scale: 0.9 }}
               onClick={() => handleAddToWishlist(product.id, product.slug, product.name, product.price, product.mainImage)}
@@ -359,13 +360,13 @@ function ProductCard({
             </button>
 
             <div className="w-full max-w-xs">
-              <label className="block text-gray-700 text-sm font-medium mb-2">Choose Option</label>
+            
               <div className="relative">
                 <button
                   onClick={() => setDropdownOpen(!dropdownOpen)}
                   className="w-full border border-gray-300 rounded-xl px-4 py-3 bg-white shadow-sm hover:shadow flex justify-between items-center text-left transition"
                 >
-                  <span className="text-gray-700">{selectedOption ? selectedOption : "Select an option"}</span>
+                  <span className="text-gray-700 whitespace-nowrap">{selectedOption ? selectedOption : "Choose option"}</span>
                   <span className={`transform transition-transform ${dropdownOpen ? "rotate-180" : ""}`}>&#9660;</span>
                 </button>
 
