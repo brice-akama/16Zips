@@ -15,6 +15,8 @@ export interface CartItem {
   quantity: number;
   mainImage: string;
   option?: string | null;
+  originalPrice?: string; // Add this
+  discount?: string; // Add this
 }
 
 interface CartContextType {

@@ -3,6 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { Edit, SimpleForm, TextInput, NumberInput, SelectInput, BooleanInput, EditProps, ReferenceArrayInput,useNotify, SelectArrayInput, SimpleFormIterator,ArrayInput, } from 'react-admin';
 import { RichTextInput } from 'ra-input-rich-text';
 import { FiUpload } from 'react-icons/fi';
+import { useRecordContext } from 'react-admin';
 
 const categories = [
   { id: 'Microdose Kits', name: 'Microdose Kits' },
@@ -52,6 +53,9 @@ export const ProductEdit: React.FC<EditProps> = (props) => {
   const [thumbnails, setThumbnails] = useState<(File | null)[]>([null, null, null, null]);
   const notify = useNotify();
   const { id } = props; 
+  const record = useRecordContext(); // Get current product data
+  const [mainImagePreview, setMainImagePreview] = useState<string | null>(null);
+const [thumbnailPreviews, setThumbnailPreviews] = useState<(string | null)[]>([null, null, null, null]);
 
 
   const [productName, setProductName] = useState('');
@@ -76,20 +80,41 @@ export const ProductEdit: React.FC<EditProps> = (props) => {
   };
 
   const handleMainImageChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files ? event.target.files[0] : null;
-    if (file) {
-      setMainImage(file);
-    }
-  };
+  const file = event.target.files ? event.target.files[0] : null;
+  if (file) {
+    setMainImage(file);
+    setMainImagePreview(URL.createObjectURL(file)); // Show preview
+  }
+};
 
-  const handleThumbnailChange = (index: number, event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files ? event.target.files[0] : null;
-    if (file) {
-      const updatedThumbnails = [...thumbnails];
-      updatedThumbnails[index] = file;
-      setThumbnails(updatedThumbnails);
-    }
-  };
+const handleThumbnailChange = (index: number, event: React.ChangeEvent<HTMLInputElement>) => {
+  const file = event.target.files ? event.target.files[0] : null;
+  if (file) {
+    const updatedThumbnails = [...thumbnails];
+    updatedThumbnails[index] = file;
+    setThumbnails(updatedThumbnails);
+
+    const updatedPreviews = [...thumbnailPreviews];
+    updatedPreviews[index] = URL.createObjectURL(file);
+    setThumbnailPreviews(updatedPreviews);
+  }
+};
+
+  useEffect(() => {
+  if (record) {
+    setProductName(record.name || '');
+    setPrice(record.price || '');
+    setDescription(record.description || '');
+    setCategory(record.category || '');
+
+    // Initialize image states with existing URLs (not files)
+    // We'll handle display separately since we can't reconstruct File objects from URLs
+    setMainImagePreview(record.mainImage || null); // <-- NEW state for preview
+    setThumbnailPreviews(
+      (record.thumbnails || []).map((url: string) => url)
+    ); // <-- NEW state for thumbnail previews
+  }
+}, [record]);
 
   useEffect(() => {
     const fetchRelatedProducts = async () => {
@@ -124,16 +149,22 @@ export const ProductEdit: React.FC<EditProps> = (props) => {
       formData.append("seeds", JSON.stringify(data.seeds)); // Serialize seeds
     }
   
-    if (mainImage) {
-      formData.append("mainImage", mainImage);
-    }
-  
-    // Append thumbnails only if they exist
-    thumbnails.forEach((thumbnail) => {
-      if (thumbnail) {
-        formData.append("thumbnails", thumbnail);
-      }
-    });
+    // Always send mainImage URL if no new file — backend should ignore if not a File
+if (mainImage) {
+  formData.append("mainImage", mainImage);
+} else if (mainImagePreview) {
+  // Send existing URL as string — backend should NOT overwrite if it's a string
+  formData.append("mainImage", mainImagePreview);
+}
+
+// For thumbnails: send new files OR existing URLs
+thumbnails.forEach((thumbnail, index) => {
+  if (thumbnail) {
+    formData.append("thumbnails", thumbnail);
+  } else if (thumbnailPreviews[index]) {
+    formData.append("thumbnails", thumbnailPreviews[index] as string);
+  }
+});
   
     try {
       const response = await fetch('/api/products', {
@@ -175,34 +206,48 @@ export const ProductEdit: React.FC<EditProps> = (props) => {
         <BooleanInput source="popularProduct" label="Popular Product" />
 
         <label>Main Image:</label>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-          <input type="file" accept="image/*" onChange={handleMainImageChange} style={{ display: 'none' }} id="mainImageUpload" />
-          <label htmlFor="mainImageUpload" style={{ cursor: 'pointer' }}>
-            <FiUpload size={24} />
-          </label>
-          {mainImage && (
-            <img src={URL.createObjectURL(mainImage)} alt="Main" style={{ width: '200px', marginTop: '10px' }} />
-          )}
-        </div>
+<div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+  <input type="file" accept="image/*" onChange={handleMainImageChange} style={{ display: 'none' }} id="mainImageUpload" />
+  <label htmlFor="mainImageUpload" style={{ cursor: 'pointer' }}>
+    <FiUpload size={24} />
+  </label>
+  {(mainImagePreview || mainImage) && (
+    <img
+      src={mainImage ? URL.createObjectURL(mainImage) : mainImagePreview!}
+      alt="Main"
+      style={{ width: '200px', marginTop: '10px', objectFit: 'cover' }}
+    />
+  )}
+</div>
 
-        <label>Thumbnails (Max 4):</label>
-        <div style={{ display: 'flex', gap: '10px' }}>
-          {thumbnails.map((thumbnail, index) => (
-            <div key={index} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-              <input type="file" accept="image/*" onChange={(event) => handleThumbnailChange(index, event)} style={{ display: 'none' }} id={`thumbnailUpload-${index}`} />
-              <label htmlFor={`thumbnailUpload-${index}`} style={{ cursor: 'pointer' }}>
-                <FiUpload size={24} />
-              </label>
-              {thumbnail && (
-                <img
-                  src={URL.createObjectURL(thumbnail)}
-                  alt={`Thumbnail ${index + 1}`}
-                  style={{ width: '100px', height: '100px', objectFit: 'cover', marginTop: '5px' }}
-                />
-              )}
-            </div>
-          ))}
-        </div>
+<label>Thumbnails (Max 4):</label>
+<div style={{ display: 'flex', gap: '10px' }}>
+  {Array.from({ length: 4 }).map((_, index) => (
+    <div key={index} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+      <input
+        type="file"
+        accept="image/*"
+        onChange={(event) => handleThumbnailChange(index, event)}
+        style={{ display: 'none' }}
+        id={`thumbnailUpload-${index}`}
+      />
+      <label htmlFor={`thumbnailUpload-${index}`} style={{ cursor: 'pointer' }}>
+        <FiUpload size={24} />
+      </label>
+      {(thumbnailPreviews[index] || thumbnails[index]) && (
+        <img
+          src={
+            thumbnails[index]
+              ? URL.createObjectURL(thumbnails[index]!)
+              : thumbnailPreviews[index]!
+          }
+          alt={`Thumbnail ${index + 1}`}
+          style={{ width: '100px', height: '100px', objectFit: 'cover', marginTop: '5px' }}
+        />
+      )}
+    </div>
+  ))}
+</div>
 
         <ReferenceArrayInput
           label="Related Products"

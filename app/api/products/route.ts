@@ -413,7 +413,6 @@ if (minPrice || maxPrice) {
   }
 }
 
-
 export async function PUT(req: NextRequest) {
   try {
     const form = await req.formData();
@@ -424,6 +423,15 @@ export async function PUT(req: NextRequest) {
     if (!id || !ObjectId.isValid(id)) {
       console.error('Invalid or missing ID:', id);
       return NextResponse.json({ error: 'Invalid or missing ID' }, { status: 400 });
+    }
+
+    // ✅ Fetch existing product AFTER validating ID
+    const client = await clientPromise;
+    const db = client.db('school-project');
+    const existingProduct = await db.collection('products').findOne({ _id: new ObjectId(id) });
+
+    if (!existingProduct) {
+      return NextResponse.json({ error: 'Product not found' }, { status: 404 });
     }
 
     const name = sanitizeInput(form.get('name') as string);
@@ -439,14 +447,11 @@ export async function PUT(req: NextRequest) {
     const weightRaw = form.get('weights') as string;
     const seedsRaw = form.get('seeds') as string;
 
-    // Parse weight if it exists and is a valid string (could be a JSON string of array)
     const weights = weightRaw ? JSON.parse(weightRaw) : [];
-    // Parse seeds if it exists and is a valid string (could be a JSON string of array)
     const seeds = seedsRaw ? JSON.parse(seedsRaw) : [];
 
     const mainImage = form.get('mainImage') as File | null;
     const thumbnails = Array.from(form.getAll('thumbnails'));
-
 
     console.log('Parsed & sanitized inputs:', {
       name,
@@ -488,7 +493,9 @@ export async function PUT(req: NextRequest) {
       },
     };
 
-    let mainImageUrl = '';
+    // ✅ Use existingProduct, not 'record'
+    let mainImageUrl = existingProduct.mainImage; // <-- Default to existing
+
     if (mainImage && mainImage.size > 0) {
       const buffer = Buffer.from(await mainImage.arrayBuffer());
       const result = await new Promise<any>((resolve, reject) => {
@@ -503,7 +510,9 @@ export async function PUT(req: NextRequest) {
       mainImageUrl = result.secure_url;
     }
 
-    let uploadedThumbnails: string[] = [];
+    // ✅ Use existingProduct, not 'record'
+    let uploadedThumbnails = existingProduct.thumbnails || []; // <-- Default to existing
+
     if (thumbnails.length > 0 && thumbnails[0] instanceof File) {
       uploadedThumbnails = await Promise.all(
         thumbnails.map(async (thumb: FormDataEntryValue) => {
@@ -520,11 +529,10 @@ export async function PUT(req: NextRequest) {
             });
             return result.secure_url;
           }
-          return null;
+          return thumb as string; // <-- Preserve existing URL if not a file
         })
       ).then(res => res.filter(Boolean));
     }
-
 
     const updateFields = {
       name,
@@ -538,21 +546,20 @@ export async function PUT(req: NextRequest) {
       thumbnails: uploadedThumbnails,
       seoKeywords,
       isPublished,
-      weights, // Optional weight array
-      seeds,   // Optional seeds array
+      weights,
+      seeds,
       translations,
       updatedAt: new Date(),
     };
 
-    if (mainImageUrl) updateFields.mainImage = mainImageUrl;
-    if (uploadedThumbnails.length > 0) updateFields.thumbnails = uploadedThumbnails;
+    // These are redundant since you already set them above
+    // if (mainImageUrl) updateFields.mainImage = mainImageUrl;
+    // if (uploadedThumbnails.length > 0) updateFields.thumbnails = uploadedThumbnails;
     console.log('Update fields:', updateFields);
 
-   
-    
-
-    const client = await clientPromise;
-    const db = client.db('school-project');
+    // ✅ You already have 'client' and 'db' from above, no need to redeclare
+    // const client = await clientPromise; // ❌ Remove this
+    // const db = client.db('school-project'); // ❌ Remove this
 
     const result = await db.collection('products').updateOne(
       { _id: new ObjectId(id) },
