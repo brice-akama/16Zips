@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, useRef } from "react";
+import React from "react";
 import { useCart } from "@/app/context/CartContext";
 import Link from "next/link";
 import Image from "next/image";
@@ -9,30 +9,14 @@ import { motion, AnimatePresence } from "framer-motion";
 const FREE_SHIPPING_THRESHOLD = 400;
 
 const CartDrawer: React.FC = () => {
-  const { cartItems, removeFromCart, isCartOpen, closeCart } = useCart();
-  const [quantities, setQuantities] = useState<{ [key: string]: number }>({});
-
-  useEffect(() => {
-    const initialQuantities = cartItems.reduce((acc, item) => {
-      acc[item.slug] = item.quantity || 1;
-      return acc;
-    }, {} as { [key: string]: number });
-    setQuantities(initialQuantities);
-  }, [cartItems]);
-
-  const updateQuantity = (slug: string, value: number) => {
-    setQuantities((prev) => {
-      const newQuantity = Math.max(1, (prev[slug] || 1) + value);
-      return { ...prev, [slug]: newQuantity };
-    });
-  };
+  const { cartItems, removeFromCart, isCartOpen, closeCart, updateQuantity } = useCart();
 
   const handleLinkClick = () => {
     closeCart();
   };
 
   const cartTotal = cartItems.reduce(
-    (acc, item) => acc + parseFloat(item.price) * (quantities[item.slug] || 1),
+    (acc, item) => acc + parseFloat(item.price) * (item.quantity || 1),
     0
   );
 
@@ -45,11 +29,8 @@ const CartDrawer: React.FC = () => {
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
         >
-          {/* Overlay background */}
-          <div
-            className="absolute inset-0  bg-opacity-50"
-            onClick={closeCart}
-          />
+          {/* Overlay */}
+          <div className="absolute inset-0 bg-opacity-50" onClick={closeCart} />
 
           {/* Drawer */}
           <motion.div
@@ -82,11 +63,11 @@ const CartDrawer: React.FC = () => {
               </div>
             ) : (
               <>
-                {/* Scrollable Cart Items */}
+                {/* Cart Items */}
                 <div className="flex-1 overflow-y-auto mt-4 px-2">
                   <ul className="space-y-4">
                     {cartItems.map((item, index) => {
-                      const itemQuantity = quantities[item.slug] || 1;
+                      const itemQuantity = item.quantity || 1;
                       const itemTotalPrice = (
                         parseFloat(item.price) * itemQuantity
                       ).toFixed(2);
@@ -108,8 +89,9 @@ const CartDrawer: React.FC = () => {
                               </h3>
                               <div className="mt-3 flex justify-start items-center space-x-3">
                                 <button
-                                  className="bg-gray-200 rounded px-3 py-1"
-                                  onClick={() => updateQuantity(item.slug, -1)}
+                                  className="bg-gray-200 rounded px-3 py-1 disabled:opacity-50"
+                                  onClick={() => updateQuantity(item.slug, itemQuantity - 1)}
+                                  disabled={itemQuantity <= 1}
                                 >
                                   -
                                 </button>
@@ -118,7 +100,7 @@ const CartDrawer: React.FC = () => {
                                 </span>
                                 <button
                                   className="bg-gray-200 rounded px-3 py-1"
-                                  onClick={() => updateQuantity(item.slug, 1)}
+                                  onClick={() => updateQuantity(item.slug, itemQuantity + 1)}
                                 >
                                   +
                                 </button>
@@ -143,12 +125,11 @@ const CartDrawer: React.FC = () => {
                   </ul>
                 </div>
 
-                {/* Fixed Footer with Total & Buttons */}
+                {/* Footer */}
                 <div className="p-4 border-t border-gray-300 mb-10">
                   {cartTotal < FREE_SHIPPING_THRESHOLD && (
                     <p className="text-sm text-orange-500 font-medium mb-2">
-                      Add ${(FREE_SHIPPING_THRESHOLD - cartTotal).toFixed(2)}{" "}
-                      more for free shipping!
+                      Add ${(FREE_SHIPPING_THRESHOLD - cartTotal).toFixed(2)} more for free shipping!
                     </p>
                   )}
                   {cartTotal >= FREE_SHIPPING_THRESHOLD && (
@@ -157,9 +138,7 @@ const CartDrawer: React.FC = () => {
                     </p>
                   )}
 
-                  <h3 className="font-bold mb-2">
-                    Total: ${cartTotal.toFixed(2)}
-                  </h3>
+                  <h3 className="font-bold mb-2">Total: ${cartTotal.toFixed(2)}</h3>
 
                   <Link
                     href="/cart-drawer"
@@ -186,3 +165,4 @@ const CartDrawer: React.FC = () => {
 };
 
 export default CartDrawer;
+

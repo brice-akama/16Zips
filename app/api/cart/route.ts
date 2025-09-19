@@ -188,3 +188,58 @@ export async function DELETE(req: Request) {
     return NextResponse.json({ error: 'Failed to remove item' }, { status: 500 });
   }
 }
+
+
+// PUT: Update quantity of a specific cart item
+export async function PUT(req: Request) {
+  try {
+    const { slug, quantity } = await req.json();
+
+    if (!slug || quantity === undefined || quantity < 0) {
+      return NextResponse.json({ error: 'Invalid slug or quantity' }, { status: 400 });
+    }
+
+    // Get guestId from cookie
+    const cookies = req.headers.get('cookie') || '';
+    const guestId = cookies.split('; ').find(c => c.startsWith('guestId='))?.split('=')[1];
+
+    if (!guestId) {
+      return NextResponse.json({ error: 'No cart found' }, { status: 400 });
+    }
+
+    const client = await clientPromise;
+    const db = client.db("school-project");
+    const cartCollection = db.collection('cart');
+
+    const cart = await cartCollection.findOne({ guestId }) as Cart | null;
+    if (!cart) {
+      return NextResponse.json({ error: 'Cart not found' }, { status: 404 });
+    }
+
+    // Find item
+    const itemIndex = cart.items.findIndex(item => item.slug === slug);
+    if (itemIndex === -1) {
+      return NextResponse.json({ error: 'Item not found in cart' }, { status: 404 });
+    }
+
+    // Update quantity
+    cart.items[itemIndex].quantity = quantity;
+
+    // Remove item if quantity is zero
+    if (cart.items[itemIndex].quantity <= 0) {
+      cart.items.splice(itemIndex, 1);
+    }
+
+    // Update cart in DB or delete if empty
+    if (cart.items.length > 0) {
+      await cartCollection.updateOne({ guestId }, { $set: { items: cart.items } });
+    } else {
+      await cartCollection.deleteOne({ guestId });
+    }
+
+    return NextResponse.json({ message: 'Cart updated', cart });
+  } catch (error) {
+    console.error('Error updating cart:', error);
+    return NextResponse.json({ error: 'Failed to update cart' }, { status: 500 });
+  }
+}

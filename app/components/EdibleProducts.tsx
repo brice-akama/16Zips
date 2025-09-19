@@ -393,16 +393,7 @@ useEffect(() => {
         </div>
 
         {/* Quantity Selector */}
-        <div className="mb-6">
-          <label className="block text-gray-700 text-sm font-medium mb-1">Quantity</label>
-          <input
-            type="number"
-            min={1}
-            value={quantity}
-            onChange={(e) => setQuantity(parseInt(e.target.value) || 1)}
-            className="w-full border border-gray-300 rounded-lg px-3 py-3 text-center text-gray-700"
-          />
-        </div>
+        
 
         {/* Add to Cart Button */}
         <motion.button
@@ -499,16 +490,7 @@ useEffect(() => {
           )}
         </div>
 
-        <div className="mt-5">
-          <label className="block text-gray-700 text-sm font-medium mb-2">Quantity</label>
-          <input
-            type="number"
-            min={1}
-            value={quantity}
-            onChange={(e) => setQuantity(parseInt(e.target.value) || 1)}
-            className="w-24 border border-gray-300 rounded-lg px-3 py-2 text-center"
-          />
-        </div>
+        
 
         <motion.button
           onClick={() => {

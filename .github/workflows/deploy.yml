@@ -20,26 +20,38 @@ jobs:
           port: ${{ secrets.SSH_PORT || 22 }}
           script: |
             echo "🚀 Starting deployment..."
-            cd /root/16Zips  # ← CONFIRMED PATH!
+            cd /root/16Zips
 
             echo "🔄 Pulling latest code..."
             git pull origin main
 
-            echo "🛑 Stopping services..."
-            docker-compose down
+            echo "🛑 Stopping existing containers..."
+            docker compose down --remove-orphans
 
-            echo "🏗️ Building and starting services..."
-            docker-compose up -d --build
+            echo "🚀 Rebuilding and starting containers..."
+            docker compose up -d --build
+
+            echo "⏳ Waiting 20 seconds for app to start..."
+            sleep 20
 
             echo "🔍 Checking if app is responding..."
-            sleep 15
-            if curl -f http://localhost:3000 > /dev/null 2>&1; then
+            if curl -f --connect-timeout 10 http://localhost:3000 > /dev/null 2>&1; then
               echo "✅ App is live and responding!"
             else
               echo "❌ App failed to start!" >&2
               echo "📄 Last 20 logs from container:"
               docker logs nextjs-app | tail -20
-              exit 1
+              echo "🔄 Restarting container one more time..."
+              docker compose restart
+              sleep 10
+              if curl -f --connect-timeout 10 http://localhost:3000 > /dev/null 2>&1; then
+                echo "✅ App recovered after restart!"
+              else
+                echo "❌ App still not responding after restart!" >&2
+                echo "📄 Final logs:"
+                docker logs nextjs-app | tail -20
+                exit 1
+              fi
             fi
 
             echo "🧹 Cleaning up unused Docker images..."
