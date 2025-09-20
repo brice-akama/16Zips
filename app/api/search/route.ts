@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import clientPromise from "../../lib/mongodb";
 import he from "he";
+import { safeGet, safeSet } from "@/lib/redis"; // 👈 ADD THIS
 
 // Decode HTML entities
 function decodeHtmlEntities(input: string): string {
@@ -27,6 +28,16 @@ export async function GET(req: Request) {
 
     if (!sanitizedSearch) {
       return NextResponse.json({ products: [], blogs: [] });
+    }
+
+    // 🔑 GENERATE REDIS CACHE KEY
+    const cacheKey = `search:${sanitizedSearch}`;
+
+    // 🧠 TRY REDIS CACHE FIRST
+    const cached = await safeGet(cacheKey);
+    if (cached) {
+      console.log(`✅ Cache hit for search: "${sanitizedSearch}"`);
+      return NextResponse.json(JSON.parse(cached));
     }
 
     const client = await clientPromise;
@@ -58,7 +69,13 @@ export async function GET(req: Request) {
       })
       .toArray();
 
-    return NextResponse.json({ products, blogs });
+    const response = { products, blogs };
+
+    // 💾 CACHE SEARCH RESULTS FOR 5 MINUTES (300 SECONDS)
+    await safeSet(cacheKey, JSON.stringify(response), 300);
+    console.log(`💾 Cached search results for: "${sanitizedSearch}"`);
+
+    return NextResponse.json(response);
   } catch (error) {
     console.error("Search error:", error);
     return NextResponse.json(

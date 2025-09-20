@@ -5,6 +5,8 @@ import clientPromise from '../../lib/mongodb';
 import cloudinary from 'cloudinary';
 import { Readable } from 'stream';
 import sanitizeHTML  from 'sanitize-html';
+import { safeGet, safeSet, safeDelPattern  } from "@/lib/redis"; // 👈 Import safe Redis helpers
+
 
 
 cloudinary.v2.config({
@@ -251,7 +253,9 @@ product: updatedProduct,
 
 
 
-// Handle Product Fetching (GET request)
+
+
+
 // Handle Product Fetching (GET request with pagination)
 export async function GET(req: NextRequest) {
   try {
@@ -267,28 +271,56 @@ export async function GET(req: NextRequest) {
     const popularProduct = searchParams.get("popularProduct") === "true";
 
     // Pagination (optional)
-   // Pagination (optional)
-const pageParam = searchParams.get("page") || searchParams.get("_page");
-const perPageParam = searchParams.get("perPage") || searchParams.get("_limit");
-const limitParam = searchParams.get("limit"); // 👈 new addition
+    const pageParam = searchParams.get("page") || searchParams.get("_page");
+    const perPageParam = searchParams.get("perPage") || searchParams.get("_limit");
+    const limitParam = searchParams.get("limit"); // 👈 new addition
 
-let skip = 0;
-let limit = 0;
+    let skip = 0;
+    let limit = 0;
 
-if (pageParam && perPageParam) {
-  const page = parseInt(pageParam, 10);
-  const perPage = parseInt(perPageParam, 10);
-  skip = (page - 1) * perPage;
-  limit = perPage;
-} else if (limitParam) {
-  limit = parseInt(limitParam, 10); // 👈 now supports limit=4 directly
-}
-
+    if (pageParam && perPageParam) {
+      const page = parseInt(pageParam, 10);
+      const perPage = parseInt(perPageParam, 10);
+      skip = (page - 1) * perPage;
+      limit = perPage;
+    } else if (limitParam) {
+      limit = parseInt(limitParam, 10); // 👈 now supports limit=4 directly
+    }
 
     // Sorting
     const sortField = searchParams.get("sort") || searchParams.get("_sort") || "createdAt";
     const sortOrder =
       (searchParams.get("order") || searchParams.get("_order") || "desc").toLowerCase() === "asc" ? 1 : -1;
+
+    // --- Handle category filtering ---
+    const categoryQuery = searchParams.get("category");
+    // --- Handle price filtering ---
+    const minPrice = searchParams.get("minPrice");
+    const maxPrice = searchParams.get("maxPrice");
+
+    // 🔑 GENERATE REDIS CACHE KEY (based on all query params)
+    const cacheKey = `products:${JSON.stringify({
+      id,
+      slug,
+      edibles,
+      popularProduct,
+      page: pageParam,
+      perPage: perPageParam,
+      limit: limitParam,
+      sortField,
+      sortOrder,
+      category: categoryQuery,
+      minPrice,
+      maxPrice,
+    })}`;
+
+    // 🧠 TRY TO READ FROM REDIS CACHE FIRST
+    const cached = await safeGet(cacheKey);
+    if (cached) {
+      console.log("✅ Cache hit for key:", cacheKey);
+      return NextResponse.json(JSON.parse(cached), { status: 200 });
+    }
+    // If no cache → proceed to MongoDB (no extra try/catch needed — safeGet handles errors)
 
     console.log("Request received", {
       id,
@@ -310,11 +342,17 @@ if (pageParam && perPageParam) {
       if (!product) {
         return NextResponse.json({ error: "Product not found" }, { status: 404 });
       }
-      return NextResponse.json({ data: { id: product._id.toString(), ...product } }, { status: 200 });
+
+      const response = { data: { id: product._id.toString(), ...product } };
+
+      // 💾 CACHE SINGLE PRODUCT RESPONSE
+      await safeSet(cacheKey, JSON.stringify(response), 300);
+
+      return NextResponse.json(response, { status: 200 });
     }
 
-     // Fetch product by slug
-     if (slug) {
+    // Fetch product by slug
+    if (slug) {
       const product = await db.collection("products").findOne({ slug });
       if (!product) {
         return NextResponse.json({ error: "Product not found" }, { status: 404 });
@@ -326,9 +364,8 @@ if (pageParam && perPageParam) {
           $in: product.relatedProductIds.map((id: string) => new ObjectId(id)),
         },
       }).toArray();
-      
 
-      return NextResponse.json({
+      const response = {
         data: {
           id: product._id.toString(),
           ...product,
@@ -337,54 +374,47 @@ if (pageParam && perPageParam) {
             name: relatedProduct.name,
             slug: relatedProduct.slug,
             mainImage: relatedProduct.mainImage,
-            price: relatedProduct.price
-          }))
-        }
-      }, { status: 200 });
-    }
+            price: relatedProduct.price,
+          })),
+        },
+      };
 
-    
+      // 💾 CACHE SLUG-BASED RESPONSE
+      await safeSet(cacheKey, JSON.stringify(response), 300);
+
+      return NextResponse.json(response, { status: 200 });
+    }
 
     // Fetch all with filters
     const filter: any = {};
     if (edibles) filter.edibles = true;
     if (popularProduct) filter.popularProduct = true;
 
-    const totalCount = await db.collection("products").countDocuments(filter);
-
     // --- Handle category filtering ---
-// --- Handle category filtering ---
-// --- Handle category filtering ---
-const categoryQuery = searchParams.get("category");
-if (categoryQuery) {
-  // Convert URL slug to DB category match (ignore case)
-  const formattedCategory = categoryQuery.replace(/-/g, " "); // e.g. vape-cartridges → vape cartridges
+    if (categoryQuery) {
+      // Convert URL slug to DB category match (ignore case)
+      const formattedCategory = categoryQuery.replace(/-/g, " "); // e.g. vape-cartridges → vape cartridges
 
-  // Special handling for known exceptions
-  let regexString = formattedCategory;
+      // Special handling for known exceptions
+      let regexString = formattedCategory;
 
-  // If category is 'disposables vapes', allow matching 'disposables' or 'disposables vapes'
-  if (formattedCategory === "disposables vapes") {
-    regexString = "disposables( vapes)?";
-  }
+      // If category is 'disposables vapes', allow matching 'disposables' or 'disposables vapes'
+      if (formattedCategory === "disposables vapes") {
+        regexString = "disposables( vapes)?";
+      }
 
-  // Use a loose regex match
-  filter.category = { $regex: new RegExp(regexString, "i") };
-}
+      // Use a loose regex match
+      filter.category = { $regex: new RegExp(regexString, "i") };
+    }
 
-// --- Handle price filtering ---
-const minPrice = searchParams.get("minPrice");
-const maxPrice = searchParams.get("maxPrice");
+    // --- Handle price filtering ---
+    if (minPrice || maxPrice) {
+      filter.price = {};
+      if (minPrice) filter.price.$gte = Number(minPrice);
+      if (maxPrice) filter.price.$lte = Number(maxPrice);
+    }
 
-if (minPrice || maxPrice) {
-  filter.price = {};
-  if (minPrice) filter.price.$gte = Number(minPrice);
-  if (maxPrice) filter.price.$lte = Number(maxPrice);
-}
-
-
-
-
+    const totalCount = await db.collection("products").countDocuments(filter);
 
     // Build query
     const query = db.collection("products").find(filter).sort({ [sortField]: sortOrder });
@@ -395,23 +425,28 @@ if (minPrice || maxPrice) {
 
     const products = await query.toArray();
 
-    const formattedProducts = products.map(product => ({
+    const formattedProducts = products.map((product) => ({
       id: product._id.toString(),
-      ...product
+      ...product,
     }));
 
-    return NextResponse.json(
-      {
-        data: formattedProducts,
-        total: totalCount,
-      },
-      { status: 200 }
-    );
+    const responseToCache = {
+      data: formattedProducts,
+      total: totalCount,
+    };
+
+    // 💾 CACHE LIST RESPONSE
+    await safeSet(cacheKey, JSON.stringify(responseToCache), 300);
+    console.log("💾 Cached response for key:", cacheKey);
+
+    return NextResponse.json(responseToCache, { status: 200 });
   } catch (error) {
     console.error("Error fetching products:", error);
     return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
   }
 }
+
+
 
 export async function PUT(req: NextRequest) {
   try {
@@ -552,14 +587,7 @@ export async function PUT(req: NextRequest) {
       updatedAt: new Date(),
     };
 
-    // These are redundant since you already set them above
-    // if (mainImageUrl) updateFields.mainImage = mainImageUrl;
-    // if (uploadedThumbnails.length > 0) updateFields.thumbnails = uploadedThumbnails;
     console.log('Update fields:', updateFields);
-
-    // ✅ You already have 'client' and 'db' from above, no need to redeclare
-    // const client = await clientPromise; // ❌ Remove this
-    // const db = client.db('school-project'); // ❌ Remove this
 
     const result = await db.collection('products').updateOne(
       { _id: new ObjectId(id) },
@@ -572,6 +600,11 @@ export async function PUT(req: NextRequest) {
       return NextResponse.json({ error: 'Product not found' }, { status: 404 });
     }
 
+    // 🧹 INVALIDATE REDIS CACHE AFTER SUCCESSFUL UPDATE
+    await safeDelPattern("products:*");
+    await safeDelPattern("search:*");
+    console.log("🧹 Redis cache invalidated after product update");
+
     return NextResponse.json({ message: 'Product updated successfully' }, { status: 200 });
   } catch (error) {
     console.error('Update error:', error);
@@ -579,7 +612,8 @@ export async function PUT(req: NextRequest) {
   }
 }
 
-// ✅ DELETE PRODUCT
+
+
 export async function DELETE(req: NextRequest) {
   try {
     console.log("Received DELETE request");
@@ -627,6 +661,11 @@ export async function DELETE(req: NextRequest) {
     console.log("Deleting product from database...");
     await db.collection("products").deleteOne({ _id: new ObjectId(id) });
     console.log("Product deleted successfully");
+
+    // 🧹 INVALIDATE REDIS CACHE AFTER SUCCESSFUL DELETE
+    await safeDelPattern("products:*");
+    await safeDelPattern("search:*");
+    console.log("🧹 Redis cache invalidated after product delete");
 
     return NextResponse.json({ message: "Product deleted successfully" }, { status: 200 });
   } catch (error) {

@@ -5,6 +5,7 @@ import { Readable } from 'stream';
 import slugify from 'slugify';
 import { ObjectId } from 'mongodb';
 import sanitizeHtml from 'sanitize-html';
+import { safeGet, safeSet, safeDelPattern } from '@/lib/redis';
 
 cloudinary.config({
   cloud_name: process.env.CLOUDINARY_NAME!,
@@ -12,7 +13,7 @@ cloudinary.config({
   api_secret: process.env.CLOUDINARY_SECRET_KEY!,
 });
 
-// Convert ReadableStream to Buffer
+// -------------------- Helpers --------------------
 async function streamToBuffer(stream: ReadableStream): Promise<Buffer> {
   const reader = stream.getReader();
   const chunks: Uint8Array[] = [];
@@ -23,52 +24,37 @@ async function streamToBuffer(stream: ReadableStream): Promise<Buffer> {
     if (value) chunks.push(value);
     done = readerDone;
   }
-
   return Buffer.concat(chunks);
 }
 
-// Upload to Cloudinary
 async function uploadToCloudinary(buffer: Buffer, folder: string): Promise<string> {
   return new Promise((resolve, reject) => {
-    const uploadStream = cloudinary.uploader.upload_stream(
-      { folder },
-      (error, result) => {
-        if (error) {
-          console.error("❌ Error uploading image:", error);
-          reject(error);
-        } else if (result) {
-          resolve(result.secure_url);
-        }
-      }
-    );
+    const uploadStream = cloudinary.uploader.upload_stream({ folder }, (error, result) => {
+      if (error) reject(error);
+      else if (result) resolve(result.secure_url);
+    });
     Readable.from(buffer).pipe(uploadStream);
   });
 }
 
-// Translate text helper
 async function translateText(text: string, source: string, target: string) {
   const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/translate`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ text, source, target }),
   });
-
   const data = await response.json();
   return data.translatedText || text;
 }
 
-// Sanitize HTML content (only allow safe tags/attrs)
 const sanitize = (input: string) =>
   sanitizeHtml(input, {
-    allowedTags: ['b', 'i', 'em', 'strong', 'a', 'ul', 'ol', 'li', 'p', 'br', 'img'],
-    allowedAttributes: {
-      a: ['href', 'target'],
-      img: ['src', 'alt', 'title', 'width', 'height'],
-    },
-    allowedSchemes: ['http', 'https', 'data'],
+    allowedTags: ['b','i','em','strong','a','ul','ol','li','p','br','img'],
+    allowedAttributes: { a:['href','target'], img:['src','alt','title','width','height'] },
+    allowedSchemes: ['http','https','data'],
   });
 
-
+// -------------------- POST Blog --------------------
 export async function POST(req: Request) {
   try {
     const formData = await req.formData();
@@ -80,25 +66,15 @@ export async function POST(req: Request) {
     const metaDescription = sanitize(formData.get('metaDescription') as string);
     const imageFile = formData.get('image') as File | null;
 
-    const slug = slugify(title, { lower: true });
     let imageUrl = '';
-
     if (imageFile) {
       const imageBuffer = await streamToBuffer(imageFile.stream());
       imageUrl = await uploadToCloudinary(imageBuffer, 'news');
     }
 
-    // Languages to translate to
-    const languages = ['en', 'fr', 'es', 'it'];
-    const translations: {
-      [key: string]: {
-        title: string;
-        content: string;
-        metaTitle: string;
-        metaDescription: string;
-      };
-    } = {};
-
+    const slug = slugify(title, { lower: true });
+    const languages = ['en','fr','es','it'];
+    const translations: any = {};
     for (let lang of languages) {
       translations[lang] = {
         title: sanitize(await translateText(title, 'en', lang)),
@@ -111,43 +87,24 @@ export async function POST(req: Request) {
     const client = await clientPromise;
     const db = client.db("school-project");
     const result = await db.collection('news').insertOne({
-      title,
-      slug,
-      content,
-      author,
-      category,
-      imageUrl,
-      metaTitle,
-      metaDescription,
-      translations,
-      createdAt: new Date(),
-      updatedAt: new Date(),
+      title, slug, content, author, category, imageUrl, metaTitle, metaDescription,
+      translations, createdAt: new Date(), updatedAt: new Date(),
     });
 
+    // ✅ Clear Redis search cache
+    await safeDelPattern("search:*");
+
     return NextResponse.json({
-      data: {
-        id: result.insertedId.toString(),
-        title,
-        slug,
-        content,
-        author,
-        category,
-        imageUrl,
-        metaTitle,
-        metaDescription,
-        translations,
-        createdAt: new Date(),
-        updatedAt: new Date(),
-      },
+      data: { id: result.insertedId.toString(), title, slug, content, author, category, imageUrl, metaTitle, metaDescription, translations },
     }, { status: 201 });
+
   } catch (error) {
     console.error("❌ Error in POST request:", error);
     return NextResponse.json({ error: 'Failed to create blog post' }, { status: 500 });
   }
 }
 
-// Fetch all blog posts or just the latest 3
-// Fetch all blog posts or just a specific one
+// -------------------- GET Blog with Redis --------------------
 export async function GET(req: Request) {
   const { searchParams } = new URL(req.url);
 
@@ -162,172 +119,142 @@ export async function GET(req: Request) {
   const db = client.db("school-project");
 
   try {
-    // Fetch by ID
+    // Redis cache key
+    const cacheKey = id ? `news:id:${id}:lang:${lang}`
+      : slug ? `news:slug:${slug}:lang:${lang}`
+      : `news:all:lang:${lang}:category:${category || 'all'}:limit:${limit || 'all'}:page:${page || 1}`;
+
+    // ✅ Try Redis cache first
+    const cached = await safeGet(cacheKey);
+    if (cached) {
+      return NextResponse.json(JSON.parse(cached));
+    }
+
+    let resultData: any;
+
     if (id) {
-      if (!ObjectId.isValid(id)) {
-        return NextResponse.json({ error: "Invalid blog ID" }, { status: 400 });
-      }
-
+      if (!ObjectId.isValid(id)) return NextResponse.json({ error: "Invalid blog ID" }, { status: 400 });
       const post = await db.collection("news").findOne({ _id: new ObjectId(id) });
+      if (!post) return NextResponse.json({ error: "Blog post not found" }, { status: 404 });
 
-      if (!post) {
-        return NextResponse.json({ error: "Blog post not found" }, { status: 404 });
-      }
-
-      const translatedPost = {
-        ...post,
-        id: post._id.toString(),
-        title: post.translations?.[lang]?.title || post.title,
-        content: post.translations?.[lang]?.content || post.content,
-        metaTitle: post.translations?.[lang]?.metaTitle || post.metaTitle,
-        metaDescription: post.translations?.[lang]?.metaDescription || post.metaDescription,
+      resultData = {
+        data: {
+          ...post,
+          id: post._id.toString(),
+          title: post.translations?.[lang]?.title || post.title,
+          content: post.translations?.[lang]?.content || post.content,
+          metaTitle: post.translations?.[lang]?.metaTitle || post.metaTitle,
+          metaDescription: post.translations?.[lang]?.metaDescription || post.metaDescription,
+        }
       };
-
-      return NextResponse.json({ data: translatedPost });
-    }
-
-    // Fetch by slug
-    if (slug) {
+    } else if (slug) {
       const post = await db.collection("news").findOne({ slug });
+      if (!post) return NextResponse.json({ error: "Blog post not found" }, { status: 404 });
 
-      if (!post) {
-        return NextResponse.json({ error: "Blog post not found" }, { status: 404 });
+      resultData = {
+        data: {
+          ...post,
+          id: post._id.toString(),
+          title: post.translations?.[lang]?.title || post.title,
+          content: post.translations?.[lang]?.content || post.content,
+          metaTitle: post.translations?.[lang]?.metaTitle || post.metaTitle,
+          metaDescription: post.translations?.[lang]?.metaDescription || post.metaDescription,
+        }
+      };
+    } else {
+      const query: Record<string, string> = {};
+      if (category) query.category = category;
+
+      const isPaginated = limit !== null || page !== null;
+
+      let posts = [];
+      let totalPosts = 0;
+
+      if (isPaginated) {
+        const limitNumber = Number(limit || 10);
+        const pageNumber = Number(page || 1);
+        const skip = (pageNumber - 1) * limitNumber;
+
+        totalPosts = await db.collection("news").countDocuments(query);
+
+        posts = await db.collection("news")
+          .find(query)
+          .sort({ createdAt: -1 })
+          .skip(skip)
+          .limit(limitNumber)
+          .toArray();
+      } else {
+        posts = await db.collection("news")
+          .find(query)
+          .sort({ createdAt: -1 })
+          .toArray();
+        totalPosts = posts.length;
       }
 
-      const translatedPost = {
+      const translatedPosts = posts.map((post) => ({
         ...post,
         id: post._id.toString(),
         title: post.translations?.[lang]?.title || post.title,
         content: post.translations?.[lang]?.content || post.content,
-        metaTitle: post.translations?.[lang]?.metaTitle || post.metaTitle,
-        metaDescription: post.translations?.[lang]?.metaDescription || post.metaDescription,
-      };
+      }));
 
-      return NextResponse.json({ data: translatedPost });
+      resultData = { data: translatedPosts, total: totalPosts };
     }
 
-    // Build query (e.g., filter by category)
-    const query: Record<string, string> = {};
-    if (category) {
-      query.category = category;
-    }
+    // ✅ Save GET result in Redis for 60s
+    await safeSet(cacheKey, JSON.stringify(resultData), 60);
 
-    // If pagination is present, use it
-    const isPaginated = limit !== null || page !== null;
+    return NextResponse.json(resultData);
 
-    let posts = [];
-    let totalPosts = 0;
-
-    if (isPaginated) {
-      const limitNumber = Number(limit || 10);
-      const pageNumber = Number(page || 1);
-      const skip = (pageNumber - 1) * limitNumber;
-
-      totalPosts = await db.collection("news").countDocuments(query);
-
-      posts = await db
-        .collection("news")
-        .find(query)
-        .sort({ createdAt: -1 })
-        .skip(skip)
-        .limit(limitNumber)
-        .toArray();
-    } else {
-      // Fetch all if no pagination provided
-      posts = await db
-        .collection("news")
-        .find(query)
-        .sort({ createdAt: -1 })
-        .toArray();
-
-      totalPosts = posts.length;
-    }
-
-    const translatedPosts = posts.map((post) => ({
-      ...post,
-      id: post._id.toString(),
-      title: post.translations?.[lang]?.title || post.title,
-      content: post.translations?.[lang]?.content || post.content,
-    }));
-
-    return NextResponse.json({
-      data: translatedPosts,
-      total: totalPosts,
-    });
   } catch (error) {
     console.error("❌ Error fetching blog posts:", error);
     return NextResponse.json({ error: "Failed to fetch blog posts" }, { status: 500 });
   }
 }
 
+// -------------------- DELETE Blog --------------------
 export async function DELETE(req: Request) {
   try {
-    console.log("🗑️ DELETE request received");
-
     const { searchParams } = new URL(req.url);
     let id = searchParams.get("id");
-
-    // If ID is not found in query params, check the request body
     if (!id) {
       const body = await req.json();
       id = body.id;
     }
 
-    if (!id || !ObjectId.isValid(id)) {
-      console.error("❌ Invalid or missing ID");
-      return NextResponse.json({ error: "Invalid or missing blog ID" }, { status: 400 });
-    }
-
-    console.log(`🆔 Deleting blog post with ID: ${id}`);
+    if (!id || !ObjectId.isValid(id)) return NextResponse.json({ error: "Invalid or missing blog ID" }, { status: 400 });
 
     const client = await clientPromise;
     const db = client.db("school-project");
 
-    // Fetch the blog post first to get the image URL
     const post = await db.collection("news").findOne({ _id: new ObjectId(id) });
+    if (!post) return NextResponse.json({ error: "Blog post not found" }, { status: 404 });
 
-    if (!post) {
-      console.error("🚫 Blog post not found");
-      return NextResponse.json({ error: "Blog post not found" }, { status: 404 });
-    }
-
-    // Delete image from Cloudinary if it exists
     if (post.imageUrl) {
-      const publicId = post.imageUrl.split('/').pop()?.split('.')[0]; // Extract public ID
-      if (publicId) {
-        console.log(`🖼️ Deleting image from Cloudinary: ${publicId}`);
-        await cloudinary.uploader.destroy(publicId);
-      }
+      const publicId = post.imageUrl.split('/').pop()?.split('.')[0];
+      if (publicId) await cloudinary.uploader.destroy(publicId);
     }
 
-    // Delete the blog post from the database
-    const result = await db.collection("news").deleteOne({ _id: new ObjectId(id) });
+    await db.collection("news").deleteOne({ _id: new ObjectId(id) });
 
-    if (result.deletedCount === 0) {
-      console.error("🚫 Failed to delete blog post");
-      return NextResponse.json({ error: "Blog post not found" }, { status: 404 });
-    }
+    // ✅ Clear Redis cache after deletion
+    await safeDelPattern("news:*");
+    await safeDelPattern("search:*");
 
-    console.log("✅ Blog post deleted successfully");
     return NextResponse.json({ message: "Blog post deleted successfully" });
-
   } catch (error) {
     console.error("❌ Error deleting blog post:", error);
     return NextResponse.json({ error: "Failed to delete blog post" }, { status: 500 });
   }
 }
 
-
+// -------------------- PUT Blog --------------------
 export async function PUT(req: NextRequest) {
   try {
-    console.log("✏️ PUT request received: Updating blog post");
-
     const { searchParams } = new URL(req.url);
     const id = searchParams.get("id");
 
-    if (!id || !ObjectId.isValid(id)) {
-      return NextResponse.json({ error: "Invalid blog ID" }, { status: 400 });
-    }
+    if (!id || !ObjectId.isValid(id)) return NextResponse.json({ error: "Invalid blog ID" }, { status: 400 });
 
     const formData = await req.formData();
     const title = formData.get('title') as string;
@@ -338,17 +265,15 @@ export async function PUT(req: NextRequest) {
     const metaDescription = formData.get('metaDescription') as string;
     const imageFile = formData.get('image') as File | null;
 
-    const languages = ['en', 'fr', 'es', 'it'];
+    const languages = ['en','fr','es','it'];
     let imageUrl = '';
-
     if (imageFile) {
       const imageBuffer = await streamToBuffer(imageFile.stream());
       imageUrl = await uploadToCloudinary(imageBuffer, 'news');
     }
 
     const slug = slugify(title, { lower: true });
-
-    const translations: { [key: string]: { title: string; content: string; metaTitle: string; metaDescription: string } } = {};
+    const translations: any = {};
     for (let lang of languages) {
       translations[lang] = {
         title: await translateText(title, 'en', lang),
@@ -361,36 +286,16 @@ export async function PUT(req: NextRequest) {
     const client = await clientPromise;
     const db = client.db("school-project");
 
-    const updateFields: any = {
-      title,
-      content,
-      author,
-      category,
-      metaTitle,
-      metaDescription,
-      slug,
-      updatedAt: new Date(),
-      translations,
-    };
+    const updateFields: any = { title, content, author, category, metaTitle, metaDescription, slug, translations, updatedAt: new Date() };
+    if (imageUrl) updateFields.imageUrl = imageUrl;
 
-    if (imageUrl) {
-      updateFields.imageUrl = imageUrl;
-    }
+    await db.collection('news').updateOne({ _id: new ObjectId(id) }, { $set: updateFields });
 
-    const result = await db.collection('news').updateOne(
-      { _id: new ObjectId(id) },
-      { $set: updateFields }
-    );
+    // ✅ Clear Redis cache after update
+    await safeDelPattern("news:*");
+    await safeDelPattern("search:*");
 
-    console.log("✅ Blog post updated:", result.modifiedCount);
-
-    return NextResponse.json({
-      message: "Blog post updated successfully",
-      data: {
-        id,
-        ...updateFields
-      }
-    });
+    return NextResponse.json({ message: "Blog post updated successfully", data: { id, ...updateFields } });
   } catch (error) {
     console.error("❌ Error updating blog post:", error);
     return NextResponse.json({ error: "Failed to update blog post" }, { status: 500 });

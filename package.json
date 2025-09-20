@@ -51,6 +51,7 @@
     "react-simple-typewriter": "^5.0.1",
     "react-star-ratings": "^2.3.0",
     "recharts": "^2.15.3",
+    "redis": "^5.8.2",
     "sanitize-html": "^2.16.0",
     "sitemap": "^8.0.0",
     "slick-carousel": "^1.8.1",
