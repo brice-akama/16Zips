@@ -1,4 +1,4 @@
-
+version: '3.8'
 
 services:
   app:
@@ -11,6 +11,8 @@ services:
       - .env.production
     depends_on:
       - mongo
+    extra_hosts:  # 👈 ADDED: Allows container to reach host's Redis
+      - "host.docker.internal:host-gateway"
 
   mongo:
     image: mongo:6
