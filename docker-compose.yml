@@ -11,7 +11,8 @@ services:
       - .env.production
     depends_on:
       - mongo
-      - redis  # 👈 Add Redis as dependency
+    extra_hosts:  # 👈 ADDED: Allows container to reach host's Redis
+      - "host.docker.internal:host-gateway"
 
   mongo:
     image: mongo:6
@@ -21,14 +22,6 @@ services:
       - '27017:27017'
     volumes:
       - mongodb_data:/data/db
-
-  redis:  # 👈 NEW: Redis inside Docker
-    image: redis:7-alpine
-    container_name: redis
-    restart: always
-    command: redis-server --requirepass EyohMer300!  # 👈 Your password here
-    ports:
-      - '6379:6379'  # Optional: only expose if you need external access
 
 volumes:
   mongodb_data:
