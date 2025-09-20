@@ -3,49 +3,76 @@
 import { createClient } from 'redis';
 import dotenv from 'dotenv';
 
-dotenv.config(); // Load .env file
+dotenv.config(); // Load environment variables
 
 // Helper to enforce required env vars
 function getEnvVar(name: string): string {
   const value = process.env[name];
-  if (value === undefined) {
+  if (!value) {
     console.error(`❌ Missing environment variable: ${name}`);
-    return ""; // return empty string so app won't crash immediately
+    return "";
   }
   return value;
 }
 
-// Create client safely
+// Create Redis client
 const redisClient = createClient({
   password: getEnvVar('REDIS_PASSWORD'),
   socket: {
     host: getEnvVar('REDIS_HOST'),
-    port: parseInt(getEnvVar('REDIS_PORT') || "6379", 10),
+    port: parseInt(getEnvVar('REDIS_PORT') || '6379', 10),
+    connectTimeout: 5000, // 5 seconds
   },
-  database: parseInt(process.env.REDIS_DB || "0", 10),
+  database: parseInt(process.env.REDIS_DB || '0', 10),
 });
 
-// Flag to track connection
 let isConnected = false;
+let reconnectAttempts = 0;
+const MAX_RECONNECT_ATTEMPTS = 5;
 
+// Redis event listeners
 redisClient.on('error', (err) => {
   console.error('❌ Redis Client Error:', err);
   isConnected = false;
 });
 
-(async () => {
-  try {
-    await redisClient.connect();
-    isConnected = true;
-    console.log('✅ Connected to Redis!');
-  } catch (error) {
-    console.error('❌ Redis connection failed:', error);
-    isConnected = false;
-  }
-})();
+redisClient.on('connect', () => {
+  console.log('🔄 Redis connecting...');
+});
 
-// --- Safe helper functions ---
-// These ensure your app continues even if Redis is down
+redisClient.on('ready', () => {
+  console.log('✅ Redis ready!');
+  isConnected = true;
+  reconnectAttempts = 0;
+});
+
+redisClient.on('end', () => {
+  console.log('🔌 Redis connection ended');
+  isConnected = false;
+});
+
+// Connect with retry logic
+async function connectWithRetry() {
+  while (reconnectAttempts < MAX_RECONNECT_ATTEMPTS) {
+    try {
+      await redisClient.connect();
+      return;
+    } catch (error) {
+      reconnectAttempts++;
+      console.error(`❌ Redis connection attempt ${reconnectAttempts} failed:`, error);
+      if (reconnectAttempts < MAX_RECONNECT_ATTEMPTS) {
+        // Wait before retrying
+        await new Promise(resolve => setTimeout(resolve, 2000 * reconnectAttempts));
+      }
+    }
+  }
+  console.error('❌ Redis connection failed after maximum attempts');
+}
+
+// Start connection
+connectWithRetry();
+
+// ---------------- Safe helper functions ----------------
 
 export async function safeGet(key: string): Promise<string | null> {
   if (!isConnected) return null;
@@ -57,34 +84,6 @@ export async function safeGet(key: string): Promise<string | null> {
   }
 }
 
-export async function safeDelPattern(pattern: string): Promise<void> {
-  if (!isConnected) return;
-
-  try {
-    let deletedCount = 0;
-
-    // scanIterator returns an async iterable of matching keys
-    for await (const key of redisClient.scanIterator({
-      MATCH: pattern,
-      COUNT: 100, // batch size
-    })) {
-      await redisClient.del(key);
-      deletedCount++;
-    }
-
-    if (deletedCount > 0) {
-      console.log(`🧹 Deleted ${deletedCount} cache keys matching: ${pattern}`);
-    } else {
-      console.log(`🧹 No cache keys found for pattern: ${pattern}`);
-    }
-
-  } catch (error) {
-    console.error(`❌ Redis DEL pattern failed for "${pattern}"`, error);
-  }
-}
-
-
-
 export async function safeSet(key: string, value: string, ttlSeconds?: number): Promise<void> {
   if (!isConnected) return;
   try {
@@ -93,8 +92,25 @@ export async function safeSet(key: string, value: string, ttlSeconds?: number): 
     } else {
       await redisClient.set(key, value);
     }
+    console.log(`💾 Cached response for key: ${key}`);
   } catch (error) {
     console.error(`❌ Redis SET failed for key "${key}"`, error);
+  }
+}
+
+export async function safeDelPattern(pattern: string): Promise<void> {
+  if (!isConnected) return;
+  try {
+    let deletedCount = 0;
+    for await (const key of redisClient.scanIterator({ MATCH: pattern, COUNT: 100 })) {
+      await redisClient.del(key);
+      deletedCount++;
+    }
+    if (deletedCount > 0) {
+      console.log(`🧹 Deleted ${deletedCount} cache keys matching: ${pattern}`);
+    }
+  } catch (error) {
+    console.error(`❌ Redis DEL pattern failed for "${pattern}"`, error);
   }
 }
 
