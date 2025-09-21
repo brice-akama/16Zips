@@ -11,7 +11,8 @@ services:
       - .env.production
     depends_on:
       - mongo
-    # extra_hosts removed
+      - redis
+    # App connects to Redis via hostname "redis"
 
   mongo:
     image: mongo:6
@@ -22,5 +23,15 @@ services:
     volumes:
       - mongodb_data:/data/db
 
+  redis:
+    image: redis:7-alpine
+    container_name: redis
+    restart: always
+    volumes:
+      - redis_data:/data
+    command: redis-server --appendonly yes --requirepass "EyohMer300!"
+    # 🔐 No 'ports' exposed → only internal Docker network access (more secure)
+
 volumes:
   mongodb_data:
+  redis_data:
