@@ -470,9 +470,13 @@ useEffect(() => {
           <div className="flex items-center">
             
             {/* Browse by Cannabis Category Dropdown */}
-<div className="relative">
+{/* Browse by Cannabis Category Dropdown */}
+<div
+  className="relative"
+  onMouseEnter={() => setActiveDropdown('cannabis')}
+  onMouseLeave={() => setActiveDropdown(null)}
+>
   <button
-    onMouseEnter={() => setActiveDropdown('cannabis')}
     className="bg-red-700 hover:bg-red-800 text-white px-6 py-4 flex items-center space-x-2 transition-colors"
   >
     <Menu size={18} />
@@ -481,24 +485,18 @@ useEffect(() => {
   </button>
 
   {activeDropdown === 'cannabis' && (
-    <div
-      className="absolute top-full left-0 bg-white shadow-xl border border-gray-200 z-50 w-64"
-      onMouseEnter={() => setActiveDropdown('cannabis')}
-      onMouseLeave={() => setActiveDropdown(null)}
-    >
+    <div className="absolute top-full left-0 bg-white shadow-xl border border-gray-200 z-50 w-64">
       <div className="py-2">
         {cannabisCategories.map((category, index) => (
-         <div key={index} className="group relative">
-          {/* Parent category name with bottom border */}
-          <div
-            className={`block px-4 py-2.5 text-gray-700 font-medium ${
-              index < cannabisCategories.length - 1 ? 'border-b border-gray-100' : ''
-            }`}
-          >
-            {category.name}
-          </div>
-            
-            {/* Submenu */}
+          <div key={index} className="group relative">
+            <div
+              className={`block px-4 py-2.5 text-gray-700 font-medium ${
+                index < cannabisCategories.length - 1 ? 'border-b border-gray-100' : ''
+              }`}
+            >
+              {category.name}
+            </div>
+
             {category.subMenu && category.subMenu.length > 0 && (
               <div className="absolute top-0 left-full ml-0 hidden group-hover:block bg-white shadow-lg border border-gray-200 w-56">
                 {category.subMenu.map((subItem, subIndex) => (
@@ -703,6 +701,56 @@ useEffect(() => {
     ))}
   </div>
 )}
+    </div>
+  ))}
+</div>
+
+{/* Main Site Navigation */}
+<div className="border-b border-gray-200 pb-4 mb-4">
+  <h3 className="font-semibold text-gray-800 mb-3">Navigation</h3>
+  {productCategories.map((item, idx) => (
+    <div
+      key={idx}
+      className={`py-1.5 ${idx < productCategories.length - 1 ? 'border-b border-gray-100' : ''}`}
+    >
+      {item.subLinks ? (
+        <div>
+          <button
+            onClick={() => toggleCategory(item.name)}
+            className="w-full flex justify-between items-center px-2 text-gray-700 font-medium hover:text-red-700"
+          >
+            <span>{item.name}</span>
+            <ChevronDown
+              size={16}
+              className={`transition-transform duration-300 ${
+                openCategories[item.name] ? "rotate-180" : "rotate-0"
+              }`}
+            />
+          </button>
+          {openCategories[item.name] && (
+            <div className="pl-4 mt-2 space-y-1">
+              {item.subLinks.map((sub, subIdx) => (
+                <Link
+                  key={subIdx}
+                  href={sub.href}
+                  className="block py-1 px-2 text-gray-600 hover:text-red-700 font-medium"
+                  onClick={() => setIsMobileMenuOpen(false)}
+                >
+                  {sub.name}
+                </Link>
+              ))}
+            </div>
+          )}
+        </div>
+      ) : (
+        <Link
+          href={item.href}
+          className="block px-2 text-gray-700 font-medium hover:text-red-700"
+          onClick={() => setIsMobileMenuOpen(false)}
+        >
+          {item.name}
+        </Link>
+      )}
     </div>
   ))}
 </div>
