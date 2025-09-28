@@ -184,7 +184,7 @@ return (
     >
       {/* Discount Badge */}
       {product.discount && (
-        <span className="absolute top-3 left-3 bg-red-500 text-white text-xs font-bold px-2 py-1 rounded-full z-10">
+        <span className="absolute top-3 left-3 bg-red-700 text-white text-xs font-bold px-2 py-1 rounded-full z-10">
           -{product.discount}%
         </span>
       )}
@@ -276,7 +276,7 @@ return (
             {product.discount ? (
               <div className="flex items-center justify-center gap-2">
                 <span className="text-gray-400 line-through">${product.price}</span>
-                <span className="text-red-500 font-bold">
+                <span className="text-red-700 font-bold">
                   ${(product.price - (product.price * product.discount) / 100).toFixed(2)}
                 </span>
               </div>
@@ -298,7 +298,7 @@ return (
                 whileTap={{ scale: 0.9 }}
                 whileHover={{ scale: 1.05 }}
                 onClick={() => setShowOptionsOverlay(true)}
-                className="bg-red-500 text-white px-4 py-2 rounded-lg shadow hover:bg-red-600 transition whitespace-nowrap"
+                className="bg-red-700 text-white px-4 py-2 rounded-lg shadow hover:bg-red-800 transition whitespace-nowrap"
               >
                 Select Options
               </motion.button>
@@ -307,7 +307,7 @@ return (
                 whileTap={{ scale: 0.9 }}
                 whileHover={{ scale: 1.05 }}
                 onClick={handleAddToCart}
-                className="bg-red-500 text-white px-4 py-2 rounded-lg shadow hover:bg-red-600 transition whitespace-nowrap"
+                className="bg-red-700 text-white px-4 py-2 rounded-lg shadow hover:bg-red-800 transition whitespace-nowrap"
               >
                 Add to Cart
               </motion.button>
@@ -319,7 +319,7 @@ return (
                   whileTap={{ scale: 0.9 }}
                   whileHover={{ scale: 1.05 }}
                   onClick={() => setShowOptionsOverlay(true)}
-                  className="p-2 rounded-lg bg-red-500 hover:bg-red-600 text-white shadow transition"
+                  className="p-2 rounded-lg bg-red-700 hover:bg-red-800 text-white shadow transition"
                 >
                   Select Options
                 </motion.button>
@@ -328,7 +328,7 @@ return (
                   whileTap={{ scale: 0.9 }}
                   whileHover={{ scale: 1.05 }}
                   onClick={handleAddToCart}
-                  className="p-2 rounded-lg bg-red-500 hover:bg-red-600 text-white shadow transition"
+                  className="p-2 rounded-lg bg-red-700 hover:bg-red-800 text-white shadow transition"
                 >
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
@@ -458,7 +458,7 @@ return (
     openCart(); // optional, if you want to open the cart panel
   }}
   whileTap={{ scale: 0.95 }}
-  className="bg-red-500 text-white px-6 py-2 rounded-lg shadow hover:bg-red-600 transition whitespace-nowrap"
+  className="bg-red-700 text-white px-6 py-2 rounded-lg shadow hover:bg-red-800 transition whitespace-nowrap"
 >
   Add to Cart
 </motion.button>
@@ -505,7 +505,7 @@ return (
     className="object-cover"
   />
   <Link href={`/products/${product.slug}`} className="absolute bottom-4 left-1/2 transform -translate-x-1/2 md:block hidden w-full">
-    <button className="bg-red-500 w-full text-white px-4 py-2 rounded shadow hover:bg-red-600 transition">
+    <button className="bg-red-700 w-full text-white px-4 py-2 rounded shadow hover:bg-red-800 transition">
       View Details
     </button>
   </Link>
@@ -517,7 +517,7 @@ return (
           <div>
             <h3 className="text-2xl font-semibold">{product.name}</h3>
             {/* Price */}
-<p className="text-red-500 font-bold text-xl mt-2">
+<p className="text-red-700 font-bold text-xl mt-2">
   ${displayPrice.toFixed(2)}
 </p>
            <p className="text-gray-600 text-sm mt-4">
@@ -560,7 +560,7 @@ return (
   className="w-24 border rounded p-2"
 />
             <button
-  className="bg-red-500 text-white px-4 py-2 rounded shadow hover:bg-red-600 transition"
+  className="bg-red-700 text-white px-4 py-2 rounded shadow hover:bg-red-800 transition"
   onClick={() => {
     if (hasOptions && !selectedOption) {
       toast.error("Please select an option first", { duration: 3000, icon: "⚠️" });

@@ -98,7 +98,7 @@ const WishlistPage: React.FC = () => {
                     <td className="py-4 px-4 flex gap-2">
                       <button
                         onClick={() => removeFromWishlist(item.slug)}
-                        className="bg-red-600 text-white px-3 py-1 rounded hover:bg-red-700 whitespace-nowrap"
+                        className="bg-red-700 text-white px-3 py-1 rounded hover:bg-red-800 whitespace-nowrap"
                       >
                         Remove
                       </button>

@@ -6,6 +6,7 @@ import Link from "next/link";
 import { FaFacebookF,   FaTelegramPlane, FaPaypal, FaBitcoin, FaCcVisa, FaCcMastercard  } from "react-icons/fa";
 
 import { SiCashapp} from "react-icons/si";
+import Image from 'next/image';
 
 import { useLanguage } from "@/app/context/LanguageContext";
 
@@ -93,32 +94,22 @@ const Footer: React.FC = () => {
     <footer className="bg-gray-800 text-white px-6 py-10">
       <div className="container mx-auto grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 text-center md:text-left">
         {/* Company Info */}
-        <div>
-          <h2 className=" text-3xl font-bold">{translatedTexts.companyName}</h2>
-          <p className="text-sm mt-2 leading-relaxed">{translatedTexts.description}</p>
-        </div>
-
-        {/* Newsletter Subscription */}
-        <div>
-          <h3 className="font-semibold text-lg">{translatedTexts.newsletter}</h3>
-          <p className="text-sm mt-2">{translatedTexts.newsletterDesc}</p>
-          <form onSubmit={handleSubscribe} className="flex mt-4">
-            <input
-              type="email"
-              placeholder={translatedTexts.placeholder}
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              className="p-2 w-full rounded-l-md border border-gray-300 text-white"
-              required
-            />
-            <button
-              type="submit"
-              className="bg-red-700 px-4 rounded-r-md hover:bg-red-800 transition"
-            >
-              {translatedTexts.subscribe}
-            </button>
-          </form>
-        </div>
+        {/* Company Info with Logo */}
+<div>
+  <div className="flex justify-center md:justify-start mb-3">
+    <Image
+      src="/assets/nels.png"
+      alt="Company Logo"
+      width={120}   // adjust as needed
+      height={40}   // adjust as needed
+      className="object-contain"
+    />
+  </div>
+  <p className="text-sm leading-relaxed text-center md:text-left">
+    {translatedTexts.description}
+  </p>
+</div>
+        
 
         {/* Navigation Links */}
         <div>
@@ -178,6 +169,28 @@ const Footer: React.FC = () => {
             </li>
             
           </ul>
+        </div>
+
+        {/* Newsletter Subscription */}
+        <div>
+          <h3 className="font-semibold text-lg">{translatedTexts.newsletter}</h3>
+          <p className="text-sm mt-2">{translatedTexts.newsletterDesc}</p>
+          <form onSubmit={handleSubscribe} className="flex mt-4">
+            <input
+              type="email"
+              placeholder={translatedTexts.placeholder}
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              className="p-2 w-full rounded-l-md border border-gray-300 text-white"
+              required
+            />
+            <button
+              type="submit"
+              className="bg-red-700 px-4 rounded-r-md hover:bg-red-800 transition"
+            >
+              {translatedTexts.subscribe}
+            </button>
+          </form>
         </div>
 
         {/* Social Media */}

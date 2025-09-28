@@ -465,7 +465,7 @@ const handlePlaceOrder = async () => {
 
    
   return (
-    <div className="mt-20 lg:mt-40">
+    <div className="mt-20 lg:mt-44">
           {/* Full-width black section */}
           <div className="bg-black text-white py-8 text-center w-full">
             

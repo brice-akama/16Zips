@@ -77,7 +77,7 @@ export default function BlogPostAbout() {
     <div className="container mx-auto px-4 py-10 mt-7">
       <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-8 gap-4">
         <h2 className="text-2xl sm:text-3xl font-bold">Latest in Cannabis Wellness</h2>
-        <Link href="/blog" className="text-green-600 hover:text-green-800 flex items-center space-x-1">
+        <Link href="/blog" className="text-red-700 hover:text-red-800 flex items-center space-x-1">
           <span className="text-base sm:text-lg font-medium">View All Articles</span>
           <span>&gt;</span>
         </Link>
@@ -112,7 +112,7 @@ export default function BlogPostAbout() {
                   <h3 className="text-2xl font-semibold mb-3">{post.title}</h3>
                   <Link href={`/blog/${post.slug}`}>
                     <motion.span
-                      className="inline-block bg-green-600 text-white px-5 py-2 rounded-lg text-sm font-medium hover:bg-green-700 transition"
+                      className="inline-block bg-red-700 text-white px-5 py-2 rounded-lg text-sm font-medium hover:bg-red-800 transition"
                       variants={buttonVariants}
                       whileHover="hover"
                     >

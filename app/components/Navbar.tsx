@@ -279,13 +279,11 @@ useEffect(() => {
           {/* Mobile Cart and Search */}
           <div className="flex items-center space-x-3">
             <button className="relative" onClick={openCart}>
-    <ShoppingCart size={20} className="text-gray-700" />
-    {cartCount > 0 && (
-      <span className="absolute -top-2 -right-2 bg-red-700 text-white text-xs rounded-full w-4 h-4 flex items-center justify-center font-bold">
-        {cartCount}
-      </span>
-    )}
-  </button>
+  <ShoppingCart size={20} className="text-gray-700" />
+  <span className="absolute -top-2 -right-2 bg-red-700 text-white text-xs rounded-full w-4 h-4 flex items-center justify-center font-bold">
+    {cartCount}
+  </span>
+</button>
 
             <button
              onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
@@ -424,41 +422,39 @@ useEffect(() => {
             </div>
           {/* Desktop Cart and Price Section */}
 <div className="flex items-center space-x-4">
-  {/* Cart */}
+{/* Cart */}
   <div className="flex items-center space-x-3">
     <button className="relative" onClick={openCart}>
       <ShoppingCart size={24} className="text-gray-700 cursor-pointer hover:text-red-700" />
-      {cartCount > 0 && (
-        <span className="absolute -top-2 -right-2 bg-red-700 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center font-bold">
-          {cartCount}
-        </span>
-      )}
+      {/* Always show badge */}
+      <span className="absolute -top-2 -right-2 bg-red-700 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center font-bold">
+        {cartCount}
+      </span>
     </button>
     <span className="text-sm font-medium">
-  ${totalPrice.toFixed(2)}
-</span>
-
+      ${totalPrice.toFixed(2)}
+    </span>
   </div>
 
   {/* Wishlist */}
-  <Link
-    href="/wishlist"
-    className="relative hidden md:flex items-center justify-center w-10 h-10 rounded-full bg-gray-100 hover:bg-red-50 transition-colors"
-  >
-    <FaHeart className="text-xl text-gray-700 hover:text-red-700 transition-colors" />
-    {wishlist.length > 0 && (
-      <span className="absolute -top-1 -right-1 bg-red-700 text-white text-[10px] font-bold w-4 h-4 flex items-center justify-center rounded-full">
-        {wishlist.length}
-      </span>
-    )}
-  </Link>
+{/* Wishlist */}
+<Link
+  href="/wishlist"
+  className="relative hidden md:flex items-center justify-center w-10 h-10 rounded-full bg-gray-100 hover:bg-red-50 transition-colors"
+>
+  <FaHeart className="text-xl text-gray-700 hover:text-red-700 transition-colors" />
+  {/* Always show badge */}
+  <span className="absolute -top-1 -right-1 bg-red-700 text-white text-[10px] font-bold w-4 h-4 flex items-center justify-center rounded-full">
+    {wishlist.length}
+  </span>
+</Link>
 
   {/* Profile */}
   <Link
     href="/profile"
     className="hidden md:flex items-center justify-center w-10 h-10 rounded-full bg-gray-100 hover:bg-blue-50 transition-colors"
   >
-    <FaUser className="text-xl text-gray-700 hover:text-blue-700 transition-colors" />
+    <FaUser className="text-xl text-gray-700 hover:text-red-700 transition-colors" />
   </Link>
 </div>
 

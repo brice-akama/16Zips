@@ -128,7 +128,7 @@ export default function BlogPage() {
                   <h2 className="text-2xl font-semibold mb-3">{post.title}</h2>
                   <Link href={`/blog/${post.slug}`}>
                     <motion.span
-                      className="inline-block bg-blue-600 text-white px-5 py-2 rounded-lg text-sm font-medium hover:bg-blue-700 transition"
+                      className="inline-block bg-red-700 text-white px-5 py-2 rounded-lg text-sm font-medium hover:bg-red-800 transition"
                       variants={buttonVariants}
                       whileHover="hover"
                     >
@@ -147,14 +147,14 @@ export default function BlogPage() {
       <div className="flex justify-between items-center mt-8">
         <button
           onClick={prevPage}
-          className="px-4 py-2 bg-blue-600 text-white rounded-lg disabled:bg-gray-400"
+          className="px-4 py-2 bg-red-700 text-white rounded-lg disabled:bg-gray-400"
           disabled={currentPage === 1}
         >
           Previous
         </button>
         <button
           onClick={nextPage}
-          className="px-4 py-2 bg-blue-600 text-white rounded-lg disabled:bg-gray-400"
+          className="px-4 py-2 bg-red-700 text-white rounded-lg disabled:bg-gray-400"
           disabled={currentPage === Math.ceil(posts.length / postsPerPage)}
         >
           Next
