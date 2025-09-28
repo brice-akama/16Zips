@@ -127,7 +127,11 @@ export default function ShopPage({ categorySlug, products, categorySEO, bestSell
   }, [searchParams, categorySlug, categories]);
 
   // Filter products by selected category
-  const sortedProducts = [...products].sort((a, b) => {
+  const filteredProducts = selectedCategory === "All" 
+    ? products 
+    : products.filter((p) => p.category === selectedCategory);
+
+  const sortedProducts = [...filteredProducts].sort((a, b) => {
     if (sortOrder === "low-to-high") return Number(a.price) - Number(b.price);
     if (sortOrder === "high-to-low") return Number(b.price) - Number(a.price);
     return 0;
@@ -185,14 +189,25 @@ export default function ShopPage({ categorySlug, products, categorySEO, bestSell
 
   return (
     <div>
+      {/* SEO */}
+      <Head>
+        <title>{categorySEO?.metaTitle || "Shop"}</title>
+        <meta name="description" content={categorySEO?.metaDescription || "Browse our shop"} />
+        <meta property="og:title" content={categorySEO?.metaTitle || "Shop"} />
+        <meta property="og:description" content={categorySEO?.metaDescription || "Browse our shop"} />
+        <meta property="og:image" content={categorySEO?.imageUrl || "/default-og-image.jpg"} />
+      </Head>
+
       {/* Hero Section */}
-      <div className="w-full h-64 md:h-96 bg-black flex flex-col items-center justify-center relative mt-10">
+      <div className="w-full h-64 md:h-96 bg-black flex flex-col items-center justify-center relative mt-10 lg:mt-20">
+
         <h1 className="text-white text-5xl md:text-4xl font-bold whitespace-nowrap ">
           {selectedCategory === "All" ? "Shop" : selectedCategory}
         </h1>
-        <div className="flex flex-wrap justify-center gap-6 mt-4">
+        
+        <div className="flex flex-wrap justify-center gap-6 ">
           {/* Desktop Hover Menu */}
-          <div className="hidden md:flex flex-wrap justify-center gap-6">
+          <div className="hidden md:flex flex-wrap justify-center gap-6 ">
             {[
               { name: "Flowers", subMenu: ["Hybrid", "Sativa", "Indica"] },
               { name: "Seeds", subMenu: ["Autoflower Seeds", "Feminized Seeds", "Regular Seeds"] },
@@ -296,26 +311,6 @@ export default function ShopPage({ categorySlug, products, categorySEO, bestSell
 
       {/* Main Container */}
       <div className="max-w-7xl mx-auto px-4 py-10">
-        {/* Breadcrumb */}
-        <nav className="block text-sm text-gray-600" aria-label="Breadcrumb">
-          <ol className="inline-flex items-center space-x-2">
-            <li>
-              <Link href="/" className="text-blue-600 hover:underline">Home</Link>
-            </li>
-            <li>/</li>
-            <li className="text-gray-900 font-medium">Shop</li>
-          </ol>
-        </nav>
-
-        {/* SEO */}
-        <Head>
-          <title>{categorySEO?.metaTitle || "Shop"}</title>
-          <meta name="description" content={categorySEO?.metaDescription || "Browse our shop"} />
-          <meta property="og:title" content={categorySEO?.metaTitle || "Shop"} />
-          <meta property="og:description" content={categorySEO?.metaDescription || "Browse our shop"} />
-          <meta property="og:image" content={categorySEO?.imageUrl || "/default-og-image.jpg"} />
-        </Head>
-
         {/* Products Grid */}
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-6 mt-2">
           {/* Categories Sidebar */}
@@ -387,7 +382,7 @@ export default function ShopPage({ categorySlug, products, categorySEO, bestSell
                 </p>
                 <button
                   onClick={handleFilter}
-                  className="mt-2 bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600"
+                  className="mt-2 bg-red-700 text-white px-4 py-2 rounded hover:bg-red-800"
                 >
                   Filter
                 </button>
@@ -407,7 +402,7 @@ export default function ShopPage({ categorySlug, products, categorySEO, bestSell
                         <p className="text-gray-800 text-sm font-semibold hover:underline">
                           {product.name}
                         </p>
-                        <p className="text-red-600 text-sm">${product.price}</p>
+                        <p className="text-red-700 text-sm">${product.price}</p>
                       </Link>
                     </div>
                   </li>
@@ -419,13 +414,13 @@ export default function ShopPage({ categorySlug, products, categorySEO, bestSell
           {/* Mobile / Medium Sidebar */}
           <div className="lg:hidden">
             <button
-              className="flex items-center px-4 py-2 bg-red-500 text-white rounded mb-4"
+              className="flex items-center px-4 py-2 bg-red-700 text-white rounded mb-4"
               onClick={() => setSidebarOpen(true)}
             >
               <span className="mr-2">&#9776;</span> Show Sidebar
             </button>
             {sidebarOpen && (
-              <div className="fixed inset-0 z-40  bg-opacity-50 flex">
+              <div className="fixed inset-0 z-100  bg-opacity-50 flex">
                 <div
                   ref={sidebarRef}
                   className="w-64 bg-white p-4 overflow-y-auto relative"
@@ -507,7 +502,7 @@ export default function ShopPage({ categorySlug, products, categorySEO, bestSell
                       </p>
                       <button
                         onClick={handleFilter}
-                        className="mt-2 bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600"
+                        className="mt-2 bg-red-700 text-white px-4 py-2 rounded hover:bg-red-800"
                       >
                         Filter
                       </button>
@@ -527,7 +522,7 @@ export default function ShopPage({ categorySlug, products, categorySEO, bestSell
                               <p className="text-gray-800 text-sm font-semibold hover:underline">
                                 {product.name}
                               </p>
-                              <p className="text-red-600 text-sm">${product.price}</p>
+                              <p className="text-red-700 text-sm">${product.price}</p>
                             </Link>
                           </div>
                         </li>
@@ -541,16 +536,57 @@ export default function ShopPage({ categorySlug, products, categorySEO, bestSell
 
           {/* --- Sorting + Grid Wrapper --- */}
           <div className="md:col-span-3 flex flex-col">
-            <div className="flex justify-end mb-4">
-              <select
-                value={sortOrder}
-                onChange={(e) => setSortOrder(e.target.value)}
-                className="border rounded-lg px-4 py-2 bg-white shadow text-gray-700 hover:border-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
-              >
-                <option value="">Sort by Price</option>
-                <option value="low-to-high">Low to High</option>
-                <option value="high-to-low">High to Low</option>
-              </select>
+            {/* Breadcrumb and Header with Product Count and Sort Options */}
+            <div className="">
+
+              {/* Product Count and Controls Row */}
+              <div className="flex justify-between items-center flex-wrap gap-4">
+
+                              {/* Breadcrumb */}
+              <nav className=" text-sm text-gray-600" aria-label="Breadcrumb">
+                <ol className="inline-flex items-center space-x-2">
+                  <li>
+                    <Link href="/" className="text-blue-600 hover:text-blue-800 transition-colors">
+                      Home
+                    </Link>
+                  </li>
+                  <li className="text-gray-400">/</li>
+                  <li>
+                    <Link href="/shop" className="text-blue-600 hover:text-blue-800 transition-colors">
+                      Shop
+                    </Link>
+                  </li>
+                  <li className="text-gray-400">/</li>
+                  <li className="text-gray-900 font-medium">
+                    {selectedCategory === "All" ? "Categories" : selectedCategory}
+                  </li>
+                </ol>
+              </nav>
+              
+                {/* Product Count */}
+                <div className="text-gray-600 text-sm">
+                  Show: <span className="font-semibold text-gray-900">{(currentPage - 1) * productsPerPage + 1}</span>
+                  {" / "}
+                  <span className="font-semibold text-gray-900">{Math.min(currentPage * productsPerPage, sortedProducts.length)}</span>
+                  {" / "}
+                  <span className="font-semibold text-gray-900">{sortedProducts.length}</span>
+                </div>
+                
+               
+                  
+                  
+
+                {/* Sort Dropdown */}
+                <select
+                  value={sortOrder}
+                  onChange={(e) => setSortOrder(e.target.value)}
+                  className="border rounded-lg px-4 py-2 bg-white shadow text-gray-700 hover:border-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                >
+                  <option value="default">Sort by popularity</option>
+                  <option value="low-to-high">Sort by price: low to high</option>
+                  <option value="high-to-low">Sort by price: high to low</option>
+                </select>
+              </div>
             </div>
 
             {/* Product Grid */}
@@ -574,7 +610,7 @@ export default function ShopPage({ categorySlug, products, categorySEO, bestSell
                     >
                       {/* --- Discount Badge --- */}
                       {clientDiscount > 0 && (
-                        <span className="absolute top-3 left-3 bg-red-500 text-white text-xs font-bold px-2 py-1 rounded-full z-10">
+                        <span className="absolute top-3 left-3 bg-red-700 text-white text-xs font-bold px-2 py-1 rounded-full z-10">
                           -{clientDiscount}%
                         </span>
                       )}
@@ -659,7 +695,7 @@ export default function ShopPage({ categorySlug, products, categorySEO, bestSell
                               <span className="text-gray-400 line-through">
                                 ${Number(product.price).toFixed(2)}
                               </span>
-                              <span className="text-red-500 font-bold">
+                              <span className="text-red-700 font-bold">
                                 ${clientFinalProductPrice.toFixed(2)}
                               </span>
                             </div>
@@ -677,7 +713,7 @@ export default function ShopPage({ categorySlug, products, categorySEO, bestSell
                             <div className="relative flex flex-col items-center group">
                               <button
                                 onClick={() => setShowOptionsOverlay({ ...product, clientDiscount, clientFinalProductPrice })}
-                                className="bg-red-500 text-white px-4 py-2 rounded-lg shadow hover:bg-red-600 transition"
+                                className="bg-red-700 text-white px-4 py-2 rounded-lg shadow hover:bg-red-800 transition"
                               >
                                 Select Options
                               </button>
@@ -691,7 +727,7 @@ export default function ShopPage({ categorySlug, products, categorySEO, bestSell
                             <div className="relative flex flex-col items-center group">
                               <button
                                 onClick={() => handleAddToCart(product, clientFinalProductPrice)}
-                                className="bg-red-500 text-white px-4 py-2 rounded-lg shadow hover:bg-red-600 transition"
+                                className="bg-red-700 text-white px-4 py-2 rounded-lg shadow hover:bg-red-800 transition"
                               >
                                 Add to Cart
                               </button>
@@ -719,7 +755,7 @@ export default function ShopPage({ categorySlug, products, categorySEO, bestSell
                 }}
                 className={`px-3 py-2 border rounded ${currentPage === 1 ? "opacity-50 cursor-not-allowed" : "hover:bg-gray-200"}`}
               >
-                
+                {"<"}
               </button>
               {(() => {
                 const pageWindow = 3;
@@ -796,7 +832,7 @@ export default function ShopPage({ categorySlug, products, categorySEO, bestSell
                       >
                         {opt.label} {opt.price ? `(+${opt.price})` : ""}
                         {showOptionsOverlay.clientDiscount && showOptionsOverlay.clientDiscount > 0 && (
-                          <span className="text-red-500 text-sm ml-2">
+                          <span className="text-red-700 text-sm ml-2">
                             ${optionFinalPrice.toFixed(2)} (after {showOptionsOverlay.clientDiscount}% off)
                           </span>
                         )}
@@ -817,7 +853,7 @@ export default function ShopPage({ categorySlug, products, categorySEO, bestSell
                       >
                         {opt.label} {opt.price ? `(+${opt.price})` : ""}
                         {showOptionsOverlay.clientDiscount && showOptionsOverlay.clientDiscount > 0 && (
-                          <span className="text-red-500 text-sm ml-2">
+                          <span className="text-red-700 text-sm ml-2">
                             ${optionFinalPrice.toFixed(2)} (after {showOptionsOverlay.clientDiscount}% off)
                           </span>
                         )}
@@ -836,7 +872,7 @@ export default function ShopPage({ categorySlug, products, categorySEO, bestSell
                       setShowOptionsOverlay(null);
                       setSelectedOption(null);
                     }}
-                    className="mt-4 w-full bg-red-500 text-white px-4 py-2 rounded-lg shadow hover:bg-red-600 transition"
+                    className="mt-4 w-full bg-red-700 text-white px-4 py-2 rounded-lg shadow hover:bg-red-800 transition"
                   >
                     Add to Cart
                   </button>
@@ -877,7 +913,7 @@ export default function ShopPage({ categorySlug, products, categorySEO, bestSell
                     className="object-cover w-full h-full rounded-l-2xl"
                   />
                   <Link href={`/products/${quickViewProduct.slug}`}>
-                    <button className="absolute bottom-4 left-1/2 transform -translate-x-1/2 bg-red-500 text-white px-4 py-2 rounded-lg w-full">
+                    <button className="absolute bottom-4 left-1/2 transform -translate-x-1/2 bg-red-700 text-white px-4 py-2 rounded-lg w-full">
                       View Details
                     </button>
                   </Link>
@@ -890,12 +926,12 @@ export default function ShopPage({ categorySlug, products, categorySEO, bestSell
                       <span className="text-gray-400 line-through">
                         ${Number(quickViewProduct.price).toFixed(2)}
                       </span>
-                      <p className="text-xl text-red-500 font-semibold">
+                      <p className="text-xl text-red-700 font-semibold">
                         ${quickViewProduct.clientFinalProductPrice?.toFixed(2)}
                       </p>
                     </div>
                   ) : (
-                    <p className="text-xl text-red-500 font-semibold">${quickViewProduct.price}</p>
+                    <p className="text-xl text-red-700 font-semibold">${quickViewProduct.price}</p>
                   )}
 
                   {/* Options Dropdown */}
@@ -957,7 +993,7 @@ export default function ShopPage({ categorySlug, products, categorySEO, bestSell
                         const finalPriceToAdd = quickViewSelectedOption?.clientFinalPrice ?? quickViewProduct.clientFinalProductPrice ?? quickViewProduct.price;
                         handleAddToCart(quickViewProduct, finalPriceToAdd, quickViewSelectedOption?.label);
                       }}
-                      className="bg-red-500 text-white px-4 py-2 rounded-lg shadow hover:bg-red-600 transition"
+                      className="bg-red-700 text-white px-4 py-2 rounded-lg shadow hover:bg-red-800 transition"
                     >
                       Add to Cart
                     </button>

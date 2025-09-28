@@ -49,7 +49,7 @@ export default function BlogPost() {
   if (loading)
     return <p className="text-center mt-10 text-gray-600 animate-pulse">Loading posts...</p>;
   if (error)
-    return <p className="text-center mt-10 text-red-500 font-medium">Error: {error}</p>;
+    return <p className="text-center mt-10 text-red-700 font-medium">Error: {error}</p>;
 
   return (
     <div className="container mx-auto px-4 py-10 mt-7">
@@ -127,9 +127,9 @@ export default function BlogPost() {
                 <h3 className="text-2xl font-semibold mb-3">{post.title}</h3>
                 <motion.div whileTap={{ scale: 0.95 }}>
                   <Link href={`/blog/${post.slug}`} className="inline-block mt-4 relative group">
-                    <span className="inline-block bg-red-500 text-white px-5 py-2 rounded-lg text-sm font-medium overflow-hidden relative">
+                    <span className="inline-block bg-red-700 text-white px-5 py-2 rounded-lg text-sm font-medium overflow-hidden relative">
                       <motion.span
-                        className="absolute inset-0 bg-red-700"
+                        className="absolute inset-0 bg-red-800"
                         initial={{ x: '-100%' }}
                         whileHover={{ x: 0 }}
                         transition={{ duration: 0.3 }}

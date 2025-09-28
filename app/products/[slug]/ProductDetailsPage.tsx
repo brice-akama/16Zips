@@ -227,7 +227,7 @@ const ProductDetailsPage: React.FC<Props> = ({ product }) => {
         ></script>
       </Head>
 
-      <section className="max-w-6xl mx-auto px-4 py-10 mt-20">
+      <section className="max-w-6xl mx-auto px-4 py-10 mt-20 md:mt-20 lg:mt-45">
         <div className="flex flex-col md:flex-row gap-10">
           {/* Left: Main Image and Thumbnails */}
           <div className="w-full md:w-1/2">

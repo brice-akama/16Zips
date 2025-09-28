@@ -108,12 +108,14 @@ server {
 
     # Redirect all HTTP to HTTPS
     return 301 https://$host$request_uri;
-}
 
-# Redirect non-www → www (or vice versa)
+    # Redirect non-www → www (or vice versa)
 if ($host = yourdomain.com) {
     return 301 https://www.yourdomain.com$request_uri;
 }
+}
+
+
 
 server {
     listen 443 ssl http2;
@@ -372,6 +374,22 @@ docker-compose up -d --build
  * Save this file. Reuse it. Modify it. Own it.
  *
  * You’re not just hosting a site — you’re running infrastructure. 🚀
+ */
+
+
+// ========================================================================
+// 🚀 TERRAFORM: DEPLOY VPS + NGINX WITH CODE(OPTIONAL FOR AUTOMATIC SERVER CONFIGURATION)
+// ========================================================================
+/**
+ * 📍 1. Install Terraform (local machine)
+ * 📍 2. Get Linode API token
+ * 📍 3. Create terraform-linode/ folder with:
+ *   - main.tf
+ *   - variables.tf
+ *   - terraform.tfvars (SECRET)
+ *   - outputs.tf
+ * 📍 4. Run: terraform init → plan → apply
+ * 📍 5. VPS + NGINX deployed automatically!
  */
 
 export {}; // 👈 Makes this a valid .tsx file..

@@ -1,823 +1,737 @@
-"use client";
+import React, { useState, useRef, useEffect } from "react";
+import { Search, ShoppingCart, Phone, MapPin, Menu, X, ChevronDown } from 'lucide-react';
 
-import { useState, useEffect, useRef } from "react";
+import { FaHeart, FaUser } from 'react-icons/fa';
 import Link from "next/link";
-import { FaSearch, FaUser, FaBars, FaTimes, FaShoppingCart, FaHeart } from "react-icons/fa";
+import Image from "next/image";
+import { useWishlist } from "../context/WishlistContext";
 import { useCart } from "../context/CartContext";
 import { useRouter } from "next/navigation";
-import { toast, Toaster } from "react-hot-toast";
-import { ChevronDown, ChevronUp, ChevronRight } from "lucide-react";
-import Image from "next/image";
-import { useLanguage } from "../context/LanguageContext";
-import { useWishlist } from "../context/WishlistContext";
-
-
-
-
-type MenuItem = {
-  name: string;
-  link: string;
-  subLinks?: (string | { name: string; subMenu?: string[] })[];
-  customDropdownType?: "category" | "default";
-};
-
-interface Product {
-  slug: string;
-  name: string;
-  mainImage?: string;
-  price?: number;
-}
-
-interface Blog {
-  slug: string;
-  title: string;
-}
-
-interface DropdownResults {
-  products: Product[];
-  blogs: Blog[];
-}
-
-
-
+import { toast } from "react-hot-toast";
 
 
 
 
 const Navbar = () => {
-  const { translate } = useLanguage();
-  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
-  const [isMobile, setIsMobile] = useState(false);
-  const [activeDropdown, setActiveDropdown] = useState<number | null>(null);
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [activeDropdown, setActiveDropdown] = useState<string | null>(null);
+  const mobileMenuRef = useRef<HTMLDivElement>(null);
+  const { openCart, cartCount, totalPrice } = useCart();  // cart logic
+const { wishlist } = useWishlist();         // wishlist logic
+const [showMainHeader, setShowMainHeader] = useState(true);
+const router = useRouter();
   const [searchQuery, setSearchQuery] = useState("");
-  const [translatedMenuItems, setTranslatedMenuItems] = useState<MenuItem[]>([]);
-  const { openCart } = useCart();
-  const { cartCount } = useCart();  // Get openCart function from context
-  const { wishlist } = useWishlist();
-  const router = useRouter();
-  const [hoverTimeout, setHoverTimeout] = useState<NodeJS.Timeout | null>(null);
-  const [expandedCategoryIndex, setExpandedCategoryIndex] = useState<number | null>(null);
-   const dropdownRef = useRef<HTMLDivElement>(null);
-  const [activeSubmenu, setActiveSubmenu] = useState<number | null>(null);
-  const [dropdownResults, setDropdownResults] = useState<DropdownResults>({
-  products: [],
-  blogs: [],
-});
-
-
-  
-
-
-
-
-useEffect(() => {
-  const handleClickOutside = (event: MouseEvent) => {
-    if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
-      setDropdownResults({ products: [], blogs: [] });
-    }
-  };
-  
-  document.addEventListener("mousedown", handleClickOutside);
-  return () => document.removeEventListener("mousedown", handleClickOutside);
-}, [dropdownRef]);
-
-
-  // State for translations
-  const [translatedTexts, setTranslatedTexts] = useState({
-    login: '',
-    specialOffer: '',
-    aquaBite: '',
-    shopNow: ''
+  const [dropdownResults, setDropdownResults] = useState<{ products: any[]; blogs: any[] }>({
+    products: [],
+    blogs: [],
   });
+const searchRef = useRef<HTMLDivElement>(null);
+const mobileSearchRef = useRef<HTMLDivElement>(null);
 
-  const handleItemClick = () => {
-    setIsSidebarOpen(false); // Close sidebar when a menu item is clicked
-    setActiveDropdown(null);
-  setActiveSubmenu(null);
-  };
 
-  const handleDropdownToggle = (index: number) => {
-    setActiveDropdown(activeDropdown === index ? null : index);
-  };
-   
-  // Ensure this is defined at the top or inside the component where it's being used
-const toSlug = (text: string): string => {
-  const baseSlug = text
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g, '-')
-    .replace(/(^-|-$)+/g, '');
 
-  // Add dash prefix only to specific ones
-  const exceptions = ['vape pods', 'vape cartridges'];
-  if (exceptions.includes(text.toLowerCase().trim())) {
-    return `-${baseSlug}`;
-  }
 
-  return baseSlug;
+  const [openCategories, setOpenCategories] = useState<Record<string, boolean>>({});
+
+// Toggle function
+const toggleCategory = (name: string) => {
+  setOpenCategories(prev => ({
+    ...prev,
+    [name]: !prev[name],
+  }));
 };
 
 
 
-
-
-
-
-const handleCategoryClick = (index: number) => {
-  setExpandedCategoryIndex(prev => (prev === index ? null : index));
-};
-
-
+  /**
+   * 🔍 Live search while typing
+   */
   useEffect(() => {
-    const translateMenuItems = async () => {
-      const items: MenuItem[] = [
-        {
-          name: await translate("ALL CATEGORY"),
-          link: "/shop",
-          customDropdownType: "category", // 👈 custom flag to identify special behavior
-          subLinks: [
-            { name: await translate("Flowers"), subMenu: [await translate("Hybrid"), await translate("Sativa"), await translate("Indica")] },
-            { name: await translate("Seeds"), subMenu: [await translate("Autoflower Seeds"), await translate("Feminized Seeds"),await  translate("Regular Seeds")] },
-            { name: await translate("Pre Rolls"), subMenu: [await translate("Hybrid Pre Rolls"), await translate("Sativa Pre Rolls"), await translate("Indica Pre Rolls")] },
-
-            { name: await translate("Vapes"), subMenu: [await translate("Disposables  Vapes"), await translate("  Vape Cartridges"),  await translate(" Vape Pods")] },
-           
-            { name: await translate("Capsules"), subMenu: [await translate("CBD Capsules"), await translate("THC Capsules")] },
-            
-            { 
-              name: await translate("Edibles"), 
-              subMenu: [
-                await translate("Edibles Gummies"), 
-                await translate("Chocolates Edibles"),
-                
-                
-              ] 
-            },
-            
-            {
-              name: await translate("Concentrates"),
-              subMenu: [
-                
-                await translate("Moon Rock"),
-                await translate("Live Resin"),
-              
-                await translate("Distillate"),
-                
-                await translate("Budder"),
-                
-                await translate("Crumble"),
-                
-              ]
-            },
-            {
-              name: await translate("Shrooms"),
-              subMenu: [
-                
-                await translate("Dried Mushrooms"),
-                await translate("Chocolate Bars"),
-                await translate("Gummies"),
-                
-                
-              ]
-            },
-            
-          
-          ],
-
-        },
-        { name: await translate("ABOUT US"), link: "/about-us" },
-        { name: await translate("SHOP"), link: "/shop" },
-        { name: await translate("BLOG"), link: "/blog" },
-
-        { name: await translate("SUPPORT"), link: "/support", subLinks: [await translate("FAQS"), await translate("Contact Us"),] },
-         { name: await translate("REVIEWS"), link: "/reviews" },
-
-
-      ];
-      setTranslatedMenuItems(items);
-    };
-
-    // Translations for AquaBite, Login, and Special Offer
-    const translateTexts = async () => {
-      const aquaBite = await translate("16Zips");
-      const login = await translate("Login");
-      const shopNow = await translate("Shop Now");
-      const specialOffer = await translate("Special Offer: Get 20% Off on All Orders! Limited Time Only.");
-
-      setTranslatedTexts({ aquaBite, login, specialOffer, shopNow });
-    };
-
-    translateMenuItems();
-    translateTexts(); // Call the function to translate texts
-  }, [translate]);
-
-  
-
-
-/**
- * 🔍 Live search while typing (for dropdown)
- */
-useEffect(() => {
-  if (!searchQuery.trim()) {
-    setDropdownResults({ products: [], blogs: [] });
-    return;
-  }
-
-  const fetchResults = async () => {
-    try {
-      const res = await fetch(
-        `/api/search?search=${encodeURIComponent(searchQuery.trim())}`
-      );
-      const { products, blogs } = await res.json();
-      setDropdownResults({ products, blogs });
-    } catch (error) {
-      console.error("Dropdown search error:", error);
-      setDropdownResults({ products: [], blogs: [] });
-    }
-  };
-
-  const delayDebounce = setTimeout(() => {
-    fetchResults();
-  }, 300); // wait 300ms before calling API
-
-  return () => clearTimeout(delayDebounce);
-}, [searchQuery]);
-
-/**
- * 🔎 Manual search trigger (Enter or button click)
- */
-const handleSearch = async () => {
-  if (!searchQuery.trim()) return;
-
-  // Static routes
-  const knownPaths = [
-    "/privacy-policy",
-    "/terms",
-    "/support",
-    "/about-us",
-    "/refund-policy",
-    "/shipping-info",
-    "/faqs",
-    "/contact-us",
-  ];
-
-  try {
-    // Check static path
-    const matchedPath = knownPaths.find((path) =>
-      path.toLowerCase().includes(searchQuery.trim().toLowerCase())
-    );
-
-    if (matchedPath) {
-      router.push(matchedPath);
-      setSearchQuery("");
+    if (!searchQuery.trim()) {
       setDropdownResults({ products: [], blogs: [] });
       return;
     }
 
-    // Query backend
-    const res = await fetch(
-      `/api/search?search=${encodeURIComponent(searchQuery.trim())}`
-    );
-    const { products, blogs } = await res.json();
+    const fetchResults = async () => {
+      try {
+        const res = await fetch(`/api/search?search=${encodeURIComponent(searchQuery.trim())}`);
+        const { products, blogs } = await res.json();
+        setDropdownResults({ products, blogs });
+      } catch (error) {
+        console.error("Dropdown search error:", error);
+        setDropdownResults({ products: [], blogs: [] });
+      }
+    };
 
-    // Handle search results
-    if (products.length === 1 && blogs.length === 0) {
-      router.push(`/products/${products[0].slug}`);
-    } else if (products.length > 1 || blogs.length > 0) {
-      router.push(`/search?query=${encodeURIComponent(searchQuery.trim())}`);
-    } else {
-      toast.error("No matching results found.");
+    const delayDebounce = setTimeout(fetchResults, 300);
+    return () => clearTimeout(delayDebounce);
+  }, [searchQuery]);
+
+  /**
+   * 🔎 Manual search (Enter key or button click)
+   */
+  const handleSearch = async () => {
+    if (!searchQuery.trim()) return;
+
+    const knownPaths = [
+      "/privacy-policy",
+      "/terms",
+      "/support",
+      "/about-us",
+      "/refund-policy",
+      "/shipping-info",
+      "/faqs",
+      "/contact-us",
+    ];
+
+    try {
+      // check static routes
+      const matchedPath = knownPaths.find((path) =>
+        path.toLowerCase().includes(searchQuery.trim().toLowerCase())
+      );
+
+      if (matchedPath) {
+        router.push(matchedPath);
+      } else {
+        const res = await fetch(`/api/search?search=${encodeURIComponent(searchQuery.trim())}`);
+        const { products, blogs } = await res.json();
+
+        if (products.length === 1 && blogs.length === 0) {
+          router.push(`/products/${products[0].slug}`);
+        } else if (products.length > 1 || blogs.length > 0) {
+          router.push(`/search?query=${encodeURIComponent(searchQuery.trim())}`);
+        } else {
+          toast.error("No matching results found.");
+        }
+      }
+    } catch (err) {
+      console.error("Search error:", err);
+      toast.error("Something went wrong. Please try again.");
+    } finally {
+      setSearchQuery("");
+      setDropdownResults({ products: [], blogs: [] });
+    }
+  };
+
+
+
+
+  const topNavItems = [
+{ name: 'How To Order', href: '/how-to-order' },
+  { name: 'Track Order', href: '/track-order' },
+  { name: 'Refund Policy', href: '/refund-policy' },
+  ];
+
+  const productCategories = [
+  { name: 'HOME', href: '/' },
+  { name: 'SHOP', href: '/shop' },
+  { name: 'ABOUT US', href: '/about-us' },
+  { name: 'BLOG', href: '/blog' },
+  { name: 'REVIEWS', href: '/reviews' },
+  { 
+    name: 'SUPPORT', 
+    href: '/support', 
+    subLinks: [
+      { name: 'FAQS', href: '/support/faqs' },
+      { name: 'Contact Us', href: '/support/contact-us' }
+    ]
+  },
+];
+
+
+  const cannabisCategories = [
+  {
+    name: "Flowers",
+    subMenu: ["Hybrid", "Sativa", "Indica"]
+  },
+  {
+    name: "Seeds",
+    subMenu: ["Autoflower Seeds", "Feminized Seeds", "Regular Seeds"]
+  },
+  {
+    name: "Pre Rolls",
+    subMenu: ["Hybrid Pre Rolls", "Sativa Pre Rolls", "Indica Pre Rolls"]
+  },
+  {
+    name: "Vapes",
+    subMenu: ["Disposables Vapes", "Vape Cartridges", "Vape Pods"]
+  },
+  {
+    name: "Capsules",
+    subMenu: ["CBD Capsules", "THC Capsules"]
+  },
+  {
+    name: "Edibles",
+    subMenu: ["Edibles Gummies", "Chocolates Edibles"]
+  },
+  {
+    name: "Concentrates",
+    subMenu: ["Moon Rock", "Live Resin", "Distillate", "Budder", "Crumble"]
+  },
+  {
+    name: "Shrooms",
+    subMenu: ["Dried Mushrooms", "Chocolate Bars", "Gummies"]
+  }
+];
+
+useEffect(() => {
+  function handleClickOutside(event: MouseEvent) {
+    if (
+      mobileMenuRef.current &&
+      !mobileMenuRef.current.contains(event.target as Node)
+    ) {
+      setIsMobileMenuOpen(false); // close mobile menu
+      setOpenCategories({}); // close all open categories
     }
 
-    setSearchQuery("");
-    setDropdownResults({ products: [], blogs: [] });
-  } catch (error) {
-    console.error("Error during search:", error);
-    toast.error("Something went wrong. Please try again.");
-    setSearchQuery("");
-    setDropdownResults({ products: [], blogs: [] });
+    // Only close dropdown if click is outside both desktop and mobile search areas
+    const clickedInsideDesktopSearch = searchRef.current && searchRef.current.contains(event.target as Node);
+    const clickedInsideMobileSearch = mobileSearchRef.current && mobileSearchRef.current.contains(event.target as Node);
+
+    if (!clickedInsideDesktopSearch && !clickedInsideMobileSearch) {
+      setDropdownResults({ products: [], blogs: [] }); // close search dropdown
+    }
   }
-};
-
-  useEffect(() => {
-    const handleResize = () => {
-      setIsMobile(window.innerWidth <= 768);
-    };
-
-    window.addEventListener("resize", handleResize);
-    handleResize(); // Initial check
-
-    return () => {
-      window.removeEventListener("resize", handleResize);
-    };
-  }, []);
-
-  const handleDropdownEnter = (index: number) => {
-    if (hoverTimeout) clearTimeout(hoverTimeout);  // Clear any existing timeout
-    setActiveDropdown(index);
-  };
-
-  const handleDropdownLeave = () => {
-    const timeout = setTimeout(() => {
-      setActiveDropdown(null);
-    }, 350);  // Set delay (in ms) before the dropdown disappears
-    setHoverTimeout(timeout);
-  };
 
   
 
-type Mode = "top" | "categoryList" | "supportList" | { subIndex: number };
-const [mode, setMode] = useState<Mode>("top");
+  document.addEventListener("mousedown", handleClickOutside);
+  return () => {
+    document.removeEventListener("mousedown", handleClickOutside);
+  };
+}, [mobileMenuRef]);
 
-// Handlers
-const openSupportList = () => setMode("supportList");
-const goBack = () => {
-  if (mode === "categoryList" || mode === "supportList") setMode("top");
-  else setMode("categoryList");
-};
+useEffect(() => {
+  const handleScroll = () => {
+    if (window.scrollY > 100) {
+      setShowMainHeader(false); // hide logo/search/top bar
+    } else {
+      setShowMainHeader(true); // show them back
+    }
+  };
+
+  window.addEventListener("scroll", handleScroll);
+  return () => window.removeEventListener("scroll", handleScroll);
+}, []);
+
 
 
   return (
-    <div className="w-full fixed top-0 z-20 left-0">
-      <Toaster position="top-center" reverseOrder={false} />
-      {/* Moving Text Bar */}
+    <header className=" fixed top-0 left-0 z-50 w-full bg-white shadow-sm">
       
-    {/* Top Bar (responsive layout) */}
-<div className="absolute top-0 left-0 w-full bg-red-500 h-10 flex items-center justify-between px-6 md:px-16 z-50">
-  {/* Left side - Special Offer */}
-  <div className="w-full lg:w-auto flex justify-center lg:justify-start">
-  <p className="text-white whitespace-nowrap text-sm font-bold flex items-center gap-2">
-    Premium Cannabis Products – Safe, Fast & Discreet
-  </p>
-</div>
-
-
-  {/* Right side - Warranty & Track Order */}
-  <div className="hidden lg:flex items-center gap-6">
-    <Link
-      href="/how-to-order"
-      className="text-white text-sm font-bold uppercase flex items-center gap-2"
-    >
-      How To Order
-    </Link>
-
-    <Link
-      href="/track-order"
-      className="text-white text-sm font-bold uppercase flex items-center gap-2"
-    >
-      Track Order
-    </Link>
-
-    <Link
-      href="/refund-policy"
-      className="text-white text-sm font-bold uppercase flex items-center gap-2"
-    >
-      Refund Policy
-    </Link>
-  </div>
-</div>
-
-      {/* Secondary Navbar */}
-      <div className="bg-white shadow-md py-4 px-12 flex justify-between items-center h-20 mt-8">
-
-
-          <div className="flex items-center space-x-4 bg-transparent">
-  {/* Sidebar toggle for mobile */}
-  {isMobile && (
-    <button onClick={() => setIsSidebarOpen(!isSidebarOpen)} className="text-lg">
-      {isSidebarOpen ? <FaTimes /> : <FaBars />}
-    </button>
+     {/* Mobile Top Bar */}
+  {showMainHeader && (
+    <div className="lg:hidden bg-red-700 text-white py-2 text-center font-medium text-sm">
+      Premium Cannabis Products – Safe, Fast & Discreet
+    </div>
   )}
 
-  {/* Logo for desktop */}
-  <Link href="/" className="hidden md:block mt-4 bg-transparent">
-    <Image
-      src="/assets/nel.png"
-      alt="logo"
-      width={120} // adjust size as needed
-      height={40}
-      className="object-contain bg-transparent "
-    />
-  </Link>
 
-  {/* Logo for mobile */}
-  <div className=" md:hidden w-full">
-  <Link href="/" className="block bg-transparent">
+      {/* Desktop Top Navigation Bar - Hidden on mobile */}
+    {/* Desktop Top Navigation Bar */}
+  {showMainHeader && (
+    <div className="hidden lg:block bg-red-700 text-white py-2">
+      <div className="max-w-7xl mx-auto px-4">
+        <div className="flex justify-between items-center text-sm">
+          <div className="font-medium">
+            Premium Cannabis Products – Safe, Fast & Discreet
+          </div>
+          <div className="flex items-center space-x-6">
+            {topNavItems.map((item, index) => (
+              <Link key={index} href={item.href} className="hover:text-red-200 transition-colors font-medium">
+                {item.name}
+              </Link>
+            ))}
+          </div>
+        </div>
+      </div>
+    </div>
+  )}
+
+      {/* Mobile Header - Simple layout for phones */}
+     <div className="lg:hidden bg-white shadow-sm ">
+
+
+        <div className="flex items-center justify-between px-4">
+          
+          {/* Mobile Menu Button */}
+          <button
+            onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+            className="flex items-center space-x-2 text-gray-700 hover:text-red-700"
+          >
+            <Menu size={20} />
+            <span className="font-medium text-sm">MENU</span>
+          </button>
+
+          <div className="flex items-center h-20">
+  <Link href="/">
     <Image
       src="/assets/nel.png"
       alt="logo"
       width={100}
-      height={30}
-      className="object-contain bg-transparent"
+      height={20}
+      className="object-contain"
     />
   </Link>
 </div>
 
+
+          {/* Mobile Cart and Search */}
+          <div className="flex items-center space-x-3">
+            <button className="relative" onClick={openCart}>
+    <ShoppingCart size={20} className="text-gray-700" />
+    {cartCount > 0 && (
+      <span className="absolute -top-2 -right-2 bg-red-700 text-white text-xs rounded-full w-4 h-4 flex items-center justify-center font-bold">
+        {cartCount}
+      </span>
+    )}
+  </button>
+
+            <button
+             onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+            className="text-gray-700">
+              <Search size={20} />
+            </button>
+          </div>
+        </div>
+      </div>
+
+      {/* Desktop Main Header Section - Hidden on mobile */}
+
+      {showMainHeader && (
+      <div className="hidden lg:block bg-white">
+
+        <div className="max-w-7xl mx-auto px-4">
+          <div className="flex items-center justify-between">
+            
+            {/* Desktop Logo Section */}
+            <div className="flex items-center">
+              <Link href="/">
+  <Image
+    src="/assets/nel.png"
+    alt="logo"
+    width={120} // adjust width
+    height={4} // adjust height
+    className="object-contain bg-transparent"
+  />
+</Link>
+
+              
+            </div>
+
+            {/* Desktop Search Bar Section - Increased width */}
+            <div  ref={searchRef} className="relative flex-1 max-w-2xl mx-8 ">
+              <div className="relative flex">
+                <input
+      type="text"
+      value={searchQuery}
+      onChange={(e) => setSearchQuery(e.target.value)}
+      onKeyDown={(e) => e.key === "Enter" && handleSearch()}
+      placeholder="Search for products or blogs"
+      className="flex-1 px-4 py-3 border border-gray-300 rounded-l-md focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-red-500"
+    />
+    
+                <select className="px-4 py-3 border-t border-b border-gray-300 bg-gray-50 text-gray-700 focus:outline-none text-sm min-w-[160px] ">
+  <option value="">SELECT CATEGORY</option>
+  {cannabisCategories.map((category) =>
+    category.subMenu.map((subItem, idx) => (
+      <option key={`${category.name}-${idx}`} value={subItem.toLowerCase().replace(/\s/g, '-')}>
+        {subItem}
+      </option>
+    ))
+  )}
+</select>
+
+                <button
+                 onClick={handleSearch}
+                className="bg-red-700 hover:bg-red-800 text-white px-6 py-3 rounded-r-md transition-colors">
+                  <Search size={20} />
+                </button>
+              </div>
+              {/* Dropdown Results */}
+              {dropdownResults.products.length > 0 || dropdownResults.blogs.length > 0 ? (
+                <div className="absolute bg-white border border-gray-300 mt-1 w-full max-w-2xl shadow-lg z-50">
+                  {/* Clear button (X icon) */}
+    {searchQuery && (
+      <button
+        onClick={() => {
+          setSearchQuery("");
+          setDropdownResults({ products: [], blogs: [] });
+        }}
+        className="absolute right-2 mt-2  text-gray-400 hover:text-gray-600"
+      >
+        <X size={18} />
+      </button>
+    )}
+
+                  {dropdownResults.products.length > 0 && (
+                    <div className="p-4 border-b border-gray-200">
+                      
+                      <h4 className="font-semibold mb-2">Products</h4>
+                      <ul className="space-y-2 max-h-60 overflow-y-auto">
+                        {dropdownResults.products.map((product, index) => (
+                          <li key={`${product.slug}-${index}`}>
+                            <Link
+                              href={`/products/${product.slug}`}
+                              className="flex items-center space-x-3 hover:bg-gray-50 p-2 rounded"
+                              onClick={() => {
+                                setSearchQuery("");
+                                setDropdownResults({ products: [], blogs: [] });
+                              }}
+                            >
+                              
+                              {product.mainImage ? (
+      <Image
+        src={product.mainImage}
+        alt={product.name}
+        width={40}
+        height={40}
+        className="object-cover rounded"
+      />
+    ) : null} {/* don't render Image if src is empty */}
+    <span>{product.name}</span>
+                            </Link>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+                  {dropdownResults.blogs.length > 0 && (
+                    <div className="p-4">
+                      <h4 className="font-semibold mb-2">Blogs</h4>
+                      <ul className="space-y-2 max-h-60 overflow-y-auto">
+                        {dropdownResults.blogs.map((blog, index) => (
+                          <li key={`blog-${blog.slug}-${index}`}>
+                            <Link
+                              href={`/blog/${blog.slug}`}
+                              className="hover:bg-gray-50 p-2 rounded block text-sm font-medium"
+                              onClick={() => {
+                                setSearchQuery("");
+                                setDropdownResults({ products: [], blogs: [] });
+                              }}
+                            >
+                              {blog.title}
+                            </Link>
+                          </li>
+                        ))}
+                      </ul>
+            </div>
+
+                  )}
+                </div>
+              ) : null}
+
+            </div>
+          {/* Desktop Cart and Price Section */}
+<div className="flex items-center space-x-4">
+  {/* Cart */}
+  <div className="flex items-center space-x-3">
+    <button className="relative" onClick={openCart}>
+      <ShoppingCart size={24} className="text-gray-700 cursor-pointer hover:text-red-700" />
+      {cartCount > 0 && (
+        <span className="absolute -top-2 -right-2 bg-red-700 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center font-bold">
+          {cartCount}
+        </span>
+      )}
+    </button>
+    <span className="text-sm font-medium">
+  ${totalPrice.toFixed(2)}
+</span>
+
+  </div>
+
+  {/* Wishlist */}
+  <Link
+    href="/wishlist"
+    className="relative hidden md:flex items-center justify-center w-10 h-10 rounded-full bg-gray-100 hover:bg-red-50 transition-colors"
+  >
+    <FaHeart className="text-xl text-gray-700 hover:text-red-700 transition-colors" />
+    {wishlist.length > 0 && (
+      <span className="absolute -top-1 -right-1 bg-red-700 text-white text-[10px] font-bold w-4 h-4 flex items-center justify-center rounded-full">
+        {wishlist.length}
+      </span>
+    )}
+  </Link>
+
+  {/* Profile */}
+  <Link
+    href="/profile"
+    className="hidden md:flex items-center justify-center w-10 h-10 rounded-full bg-gray-100 hover:bg-blue-50 transition-colors"
+  >
+    <FaUser className="text-xl text-gray-700 hover:text-blue-700 transition-colors" />
+  </Link>
 </div>
-        {/* Search Bar (Centered on Medium and Larger Devices) */}
-       {/* Search Bar with Dropdown */}
-<div className="relative w-1/2 mx-auto mt-3 hidden md:block" ref={dropdownRef}>
-  <div className="flex items-center bg-gray-50 rounded-full shadow-inner px-6 py-3">
+
+          </div>
+        </div>
+      </div>
+       )}
+
+      {/* Desktop Product Categories Navigation - Hidden on mobile */}
+      <nav className="hidden lg:block bg-white border-t border-gray-200">
+
+        <div className="max-w-7xl mx-auto px-4">
+          <div className="flex items-center">
+            
+            {/* Browse by Cannabis Category Dropdown */}
+<div className="relative">
+  <button
+    onMouseEnter={() => setActiveDropdown('cannabis')}
+    className="bg-red-700 hover:bg-red-800 text-white px-6 py-4 flex items-center space-x-2 transition-colors"
+  >
+    <Menu size={18} />
+    <span className="font-medium">ALL CATEGORY</span>
+    <ChevronDown size={16} />
+  </button>
+
+  {activeDropdown === 'cannabis' && (
+    <div
+      className="absolute top-full left-0 bg-white shadow-xl border border-gray-200 z-50 w-64"
+      onMouseEnter={() => setActiveDropdown('cannabis')}
+      onMouseLeave={() => setActiveDropdown(null)}
+    >
+      <div className="py-2">
+        {cannabisCategories.map((category, index) => (
+         <div key={index} className="group relative">
+          {/* Parent category name with bottom border */}
+          <div
+            className={`block px-4 py-2.5 text-gray-700 font-medium ${
+              index < cannabisCategories.length - 1 ? 'border-b border-gray-100' : ''
+            }`}
+          >
+            {category.name}
+          </div>
+            
+            {/* Submenu */}
+            {category.subMenu && category.subMenu.length > 0 && (
+              <div className="absolute top-0 left-full ml-0 hidden group-hover:block bg-white shadow-lg border border-gray-200 w-56">
+                {category.subMenu.map((subItem, subIndex) => (
+                  <Link
+                    key={subIndex}
+                    href={`/shop?category=${subItem.toLowerCase().replace(/\s/g, '-')}`}
+                    className="block px-4 py-2 text-gray-700 hover:bg-red-50 hover:text-red-700 transition-colors font-medium"
+                  >
+                    {subItem}
+                  </Link>
+                ))}
+              </div>
+            )}
+          </div>
+        ))}
+      </div>
+    </div>
+  )}
+</div>
+
+
+            {/* Desktop Product Categories */}
+            <div className="flex items-center ml-0">
+  {productCategories.map((category, index) => (
+    <div key={index} className="relative group">
+      {category.subLinks ? (
+        <>
+          <button className="px-6 py-4 text-gray-700 hover:text-red-700 hover:bg-gray-50 font-medium transition-colors flex items-center space-x-1">
+            <span>{category.name}</span>
+            <ChevronDown size={14} />
+          </button>
+          <div className="absolute top-full left-0 hidden group-hover:block bg-white shadow-lg border border-gray-200 w-44 z-50">
+            {category.subLinks.map((sub, subIndex) => (
+              <Link
+                key={subIndex}
+                href={sub.href}
+                className="block px-4 py-2 text-gray-700 hover:bg-red-50 hover:text-red-700 font-medium transition-colors"
+              >
+                {sub.name}
+              </Link>
+            ))}
+          </div>
+        </>
+      ) : (
+        <Link
+          href={category.href}
+          className="px-6 py-4 text-gray-700 hover:text-red-700 hover:bg-gray-50 font-medium transition-colors"
+        >
+          {category.name}
+        </Link>
+      )}
+    </div>
+  ))}
+</div>
+
+          </div>
+        </div>
+      </nav>
+
+      {/* Mobile Menu Overlay */}
+      {isMobileMenuOpen && (
+  <div
+  
+  className="lg:hidden fixed inset-0 z-50  bg-opacity-50">
+
+          <div 
+          ref={mobileMenuRef}
+          className="bg-white w-80 h-full overflow-y-auto">
+            
+            {/* Mobile Menu Header */}
+            <div className="flex justify-between items-center p-4 bg-red-700 text-white">
+              <h2 className="text-lg font-bold">MENU</h2>
+              <button
+                onClick={() => setIsMobileMenuOpen(false)}
+                className="text-white hover:text-red-200"
+              >
+                <X size={24} />
+              </button>
+            </div>
+
+            <div className="p-4">
+              
+              {/* Mobile Search */}
+{/* Mobile Search */}
+<div className="mb-6 relative" ref={mobileSearchRef}>
+  <div className="flex">
     <input
       type="text"
       value={searchQuery}
       onChange={(e) => setSearchQuery(e.target.value)}
-      placeholder="Search..."
-      className="flex-grow bg-transparent outline-none text-gray-800 text-lg"
       onKeyDown={(e) => e.key === "Enter" && handleSearch()}
+      placeholder="Search products..."
+      className="flex-1 px-3 py-2 border border-gray-300 rounded-l-md focus:outline-none focus:ring-2 focus:ring-red-500 text-sm"
     />
-
-    <button onClick={handleSearch} className="flex-shrink-0 ml-3">
-      <FaSearch className="text-gray-500 text-xl" />
+    <button
+      onClick={handleSearch}
+      className="bg-red-700 text-white px-4 py-2 rounded-r-md"
+    >
+      <Search size={18} />
     </button>
   </div>
 
-  {/* Dropdown */}
-  {(dropdownResults.products.length || dropdownResults.blogs.length) > 0 && (
-    <div
-      ref={dropdownRef}
-      className="absolute left-0 top-full mt-2 w-full bg-white rounded-lg shadow-lg border border-gray-100 z-50"
-    >
-      {/* Close X Icon */}
-      <button
-        onClick={() => setDropdownResults({ products: [], blogs: [] })}
-        className="absolute top-2 right-2 text-gray-400 hover:text-gray-600 z-10"
-        aria-label="Close"
-      >
-        <FaTimes className="w-5 h-5" />
-      </button>
-
-      {/* PRODUCTS HEADER */}
+  {/* ✅ Dropdown placed OUTSIDE the flex, but inside the relative container */}
+  {(dropdownResults.products.length > 0 || dropdownResults.blogs.length > 0) && (
+    <div className="absolute bg-white border border-gray-300 mt-1 w-full shadow-lg z-50 max-h-64 overflow-y-auto">
       {dropdownResults.products.length > 0 && (
-        <div className="border-b px-4 py-2 font-semibold text-xs text-gray-500 tracking-widest">
-          PRODUCTS
-        </div>
-      )}
-
-      {/* Products Grid */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 px-4 py-4 max-h-[320px] overflow-y-auto">
-        {dropdownResults.products.map((product, index) => (
-          <div
-            key={`${product.slug}-${index}`}
-            className="flex flex-col items-center bg-gray-50 rounded-md p-3 cursor-pointer hover:bg-gray-100 transition shadow"
-            onClick={() => {
-              router.push(`/products/${product.slug}`);
-              setDropdownResults({ products: [], blogs: [] });
-              setSearchQuery("");
-            }}
-          >
-            <img
-              src={product.mainImage || "/placeholder.jpg"}
-              alt={product.name}
-              className="w-20 h-20 object-cover rounded border mb-2"
-            />
-            <div className="font-semibold text-center text-gray-800 text-sm">{product.name}</div>
-            <div className="text-rose-500 font-semibold">
-              {product.price ? `$${product.price}` : ""}
-            </div>
-          </div>
-        ))}
-      </div>
-    </div>
-  )}
-</div>
-
-        <div className="flex items-center space-x-2 ">
-
-          
-  {/* Search Icon - visible only on phones */}
-<div className="block md:hidden">
-  <FaSearch
-    className="text-2xl cursor-pointer text-black hover:text-gray-600 mt-3"
-    onClick={() => setIsSidebarOpen(true)} // ✅ open sidebar
-  />
-</div>
-
-          {/* Wishlist (Heart) - hidden on phones, visible on md+ */}
-  <Link href="/wishlist" className="relative hidden md:block">
-    <FaHeart className="text-2xl cursor-pointer text-black hover:text-red-700 mt-3" />
-    <span className="absolute -top-2 -right-2 bg-red-600 text-white text-xs font-bold w-5 h-5 flex items-center justify-center rounded-full mt-3">
-      {wishlist.length}
-    </span>
-  </Link>
-          
-          <Link href="/profile">
-            <FaUser className="text-2xl cursor-pointer hidden md:block mt-3" />
-          </Link>
-          {/* Shopping Cart Icon with Cart Count */}
-          <div className="relative">
-            <FaShoppingCart
-              className="cursor-pointer hover:text-gray-400 text-2xl mt-3"
-              onClick={openCart} // Open the cart drawer
-            />
-            <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs font-bold w-5 h-5 flex items-center justify-center rounded-full mt-3">
-              {cartCount}
-            </span>
-          </div>
-
-        </div>
-      </div>
-
-      {/* Main Navbar */}
-      {!isMobile && (
-        <div className="bg-white shadow-md py-3 px-6">
-          <div className="flex justify-start space-x-6 relative">
-            {translatedMenuItems.map((item, index) => (
-              <div
-                key={index}
-                className="relative"
-                onMouseEnter={() => handleDropdownEnter(index)}  // Show dropdown
-                onMouseLeave={handleDropdownLeave}  // Delay hiding the dropdown
-              >
-                <div
-                  className="cursor-pointer uppercase mt-2 flex items-center gap-1 rounded-md transition"
-                  onClick={() => item.subLinks && handleDropdownToggle(index)} // for click toggle
-                >
-                  <Link href={item.link}>{item.name}</Link>
-                  {item.subLinks && (
-                    activeDropdown === index ? (
-                      <ChevronUp className="w-4 h-4 mt-0.5" />
-                    ) : (
-                      <ChevronDown className="w-4 h-4 mt-0.5" />
-                    )
-                  )}
-                </div>
-
-
-                {item.subLinks && activeDropdown === index && (
-  <div className="absolute left-0 top-full mt-3 bg-white border border-gray-200 shadow-lg py-2 w-52 z-10">
-    {Array.isArray(item.subLinks) && item.subLinks.map((sub, subIndex) => {
-      const isSubWithMenu = typeof sub === "object" && Array.isArray(sub.subMenu);
-      const label = typeof sub === "string" ? sub : sub.name;
-      const submenu = isSubWithMenu ? sub.subMenu : [];
-
-      return (
-        <div key={subIndex} className="group relative">
-          <div className="flex items-center justify-between px-4 py-2 text-sm hover:bg-gray-100 cursor-pointer">
-            {!isSubWithMenu ? (
-              <Link
-                href={`${item.link}/${toSlug(label)}`}
-                passHref
-                className="block w-full"
-              >
-                {label}
-              </Link>
-            ) : (
-              <span>{label}</span>
-            )}
-            {isSubWithMenu && <span className="ml-2">&gt;</span>}
-          </div>
-
-          {isSubWithMenu && submenu && (
-            <div className="absolute top-0 left-full bg-white border border-gray-200 shadow-lg w-44 ml-1 hidden group-hover:block z-20">
-              {submenu.map((subItem, i) => (
+        <div className="p-4 border-b border-gray-200">
+          <h4 className="font-semibold mb-2">Products</h4>
+          <ul className="space-y-2">
+            {dropdownResults.products.map((product, index) => (
+              <li key={`${product.slug}-${index}`}>
                 <Link
-                  key={i}
-                  href={`/shop?category=${toSlug(subItem)}`}
-                  passHref
-                  className="block px-4 py-2 text-sm hover:bg-gray-100 cursor-pointer whitespace-nowrap"
+                  href={`/products/${product.slug}`}
+                  className="flex items-center space-x-3 hover:bg-gray-50 p-2 rounded"
+                  onClick={() => {
+                    setSearchQuery("");
+                    setDropdownResults({ products: [], blogs: [] });
+                    setIsMobileMenuOpen(false);
+                  }}
                 >
-                  {subItem}
-                </Link>
-              ))}
-            </div>
-          )}
-        </div>
-      );
-    })}
-  </div>
-)}
-
-
-                
-
-              </div>
-            ))}
-
-            
-          </div>
-        </div>
-      )}
-
-      {/* Sidebar for mobile */}
-      {isSidebarOpen && isMobile && (
-        <div className="fixed inset-0 z-30 bg-opacity-50">
-          <div className="fixed inset-0 z-40 bg-white w-64">
-            <div className="flex justify-end p-4 mt-10">
-              <button onClick={() => setIsSidebarOpen(false)}>
-                <FaTimes className="text-xl" />
-              </button>
-            </div>
-            <div className="flex flex-col space-y-4 p-4">
-<div className="relative w-full mb-4">
-  <input
-    type="text"
-    value={searchQuery}
-    onChange={(e) => setSearchQuery(e.target.value)}
-    placeholder="Search..."
-    className="w-full py-2 pl-4 pr-12 border border-gray-300 rounded-md focus:outline-none focus:ring-0"
-    onKeyDown={(e) => e.key === "Enter" && handleSearch()}
-  />
-  <button
-    onClick={handleSearch}
-    className="absolute right-0 top-0 h-full bg-gray-500 w-12 flex items-center justify-center rounded-r-md"
-  >
-    <FaSearch className="text-white text-lg" />
-  </button>
-
-  {/* Dropdown for search results */}
-  {(dropdownResults.products.length || dropdownResults.blogs.length) > 0 && (
-    <div
-      ref={dropdownRef} // Only here
-      className="absolute left-0 top-full mt-2 w-full bg-white rounded-lg shadow-lg border border-gray-100 z-50 max-h-[320px] overflow-y-auto"
-    >
-      {/* Close X Icon */}
-      <button
-        onClick={() => setDropdownResults({ products: [], blogs: [] })}
-        className="absolute top-2 right-2 text-gray-400 hover:text-gray-600 z-10"
-        aria-label="Close"
-      >
-        <FaTimes className="w-5 h-5" />
-      </button>
-
-      {/* Products Grid */}
-      <div className="grid grid-cols-1 gap-4 px-4 py-4">
-        {dropdownResults.products.map((product, index) => (
-          <button
-            key={`${product.slug}-${index}`}
-            onClick={() => {
-              router.push(`/products/${product.slug}`);
-              setDropdownResults({ products: [], blogs: [] });
-              setSearchQuery("");
-              setIsSidebarOpen(false);
-            }}
-            className="flex flex-col items-center bg-gray-50 rounded-md p-3 cursor-pointer hover:bg-gray-100 transition shadow text-left"
-          >
-            <img
-              src={product.mainImage || "/placeholder.jpg"}
-              alt={product.name}
-              className="w-20 h-20 object-cover rounded border mb-2"
-            />
-            <div className="font-semibold text-gray-800 text-sm">{product.name}</div>
-            <div className="text-rose-500 font-semibold">
-              {product.price ? `$${product.price}` : ""}
-            </div>
-          </button>
-        ))}
-      </div>
-    </div>
-  )}
-</div>
-
-             {/* === TOP LEVEL MENU === */}
-{mode === "top" && (
-  <div className="divide-y divide-gray-200">
-    {translatedMenuItems.map((item, idx) => {
-      const commonClasses = "w-full text-lg text-left py-3 px-2";
-
-      // All Category
-      if (item.customDropdownType === "category") {
-        return (
-          <button
-            key={idx}
-            onClick={() => setMode("categoryList")}
-            className={`${commonClasses} flex justify-between items-center border-b border-gray-200`}
-          >
-            {item.name} <ChevronRight />
-          </button>
-        );
-      }
-
-      // Support
-      if (item.link === "/support") {
-        return (
-          <button
-            key={idx}
-            onClick={() => setMode("supportList")}
-            className={`${commonClasses} flex justify-between items-center border-b border-gray-200`}
-          >
-            {item.name} <ChevronRight />
-          </button>
-        );
-      }
-
-      // Plain links: About, Shop, Blog
-      return (
-        <Link
-          key={idx}
-          href={item.link}
-          onClick={handleItemClick}
-          className={`${commonClasses} block border-b border-gray-200`}
-        >
-          {item.name}
-        </Link>
-      );
-    })}
-  </div>
-)}
-
-{/* === SUPPORT SUB‑LINKS === */}
-{mode === "supportList" && (
-  <div className="p-4 bg-white h-full">
-    <button
-      onClick={goBack}
-      className="mb-4 flex items-center gap-2 text-lg"
-    >
-      <FaTimes /> Back
-    </button>
-    <div className="divide-y divide-gray-200">
-      {translatedMenuItems
-        .find((it) => it.link === "/support")!
-        .subLinks!.filter((s): s is string => typeof s === "string")
-        .map((s, i) => (
-          <Link
-            key={i}
-            href={`/support/${toSlug(s)}`}
-            onClick={handleItemClick}
-            className="block ml-4 py-2 border-b border-gray-200 hover:text-black"
-          >
-            {s}
-          </Link>
-        ))}
-    </div>
-  </div>
-)}
-
-{/* === MAIN CATEGORIES LIST === */}
-{mode === "categoryList" && (
-  <div className="p-4 bg-white h-full">
-    <button
-      onClick={goBack}
-      className="mb-4 flex items-center gap-2 text-lg"
-    >
-      <FaTimes /> Back
-    </button>
-    <div className="divide-y divide-gray-200">
-      {translatedMenuItems
-        .find((it) => it.customDropdownType === "category")
-        ?.subLinks?.map((cat: any, i: number) => (
-          <button
-            key={i}
-            onClick={() => setMode({ subIndex: i })}
-            className="flex justify-between items-center w-full py-2 px-2 text-lg border-b border-gray-200"
-          >
-            {cat.name} <ChevronRight />
-          </button>
-        ))}
-    </div>
-  </div>
-)}
-
-{/* === CATEGORY SUBMENU === */}
-{typeof mode === "object" && (
-  <div className="p-4 bg-white h-full">
-    <button
-      onClick={goBack}
-      className="mb-4 flex items-center gap-2 text-lg"
-    >
-      <FaTimes /> Back
-    </button>
-    {(() => {
-      const cat = (translatedMenuItems.find(
-        (it) => it.customDropdownType === "category"
-      )!.subLinks! as { name: string; subMenu: string[] }[])[
-        mode.subIndex
-      ];
-      return (
-        <>
-          <h3 className="font-bold mb-2">{cat.name}</h3>
-          <ul className="divide-y divide-gray-200">
-            {cat.subMenu.map((sub, j) => (
-              <li key={j} className="py-2">
-                <Link
-                  href={`/shop?category=${toSlug(sub)}`}
-                  onClick={handleItemClick}
-                  className="block"
-                >
-                  {sub}
+                  {product.mainImage ? (
+                    <Image
+                      src={product.mainImage}
+                      alt={product.name}
+                      width={40}
+                      height={40}
+                      className="object-cover rounded"
+                    />
+                  ) : null}
+                  <span>{product.name}</span>
                 </Link>
               </li>
             ))}
           </ul>
-        </>
-      );
-    })()}
+        </div>
+      )}
+      {dropdownResults.blogs.length > 0 && (
+        <div className="p-4">
+          <h4 className="font-semibold mb-2">Blogs</h4>
+          <ul className="space-y-2">
+            {dropdownResults.blogs.map((blog, index) => (
+              <li key={`blog-${blog.slug}-${index}`}>
+                <Link
+                  href={`/blog/${blog.slug}`}
+                  className="hover:bg-gray-50 p-2 rounded block text-sm font-medium"
+                  onClick={() => {
+                    setSearchQuery("");
+                    setDropdownResults({ products: [], blogs: [] });
+                    setIsMobileMenuOpen(false);
+                  }}
+                >
+                  {blog.title}
+                </Link>
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
+    </div>
+  )}
+</div>
+
+              
+              {/* Mobile Product Categories */}
+             <div className="border-b border-gray-200 pb-4 mb-4">
+  <h3 className="font-semibold text-gray-800 mb-3">Products</h3>
+  {cannabisCategories.map((category, idx) => (
+    <div key={idx} 
+      className={`py-2 ${idx < cannabisCategories.length - 1 ? 'border-b border-gray-200' : ''}`}
+    >
+      {/* Parent Category with toggle */}
+      <button
+        onClick={() => toggleCategory(category.name)}
+        className="w-full flex justify-between items-center px-2 py-1 text-gray-700 font-medium hover:text-red-700 focus:outline-none"
+      >
+        <span>{category.name}</span>
+        <ChevronDown
+          size={16}
+          className={`transition-transform duration-300 ${
+            openCategories[category.name] ? "rotate-180" : "rotate-0"
+          }`}
+        />
+      </button>
+
+      {/* Submenu - only visible if open */}
+      {/* Submenu - only visible if open */}
+{openCategories[category.name] && (
+  <div className="pl-4 mt-2">
+    {category.subMenu.map((subItem, subIdx) => (
+      <div
+        key={subIdx}
+        className={`py-1.5 ${subIdx < category.subMenu.length - 1 ? 'border-b border-gray-100' : ''}`}
+      >
+        <Link
+          href={`/shop?category=${subItem.toLowerCase().replace(/\s/g, '-')}`}
+          className="block px-2 text-gray-600 hover:text-red-700 font-medium"
+          onClick={() => setIsMobileMenuOpen(false)}
+        >
+          {subItem}
+        </Link>
+      </div>
+    ))}
   </div>
 )}
+    </div>
+  ))}
+</div>
 
-<Link
-  onClick={() => setIsSidebarOpen(false)}
-  href="/profile"
-  className="ml-3 text-lg  !text-black hover:!text-red-800"
->
-  {translatedTexts.login}
-</Link>
 
+              {/* Login / Register Section */}
+<div className="border-b border-gray-200 pb-4 mb-4">
+  <Link
+    href="/profile"
+    className="flex items-center space-x-3 px-2 py-2 text-gray-700 hover:text-red-700 font-medium"
+    onClick={() => setIsMobileMenuOpen(false)}
+  >
+    <FaUser className="text-lg" />
+    <span>Login / Register</span>
+  </Link>
+</div>
+              
             </div>
           </div>
         </div>
       )}
-    </div>
+    </header>
   );
 };
 
 export default Navbar;
+
+

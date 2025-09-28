@@ -176,7 +176,7 @@ useEffect(() => {
       >
         {/* Discount Badge */}
         {product.discount && (
-          <span className="absolute top-3 left-3 bg-gradient-to-r from-red-500 to-pink-500 text-white text-xs font-bold px-2.5 py-1 rounded-full z-10 drop-shadow-sm"> {/* 🎨 Gradient + drop shadow */}
+          <span className="absolute top-3 left-3 bg-gradient-to-r from-red-700 to-pink-700 text-white text-xs font-bold px-2.5 py-1 rounded-full z-10 drop-shadow-sm"> {/* 🎨 Gradient + drop shadow */}
             -{product.discount}%
           </span>
         )}
@@ -242,7 +242,7 @@ useEffect(() => {
         <div className="p-4 flex flex-col flex-grow justify-between text-center relative">
           <div>
             <Link href={`/products/${product.slug}`}>
-              <h3 className="text-base md:text-lg font-semibold text-gray-800 hover:text-red-500 transition-colors leading-tight"> {/* 🎨 Better color, leading */}
+              <h3 className="text-base md:text-lg font-semibold text-gray-800 hover:text-red-700 transition-colors leading-tight"> {/* 🎨 Better color, leading */}
                 {product.name}
               </h3>
             </Link>
@@ -251,7 +251,7 @@ useEffect(() => {
               {product.discount ? (
                 <div className="flex items-center justify-center gap-2">
                   <span className="text-gray-400 line-through text-sm">${product.price.toFixed(2)}</span> {/* 🎨 Smaller strikethrough */}
-                  <span className="text-red-500 font-bold text-lg">${(product.price - (product.price * product.discount) / 100).toFixed(2)}</span> {/* 🎨 Larger discounted price */}
+                  <span className="text-red-700 font-bold text-lg">${(product.price - (product.price * product.discount) / 100).toFixed(2)}</span> {/* 🎨 Larger discounted price */}
                 </div>
               ) : (
                 <p className="text-gray-800 font-bold text-lg">${product.price.toFixed(2)}</p> 
@@ -271,7 +271,7 @@ useEffect(() => {
                   whileTap={{ scale: 0.95 }}
                   whileHover={{ scale: 1.03 }}
                   onClick={() => setShowOptionsOverlay(true)}
-                  className="bg-red-500 text-white px-5 py-2.5 whitespace-nowrap rounded-xl shadow-md hover:bg-red-600 transition-all duration-200 font-medium text-sm" // 🎨 Rounded-xl, padding, font size
+                  className="bg-red-700 text-white px-5 py-2.5 whitespace-nowrap rounded-xl shadow-md hover:bg-red-800 transition-all duration-200 font-medium text-sm" // 🎨 Rounded-xl, padding, font size
                 >
                   Select Options
                 </motion.button>
@@ -280,7 +280,7 @@ useEffect(() => {
                   whileTap={{ scale: 0.95 }}
                   whileHover={{ scale: 1.03 }}
                   onClick={handleAddToCart}
-                  className="bg-red-500 text-white px-5 py-2.5 rounded-xl shadow-md hover:bg-red-600 transition-all duration-200 font-medium text-sm"
+                  className="bg-red-700 text-white px-5 py-2.5 rounded-xl shadow-md hover:bg-red-800 transition-all duration-200 font-medium text-sm"
                 >
                   Add to Cart
                 </motion.button>
@@ -292,7 +292,7 @@ useEffect(() => {
                     whileTap={{ scale: 0.95 }}
                     whileHover={{ scale: 1.03 }}
                     onClick={() => setShowOptionsOverlay(true)}
-                    className="bg-red-500 text-white px-4 py-2 rounded-xl shadow-md hover:bg-red-600 transition-all duration-200 font-medium text-sm"
+                    className="bg-red-700 text-white px-4 py-2 rounded-xl shadow-md hover:bg-red-800 transition-all duration-200 font-medium text-sm"
                   >
                     Select Options
                   </motion.button>
@@ -301,7 +301,7 @@ useEffect(() => {
                     whileTap={{ scale: 0.95 }}
                     whileHover={{ scale: 1.03 }}
                     onClick={handleAddToCart}
-                    className="bg-red-500 text-white p-2.5 rounded-xl shadow-md hover:bg-red-600 transition-all duration-200"
+                    className="bg-red-700 text-white p-2.5 rounded-xl shadow-md hover:bg-red-800 transition-all duration-200"
                   >
                     <svg
                       xmlns="http://www.w3.org/2000/svg"
@@ -421,7 +421,7 @@ useEffect(() => {
             setSelectedOption(null);
           }}
           whileTap={{ scale: 0.98 }}
-          className="w-full bg-red-500 text-white py-4 rounded-xl shadow-md hover:bg-red-600 transition font-bold text-lg"
+          className="w-full bg-red-700 text-white py-4 rounded-xl shadow-md hover:bg-red-800 transition font-bold text-lg"
         >
           Add to Cart — ${displayPrice.toFixed(2)}
         </motion.button>
@@ -518,7 +518,7 @@ useEffect(() => {
             setSelectedOption(null);
           }}
           whileTap={{ scale: 0.98 }}
-          className="mt-6 w-full bg-red-500 text-white py-3 rounded-xl shadow-md hover:bg-red-600 transition font-medium"
+          className="mt-6 w-full bg-red-700 text-white py-3 rounded-xl shadow-md hover:bg-red-800 transition font-medium"
         >
           Add to Cart — ${displayPrice.toFixed(2)}
         </motion.button>
@@ -559,7 +559,7 @@ useEffect(() => {
                   unoptimized
                 />
                 <Link href={`/products/${product.slug}`} className="absolute bottom-4 left-1/2 transform -translate-x-1/2 md:block hidden w-full">
-                  <button className="bg-red-500 w-full text-white px-4 py-2 rounded shadow hover:bg-red-600 transition">
+                  <button className="bg-red-700 w-full text-white px-4 py-2 rounded shadow hover:bg-red-800 transition">
                     View Details
                   </button>
                 </Link>
@@ -568,7 +568,7 @@ useEffect(() => {
               <div className="p-6 md:w-1/2 flex flex-col justify-between">
                 <div>
                   <h3 className="text-2xl font-bold text-gray-800 mb-1">{product.name}</h3>
-                  <p className="text-red-500 font-bold text-xl">${displayPrice.toFixed(2)}</p>
+                  <p className="text-red-700 font-bold text-xl">${displayPrice.toFixed(2)}</p>
                   <p className="text-gray-600 text-sm mt-4 leading-relaxed">
                     {product.description
                       ? product.description.replace(/<[^>]+>/g, "").slice(0, 150) + "..."
@@ -612,7 +612,7 @@ useEffect(() => {
 
                 <div className="mt-6 flex flex-col gap-3">
                   <button
-                    className="bg-red-500 text-white py-3 rounded-xl shadow-md hover:bg-red-600 transition font-medium"
+                    className="bg-red-700 text-white py-3 rounded-xl shadow-md hover:bg-red-800 transition font-medium"
                     onClick={() => {
                       if (hasOptions && !selectedOption) {
                         toast.error("Please select an option first", { duration: 3000, icon: "⚠️" });

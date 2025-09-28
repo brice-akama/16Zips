@@ -126,7 +126,7 @@ const CartDrawerPage: React.FC = () => {
                       </span>
                       <button
                         onClick={() => removeFromCart(item.slug)}
-                        className="ml-4 text-red-500 hover:text-red-700 block md:inline"
+                        className="ml-4 text-red-700 hover:text-red-700 block md:inline"
                       >
                         Remove
                       </button>
@@ -149,7 +149,7 @@ const CartDrawerPage: React.FC = () => {
                   />
                   <button
                     onClick={applyCoupon}
-                    className="bg-red-500 text-white px-4 rounded-r hover:bg-red-600"
+                    className="bg-red-700 text-white px-4 rounded-r hover:bg-red-800"
                   >
                     Apply
                   </button>
@@ -182,7 +182,7 @@ const CartDrawerPage: React.FC = () => {
                       onChange={() => setSelectedShipping(option)}
                     />
                     <span>{option.label}: </span>
-                    <span className="text-red-500 font-semibold">${option.cost.toFixed(2)}</span>
+                    <span className="text-red-700 font-semibold">${option.cost.toFixed(2)}</span>
                   </label>
                 ))}
               </div>
@@ -201,14 +201,14 @@ const CartDrawerPage: React.FC = () => {
               <Link
                 href={selectedShipping ? "/checkout" : "#"}
                 className={`block mt-6 text-white text-center py-3 rounded font-semibold transition-colors
-                  ${selectedShipping ? "bg-red-500 hover:bg-red-700" : "bg-gray-400 cursor-not-allowed border border-red-500"}`}
+                  ${selectedShipping ? "bg-red-700 hover:bg-red-800" : "bg-gray-400 cursor-not-allowed border border-red-500"}`}
                 onClick={(e) => { if (!selectedShipping) e.preventDefault(); }}
               >
                 Proceed to Checkout
               </Link>
 
               {!selectedShipping && (
-                <p className="mt-2 text-red-600 text-sm font-semibold text-center">
+                <p className="mt-2 text-red-700 text-sm font-semibold text-center">
                   ⚠️ Please select a shipping option before proceeding.
                 </p>
               )}

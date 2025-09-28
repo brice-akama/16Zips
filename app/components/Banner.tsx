@@ -27,7 +27,7 @@ const Banner: React.FC = () => {
 
         {/* Call-to-Action Button */}
         <Link href="/shop">
-          <button className="mt-4 px-6 py-3 bg-red-600 text-white font-semibold text-lg rounded-full shadow-lg hover:bg-red-600 transition duration-300">
+          <button className="mt-4 px-6 py-3 bg-red-700 text-white font-semibold text-lg rounded-full shadow-lg hover:bg-red-800 transition duration-300">
             Shop Now
           </button>
         </Link>

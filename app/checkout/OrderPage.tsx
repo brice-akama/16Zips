@@ -50,7 +50,7 @@ const AddressForm: React.FC<AddressFormProps> = ({ data, onChange }) => (
   <div className="space-y-4">
     <div className="flex flex-col md:flex-row gap-6">
       <div className="flex-1">
-        <label className="block font-medium mb-1">First name <span className="text-red-500">*</span></label>
+        <label className="block font-medium mb-1">First name <span className="text-red-700">*</span></label>
         <input
           type="text"
           name="firstName"
@@ -60,7 +60,7 @@ const AddressForm: React.FC<AddressFormProps> = ({ data, onChange }) => (
         />
       </div>
       <div className="flex-1">
-        <label className="block font-medium mb-1">Last name <span className="text-red-500">*</span></label>
+        <label className="block font-medium mb-1">Last name <span className="text-red-700">*</span></label>
         <input
           type="text"
           name="lastName"
@@ -84,7 +84,7 @@ const AddressForm: React.FC<AddressFormProps> = ({ data, onChange }) => (
     </div>
 
     <div>
-      <label className="block font-medium mb-1">Email <span className="text-red-500">*</span></label>
+      <label className="block font-medium mb-1">Email <span className="text-red-700">*</span></label>
       <input
         type="email"
         name="email"
@@ -96,7 +96,7 @@ const AddressForm: React.FC<AddressFormProps> = ({ data, onChange }) => (
     </div>
 
     <div>
-      <label className="block font-medium mb-1">Phone <span className="text-red-500">*</span></label>
+      <label className="block font-medium mb-1">Phone <span className="text-red-700">*</span></label>
       <input
         type="tel"
         name="phone"
@@ -108,7 +108,7 @@ const AddressForm: React.FC<AddressFormProps> = ({ data, onChange }) => (
     </div>
 
     <div>
-      <label className="block font-medium mb-1">Country / Region <span className="text-red-500">*</span></label>
+      <label className="block font-medium mb-1">Country / Region <span className="text-red-700">*</span></label>
       <input
         type="text"
         name="country"
@@ -120,7 +120,7 @@ const AddressForm: React.FC<AddressFormProps> = ({ data, onChange }) => (
     </div>
 
     <div>
-      <label className="block font-medium mb-1">Street Address <span className="text-red-500">*</span></label>
+      <label className="block font-medium mb-1">Street Address <span className="text-red-700">*</span></label>
       <input
         type="text"
         name="streetAddress"
@@ -132,7 +132,7 @@ const AddressForm: React.FC<AddressFormProps> = ({ data, onChange }) => (
     </div>
 
     <div>
-      <label className="block font-medium mb-1">City <span className="text-red-500">*</span></label>
+      <label className="block font-medium mb-1">City <span className="text-red-700">*</span></label>
       <input
         type="text"
         name="city"
@@ -145,7 +145,7 @@ const AddressForm: React.FC<AddressFormProps> = ({ data, onChange }) => (
 
     <div className="flex flex-col md:flex-row gap-6">
       <div className="flex-1">
-        <label className="block font-medium mb-1">State <span className="text-red-500">*</span></label>
+        <label className="block font-medium mb-1">State <span className="text-red-700">*</span></label>
         <input
           type="text"
           name="state"
@@ -156,7 +156,7 @@ const AddressForm: React.FC<AddressFormProps> = ({ data, onChange }) => (
         />
       </div>
       <div className="flex-1">
-        <label className="block font-medium mb-1">ZIP Code <span className="text-red-500">*</span></label>
+        <label className="block font-medium mb-1">ZIP Code <span className="text-red-700">*</span></label>
         <input
           type="text"
           name="zipCode"
@@ -497,7 +497,7 @@ const handlePlaceOrder = async () => {
   <button
     type="button"
     onClick={() => setShowLogin(!showLogin)}
-    className="text-red-500 font-medium underline hover:text-red-700 transition"
+    className="text-red-700 font-medium underline hover:text-red-700 transition"
   >
     Click here to login
   </button>
@@ -559,7 +559,7 @@ const handlePlaceOrder = async () => {
         <div className="flex items-center justify-between text-sm">
           <Link
             href="/forgot-password"   
-            className="text-red-700 underline hover:text-red-700 transition"
+            className="text-red-700 underline hover:text-red-800 transition"
           >
             Lost your password?
           </Link>
@@ -568,7 +568,7 @@ const handlePlaceOrder = async () => {
         {/* Login button */}
         <button
           type="submit"
-          className="w-full bg-red-500 text-white py-2 rounded-md hover:bg-red-700 transition font-medium"
+          className="w-full bg-red-700 text-white py-2 rounded-md hover:bg-red-800 transition font-medium"
         >
           Login
         </button>
@@ -582,7 +582,7 @@ const handlePlaceOrder = async () => {
   <button
     type="button"
     onClick={() => setShowCoupon(!showCoupon)}
-    className="text-red-500 font-medium underline hover:text-red-600 transition"
+    className="text-red-700 font-medium underline hover:text-red-800 transition"
   >
     Click here to enter your code
   </button>
@@ -600,7 +600,7 @@ const handlePlaceOrder = async () => {
     <button
       type="button"
       onClick={applyCoupon}
-      className="bg-red-500 text-white px-4 py-2 rounded-lg hover:bg-red-700"
+      className="bg-red-700 text-white px-4 py-2 rounded-lg hover:bg-red-800"
     >
       Apply Coupon
     </button>
@@ -692,7 +692,7 @@ const handlePlaceOrder = async () => {
           password: billingDetails.password
         });
       }}
-      className="bg-red-500 text-white px-4 py-2 rounded-md mt-2"
+      className="bg-red-700 text-white px-4 py-2 rounded-md mt-2"
     >
       Create Account
     </button>
@@ -779,7 +779,7 @@ const handlePlaceOrder = async () => {
   <h3 className="font-semibold mb-2">Shipping</h3>
   <p>
     {selectedShipping ? selectedShipping.label : "Standard Shipping"}: 
-    <span className="text-red-500">${effectiveShippingCost.toFixed(2)}</span>
+    <span className="text-red-700">${effectiveShippingCost.toFixed(2)}</span>
   </p>
 </div>
 
@@ -855,7 +855,7 @@ const handlePlaceOrder = async () => {
       </li>
       <li>Tap “Pay.”</li>
     </ol>
-    <p className="text-red-600 font-medium mt-2">
+    <p className="text-red-700 font-medium mt-2">
       NB: Please don’t make the Cash App payment to our website email 
       <strong>info@16zip.com</strong>. Kindly get in touch via live chat or email for our Cash App info.  
       Payments made to our website email won’t be validated nor confirmed.
@@ -900,7 +900,7 @@ const handlePlaceOrder = async () => {
         <a href="mailto:info@16zip.com" className="text-blue-600 underline">info@16zip.com</a> for assistance regarding the Zelle payment.
       </li>
     </ol>
-    <p className="text-red-600 font-medium mt-2">
+    <p className="text-red-700 font-medium mt-2">
       NB: Please don’t make the Zelle payment to our website email ”info@16zip.com”. Kindly get in touch via live chat or email for our Zelle info. Payments made to our website email won’t be validated nor confirmed.
     </p>
   </div>
@@ -959,13 +959,13 @@ const handlePlaceOrder = async () => {
             </p>
           )}
           {orderStatus === 'error' && (
-            <p className="text-sm text-red-600 bg-red-100 p-2 rounded-md">
+            <p className="text-sm text-red-700 bg-red-100 p-2 rounded-md">
               ❌ Something went wrong while placing your order. Please try again.
             </p>
           )}
           <p className="mt-2 text-sm">
             Your personal data will be used to process your order, support your experience throughout this website, and for other purposes described in our{' '}
-            <Link  href="/privacy-policy" className="text-red-500 underline">privacy policy</Link>.
+            <Link  href="/privacy-policy" className="text-red-700 underline">privacy policy</Link>.
           </p>
           {cryptoWarning && (
             <p className="text-sm text-orange-700 bg-orange-100 p-2 rounded-md">
@@ -983,7 +983,7 @@ const handlePlaceOrder = async () => {
     className="w-4 h-4"
   />
   <label htmlFor="terms" className="text-sm">
-    I have read and agree to the website <Link href="/terms" className="text-red-500 underline">terms and conditions</Link>
+    I have read and agree to the website <Link href="/terms" className="text-red-700 underline">terms and conditions</Link>
   </label>
 </div>
           
@@ -995,7 +995,7 @@ const handlePlaceOrder = async () => {
     }
     handlePlaceOrder();
   }}
-  className="w-full bg-red-500 text-white py-2 rounded-md mt-4 hover:bg-red-700 transition"
+  className="w-full bg-red-700 text-white py-2 rounded-md mt-4 hover:bg-red-700 transition"
 >
   Place Order
 </button>

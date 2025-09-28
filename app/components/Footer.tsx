@@ -113,7 +113,7 @@ const Footer: React.FC = () => {
             />
             <button
               type="submit"
-              className="bg-red-500 px-4 rounded-r-md hover:bg-red-700 transition"
+              className="bg-red-700 px-4 rounded-r-md hover:bg-red-800 transition"
             >
               {translatedTexts.subscribe}
             </button>

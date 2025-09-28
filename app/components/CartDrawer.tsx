@@ -24,7 +24,7 @@ const CartDrawer: React.FC = () => {
     <AnimatePresence>
       {isCartOpen && (
         <motion.div
-          className="fixed inset-0 z-20 flex justify-end"
+          className="fixed inset-0 z-100 flex justify-end"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
@@ -55,7 +55,7 @@ const CartDrawer: React.FC = () => {
                 <p>Your cart is empty, continue shopping.</p>
                 <Link
                   href="/shop"
-                  className="block bg-red-500 text-white text-center py-2 rounded mt-4"
+                  className="block bg-red-700 text-white text-center py-2 rounded mt-4"
                   onClick={handleLinkClick}
                 >
                   Continue Shopping
@@ -110,7 +110,7 @@ const CartDrawer: React.FC = () => {
                               <span>${itemTotalPrice}</span>
                               <button
                                 onClick={() => removeFromCart(item.slug)}
-                                className="ml-2 text-red-500 text-sm"
+                                className="ml-2 text-red-700 text-sm"
                               >
                                 Remove
                               </button>
@@ -142,14 +142,14 @@ const CartDrawer: React.FC = () => {
 
                   <Link
                     href="/cart-drawer"
-                    className="block bg-red-500 text-white text-center py-2 rounded mb-2"
+                    className="block bg-red-700 text-white text-center py-2 rounded mb-2"
                     onClick={handleLinkClick}
                   >
                     View Cart
                   </Link>
                   <Link
                     href="/checkout"
-                    className="block bg-red-500 text-white text-center py-2 rounded"
+                    className="block bg-red-700 text-white text-center py-2 rounded"
                     onClick={handleLinkClick}
                   >
                     Checkout
