@@ -617,7 +617,7 @@ const handlePlaceOrder = async () => {
     </span>
     <div className="w-full bg-green-200 rounded-full mt-1 h-2">
       <div
-        className="bg-green-500 h-2 rounded-full transition-all"
+        className="bg-red-700 h-2 rounded-full transition-all"
         style={{ width: "100%" }}
       />
     </div>
@@ -629,7 +629,7 @@ const handlePlaceOrder = async () => {
     </span>
     <div className="w-full bg-red-200 rounded-full mt-1 h-2">
       <div
-        className="bg-blue-500 h-2 rounded-full transition-all"
+        className="bg-red-700 h-2 rounded-full transition-all"
         style={{
           width: `${(totalPrice / freeShippingThreshold) * 100}%`,
         }}
@@ -737,269 +737,354 @@ const handlePlaceOrder = async () => {
         </div>
         </div>
         {/* Right: Cart Summary & Payment */}
-        <div className=" space-y-4 bg-gray-50  p-6 rounded-lg shadow-md lg:col-span-2">
-          <h2 className="text-xl font-semibold">YOUR ORDER</h2>
-          <div>
-            {cartItems.map((item) => {
-              const priceNum = typeof item.price === 'string' ? parseFloat(item.price) : item.price;
-              return (
-                <div key={item.slug} className="flex items-center gap-4 border-b pb-2">
-                  <img
-                    src={item.mainImage}
-                    alt={item.name}
-                    className="w-16 h-16 object-cover rounded-md"
-                  />
-                  <div>
-                    <p className="font-medium">{item.name}</p>
-                    <p className="text-sm">${priceNum.toFixed(2)} x {item.quantity}</p>
-                    <p className="text-sm font-semibold">Total: ${(priceNum * item.quantity).toFixed(2)}</p>
-                  </div>
-                  
-                </div>
-                
-              );
-            })}
-           
-<div className="flex justify-between mt-1">
-  <span>Subtotal</span>
-  <span>${subtotal.toFixed(2)}</span>
-</div>
-
-{discount > 0 && (
-  <div className="flex justify-between mt-3 text-green-600 font-medium">
-    <span>Coupon Discount</span>
-    <span>- ${discount.toFixed(2)}</span>
+{/* Right: Cart Summary & Payment */}
+<div className="space-y-6 bg-white border border-gray-200 p-8 rounded-lg shadow-sm lg:col-span-2">
+  {/* Order Header */}
+  <div className="border-b border-gray-200 pb-4">
+    <h2 className="text-2xl font-bold text-gray-800">Your Order</h2>
   </div>
-)}
 
-{/* Shipping Options */}
-{/* Shipping Summary */}
-{/* Shipping Summary */}
-<div className="mt-4">
-  <h3 className="font-semibold mb-2">Shipping</h3>
-  <p>
-    {selectedShipping ? selectedShipping.label : "Standard Shipping"}: 
-    <span className="text-red-700">${effectiveShippingCost.toFixed(2)}</span>
-  </p>
-</div>
-
-{/* Sales Tax */}
-<div className="flex justify-between mt-1">
-  <span>Sales Tax (7%)</span>
-  <span>${salesTaxAmount.toFixed(2)}</span>
-</div>
-
-{/* Grand Total */}
-<p className="mt-4 text-lg font-bold border-t pt-2">
-  Grand Total: ${(subtotal + effectiveShippingCost + salesTaxAmount - discount).toFixed(2)}
-</p>
-
-{/* Optional Calculate Shipping Button */}
-{shippingCost === null && (
-  <button
-    type="button"
-    onClick={calculateShipping}
-    className="mt-4 w-full bg-blue-600 text-white py-2 rounded-md hover:bg-blue-700 transition font-medium"
-  >
-    Calculate Shipping
-  </button>
-)}
-
+  {/* Order Items */}
+  <div className="space-y-4">
+    {cartItems.map((item) => {
+      const priceNum = typeof item.price === 'string' ? parseFloat(item.price) : item.price;
+      return (
+        <div key={item.slug} className="flex items-start gap-4 pb-4 border-b border-gray-100">
+          <div className="relative flex-shrink-0">
+            <img
+              src={item.mainImage}
+              alt={item.name}
+              className="w-20 h-20 object-cover rounded-md border border-gray-200"
+            />
+            <span className="absolute -top-2 -right-2 bg-gray-700 text-white text-xs font-semibold rounded-full w-6 h-6 flex items-center justify-center">
+              {item.quantity}
+            </span>
           </div>
-          <h3 className="text-lg font-semibold mt-4">Payment Methods</h3>
-          <div className="space-y-2">
-  {['Cash App', 'Paypal', 'Zelle', 'Apple Pay', 'Venmo', 'crypto'].map((method) => (
-    <label key={method} className="flex items-center gap-2 cursor-pointer mt-5">
+          <div className="flex-1">
+            <p className="font-semibold text-gray-800 mb-1">{item.name}</p>
+            <p className="text-sm text-gray-600">
+              ${priceNum.toFixed(2)} × {item.quantity}
+            </p>
+            <p className="text-base font-bold text-gray-900 mt-1">
+              ${(priceNum * item.quantity).toFixed(2)}
+            </p>
+          </div>
+        </div>
+      );
+    })}
+  </div>
+
+  {/* Order Summary */}
+  <div className="bg-gray-50 p-5 rounded-md space-y-3">
+    <div className="flex justify-between text-gray-700">
+      <span className="font-medium">Subtotal</span>
+      <span className="font-semibold">${subtotal.toFixed(2)}</span>
+    </div>
+
+    {discount > 0 && (
+      <div className="flex justify-between text-green-600 font-medium">
+        <span>Coupon Discount</span>
+        <span>−${discount.toFixed(2)}</span>
+      </div>
+    )}
+
+    {/* Shipping Section */}
+    <div className="border-t border-gray-200 pt-3">
+      <div className="flex justify-between text-gray-700">
+        <span className="font-medium">Shipping</span>
+        <div className="text-right">
+          <p className="font-semibold">
+            {selectedShipping ? selectedShipping.label : "Standard Shipping"}
+          </p>
+          <p className="text-sm text-red-600 font-bold">
+            ${effectiveShippingCost.toFixed(2)}
+          </p>
+        </div>
+      </div>
+    </div>
+
+    {/* Sales Tax */}
+    <div className="flex justify-between text-gray-700">
+      <span className="font-medium">Sales Tax (7%)</span>
+      <span className="font-semibold">${salesTaxAmount.toFixed(2)}</span>
+    </div>
+
+    {/* Grand Total */}
+    <div className="border-t-2 border-gray-300 pt-3">
+      <div className="flex justify-between items-center">
+        <span className="text-lg font-bold text-gray-900">Total</span>
+        <span className="text-2xl font-bold text-red-600">
+          ${(subtotal + effectiveShippingCost + salesTaxAmount - discount).toFixed(2)}
+        </span>
+      </div>
+    </div>
+  </div>
+
+  {/* Calculate Shipping Button */}
+  {shippingCost === null && (
+    <button
+      type="button"
+      onClick={calculateShipping}
+      className="w-full bg-blue-600 text-white py-3 rounded-md hover:bg-blue-700 transition font-semibold shadow-sm"
+    >
+      Calculate Shipping
+    </button>
+  )}
+
+  {/* Payment Methods Section */}
+  <div className="border-t border-gray-200 pt-6">
+    <h3 className="text-xl font-bold text-gray-800 mb-4">Payment Method</h3>
+    <div className="space-y-3 bg-gray-50 p-4 rounded-md">
+      {['Cash App', 'Paypal', 'Zelle', 'Apple Pay', 'Venmo', 'crypto'].map((method) => (
+        <label
+          key={method}
+          className="flex items-center gap-3 p-3 bg-white border border-gray-200 rounded-md cursor-pointer hover:border-blue-500 hover:bg-blue-50 transition"
+        >
+          <input
+            type="radio"
+            name="paymentMethod"
+            value={method}
+            checked={paymentMethod === method}
+            onChange={() =>
+              setPaymentMethod(
+                method as 'Cash App' | 'Paypal' | 'Zelle' | 'Apple Pay' | 'Venmo' | 'crypto'
+              )
+            }
+            className="w-4 h-4 text-blue-600"
+          />
+          <span className="flex items-center gap-2 font-medium text-gray-800">
+            {paymentIcons[method]}
+            {method}
+          </span>
+        </label>
+      ))}
+    </div>
+  </div>
+
+  {/* Payment Instructions */}
+  {paymentMethod === 'Cash App' && (
+    <div className="bg-blue-50 border-l-4 border-blue-500 p-5 rounded-md">
+      <p className="font-bold text-blue-800 mb-3 text-base">
+        Cash App Payment Instructions
+      </p>
+      <ol className="list-decimal list-inside space-y-2 text-sm text-gray-700">
+        <li>Open the Cash App mobile app.</li>
+        <li>
+          Add "cash" to your "Cash App balance" before making the payment to avoid payment failure.
+        </li>
+        <li>Enter the amount you want to send.</li>
+        <li>Tap "Pay."</li>
+        <li>
+          Contact us via live chat or email for our cashtag:
+          <span className="inline-flex items-center gap-1 ml-1">
+            <span className="text-blue-700 font-semibold">info@16zip.com</span>
+            <button
+              onClick={() => navigator.clipboard.writeText('info@16zip.com')}
+              className="text-xs text-gray-500 hover:text-gray-700 px-1"
+              title="Copy email"
+            >
+              📋
+            </button>
+          </span>
+        </li>
+        <li>Enter the email address, phone number, or "$Cashtag".</li>
+        <li>Enter what you are sending the payment for (e.g., "ORDER #7895").</li>
+        <li>Tap "Pay."</li>
+      </ol>
+      <div className="bg-red-50 border border-red-200 p-3 rounded-md mt-3">
+        <p className="text-sm text-red-700">
+          <strong>Important:</strong> Do not make Cash App payments to our website email 
+          <strong> info@16zip.com</strong>. Contact us via live chat or email for our Cash App info. 
+          Payments made to our website email will not be validated.
+        </p>
+      </div>
+    </div>
+  )}
+
+  {paymentMethod === 'Paypal' && (
+    <div className="bg-blue-50 border-l-4 border-blue-500 p-5 rounded-md">
+      <p className="font-bold text-blue-800 mb-3 text-base">
+        PayPal Payment Instructions
+      </p>
+      <ol className="list-decimal list-inside space-y-2 text-sm text-gray-700">
+        <li>
+          After placing your order, contact us via live chat or email to receive our PayPal payment details:
+          <span className="inline-flex items-center gap-1 ml-1">
+            <span className="text-blue-700 font-semibold">info@16zip.com</span>
+            <button
+              onClick={() => navigator.clipboard.writeText('info@16zip.com')}
+              className="text-xs text-gray-500 hover:text-gray-700 px-1"
+              title="Copy email"
+            >
+              📋
+            </button>
+          </span>
+        </li>
+      </ol>
+    </div>
+  )}
+
+  {paymentMethod === 'Zelle' && (
+    <div className="bg-blue-50 border-l-4 border-blue-500 p-5 rounded-md">
+      <p className="font-bold text-blue-800 mb-3 text-base">
+        Zelle Payment Instructions
+      </p>
+      <ol className="list-decimal list-inside space-y-2 text-sm text-gray-700">
+        <li>Download the Zelle App to get started.</li>
+        <li>All you need is the preferred email address or mobile number of the recipient.</li>
+        <li>
+          Contact us via live chat or email for our Zelle details:
+          <span className="inline-flex items-center gap-1 ml-1">
+            <span className="text-blue-700 font-semibold">info@16zip.com</span>
+            <button
+              onClick={() => navigator.clipboard.writeText('info@16zip.com')}
+              className="text-xs text-gray-500 hover:text-gray-700 px-1"
+              title="Copy email"
+            >
+              📋
+            </button>
+          </span>
+        </li>
+        <li>After payment, send a screenshot to our live chat or email.</li>
+        <li>Your order is valid once we receive payment details with your Order ID.</li>
+      </ol>
+      <div className="bg-red-50 border border-red-200 p-3 rounded-md mt-3">
+        <p className="text-sm text-red-700">
+          <strong>Important:</strong> Do not make Zelle payments to our website email. 
+          Contact us for Zelle info. Payments to website email will not be validated.
+        </p>
+      </div>
+    </div>
+  )}
+
+  {paymentMethod === 'Apple Pay' && (
+    <div className="bg-blue-50 border-l-4 border-blue-500 p-5 rounded-md">
+      <p className="font-bold text-blue-800 mb-3 text-base">
+        Apple Pay Payment Instructions
+      </p>
+      <ol className="list-decimal list-inside space-y-2 text-sm text-gray-700">
+        <li>
+          Contact us via live chat or email after placing your order to receive Apple Pay information:
+          <span className="inline-flex items-center gap-1 ml-1">
+            <span className="text-blue-700 font-semibold">info@16zip.com</span>
+            <button
+              onClick={() => navigator.clipboard.writeText('info@16zip.com')}
+              className="text-xs text-gray-500 hover:text-gray-700 px-1"
+              title="Copy email"
+            >
+              📋
+            </button>
+          </span>
+        </li>
+      </ol>
+    </div>
+  )}
+
+  {paymentMethod === 'Venmo' && (
+    <div className="bg-blue-50 border-l-4 border-blue-500 p-5 rounded-md">
+      <p className="font-bold text-blue-800 mb-3 text-base">
+        Venmo Payment Instructions
+      </p>
+      <ol className="list-decimal list-inside space-y-2 text-sm text-gray-700">
+        <li>
+          Contact us via live chat or email after placing your order to receive Venmo payment details:
+          <span className="inline-flex items-center gap-1 ml-1">
+            <span className="text-blue-700 font-semibold">info@16zip.com</span>
+            <button
+              onClick={() => navigator.clipboard.writeText('info@16zip.com')}
+              className="text-xs text-gray-500 hover:text-gray-700 px-1"
+              title="Copy email"
+            >
+              📋
+            </button>
+          </span>
+        </li>
+      </ol>
+    </div>
+  )}
+
+  {paymentMethod === 'crypto' && (
+    <div className="bg-gradient-to-br from-blue-50 to-purple-50 border-l-4 border-purple-500 p-6 rounded-md text-center">
+      <p className="font-bold text-gray-800 mb-4">Scan QR Code to Pay</p>
+      <div className="inline-block bg-white p-4 rounded-lg shadow-md">
+        <QRCodeWrapper
+          value="bc1qv8wl5n9pe89qv9hptvnhljc0cg57c4j63nrynm"
+          size={180}
+        />
+      </div>
+      <p className="text-xs text-gray-600 mt-3">Bitcoin Wallet Address</p>
+    </div>
+  )}
+
+  {/* Order Status Messages */}
+  {orderStatus === 'success' && (
+    <div className="bg-green-50 border-l-4 border-green-500 p-4 rounded-md">
+      <p className="text-sm text-green-800 font-medium">
+        ✓ Your order has been successfully placed and is pending payment via <strong>{paymentMethod}</strong>.
+      </p>
+    </div>
+  )}
+  
+  {orderStatus === 'error' && (
+    <div className="bg-red-50 border-l-4 border-red-500 p-4 rounded-md">
+      <p className="text-sm text-red-800 font-medium">
+        ✗ Something went wrong while placing your order. Please try again.
+      </p>
+    </div>
+  )}
+
+  {cryptoWarning && (
+    <div className="bg-orange-50 border-l-4 border-orange-500 p-4 rounded-md">
+      <p className="text-sm text-orange-800">
+        ⚠ You selected Crypto. Please send payment to the wallet address above and contact us with a screenshot. 
+        We will process your order once payment is verified.
+      </p>
+    </div>
+  )}
+
+  {/* Privacy Policy Notice */}
+  <p className="text-xs text-gray-600 leading-relaxed">
+    Your personal data will be used to process your order, support your experience throughout this website, 
+    and for other purposes described in our{' '}
+    <Link href="/privacy-policy" className="text-blue-600 hover:text-blue-800 underline font-medium">
+      privacy policy
+    </Link>.
+  </p>
+
+  {/* Terms & Conditions */}
+  <div className="bg-gray-50 border border-gray-200 p-4 rounded-md">
+    <label className="flex items-start gap-3 cursor-pointer">
       <input
-        type="radio"
-        name="paymentMethod"
-        value={method}
-        checked={paymentMethod === method}
-        onChange={() =>
-          setPaymentMethod(
-            method as 'Cash App' | 'Paypal' | 'Zelle' | 'Apple Pay' | 'Venmo' | 'crypto'
-          )
-        }
+        type="checkbox"
+        id="terms"
+        checked={agreedToTerms}
+        onChange={(e) => setAgreedToTerms(e.target.checked)}
+        className="w-5 h-5 mt-0.5 text-blue-600 rounded"
       />
-      <span className="flex items-center gap-1">
-        {paymentIcons[method]}
-        {method}
+      <span className="text-sm text-gray-700">
+        I have read and agree to the website{' '}
+        <Link href="/terms" className="text-blue-600 hover:text-blue-800 underline font-medium">
+          terms and conditions
+        </Link>{' '}
+        <span className="text-red-600">*</span>
       </span>
     </label>
-  ))}
+  </div>
+
+  {/* Place Order Button */}
+  <button
+    onClick={() => {
+      if (!agreedToTerms) {
+        alert("You must agree to the terms and conditions before placing your order.");
+        return;
+      }
+      handlePlaceOrder();
+    }}
+    className="w-full bg-gradient-to-r from-red-600 to-red-700 text-white py-4 rounded-lg font-bold text-lg hover:from-red-700 hover:to-red-800 transition-all shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
+  >
+    Place Order
+  </button>
 </div>
-
-          {/* Cash App Instructions */}
-{paymentMethod === 'Cash App' && (
-  <div className="bg-white border border-gray-300 p-4 rounded-md text-sm text-gray-700 space-y-2">
-    <p className="font-semibold text-blue-700">
-      Cashapp payment instructions at checkout:
-    </p>
-    <ol className="list-decimal list-inside space-y-1">
-      <li>Open the Cash App mobile app.</li>
-      <li>
-        Add “cash” to your “Cash App balance” before making the payment so as to avoid fail payment.
-      </li>
-      <li>Enter the amount you want to send.</li>
-      <li>Tap “Pay.”</li>
-      <li>
-        Get in touch with us through our live chat or email: 
-        <a href="mailto:info@16zip.com" className="text-blue-600 underline">
-         info@16zip.com
-        </a> 
-        for our cashtag.
-      </li>
-      <li>Enter the email address, phone number, or “$Cashtag”.</li>
-      <li>
-        Enter what you are sending the payment for. For example: “ORDER #7895”.
-      </li>
-      <li>Tap “Pay.”</li>
-    </ol>
-    <p className="text-red-700 font-medium mt-2">
-      NB: Please don’t make the Cash App payment to our website email 
-      <strong>info@16zip.com</strong>. Kindly get in touch via live chat or email for our Cash App info.  
-      Payments made to our website email won’t be validated nor confirmed.
-    </p>
-  </div>
-)}
-
-      {/* Paypal Instructions */}
-{/* Paypal Instructions */}
-{/* Paypal Instructions */}
-{paymentMethod === 'Paypal' && (
-  <div className="bg-white border border-gray-300 p-4 rounded-md text-sm text-gray-700 space-y-2">
-    <p className="font-semibold text-blue-700">
-      PayPal Payment Instructions:
-    </p>
-    <ol className="list-decimal list-inside space-y-1">
-      <li>
-        After placing your order, please contact us via live chat or email to receive our PayPal payment details.
-        <br />
-        Email: <a href="mailto:info@16zip.com" className="text-blue-600 underline">info@16zip.com</a>
-      </li>
-    </ol>
-  </div>
-)}
-
-{paymentMethod === 'Zelle' && (
-  <div className="bg-white border border-gray-300 p-4 rounded-md text-sm text-gray-700 space-y-2">
-    <p className="font-semibold text-blue-700">
-      Zelle Payment Instructions at Checkout:
-    </p>
-    <ol className="list-decimal list-inside space-y-1">
-      <li>Download the Zelle App to get started!</li>
-      <li>All you need to send money with Zelle is the preferred email address or mobile number of the trusted recipient.</li>
-      <li>Please kindly get in touch with us via live chat or email: 
-        <a href="mailto:info@16zip.com" className="text-blue-600 underline">info@16zip.com</a> for our Zelle details.
-      </li>
-      <li>After making payment, take a screenshot and send it to our live chat or email: 
-        <a href="mailto:info@16zip.com" className="text-blue-600 underline">info@16zip.com</a> for confirmation.
-      </li>
-      <li>Your order is considered valid once we receive details of your payment, which should be pictures or screenshots showing transaction details alongside your Order ID.</li>
-      <li>Contact our live chat or email: 
-        <a href="mailto:info@16zip.com" className="text-blue-600 underline">info@16zip.com</a> for assistance regarding the Zelle payment.
-      </li>
-    </ol>
-    <p className="text-red-700 font-medium mt-2">
-      NB: Please don’t make the Zelle payment to our website email ”info@16zip.com”. Kindly get in touch via live chat or email for our Zelle info. Payments made to our website email won’t be validated nor confirmed.
-    </p>
-  </div>
-)}
-
-{paymentMethod === 'Apple Pay' && (
-  <div className="bg-white border border-gray-300 p-4 rounded-md text-sm text-gray-700 space-y-2">
-    <p className="font-semibold text-blue-700">
-      Apple Pay Payment Instructions:
-    </p>
-    <ol className="list-decimal list-inside space-y-1">
-      <li>
-        Kindly contact us via live chat or email after placing your order to receive our Apple Pay information.
-        <br />
-        Email: <a href="mailto:info@16zip.com" className="text-blue-600 underline">info@16zip.com</a>
-      </li>
-    </ol>
-  </div>
-)}
-
-{paymentMethod === 'Venmo' && (
-  <div className="bg-white border border-gray-300 p-4 rounded-md text-sm text-gray-700 space-y-2">
-    <p className="font-semibold text-blue-700">
-      Venmo Payment Instructions:
-    </p>
-    <ol className="list-decimal list-inside space-y-1">
-      <li>
-        Kindly contact us via live chat or email after placing your order to receive our Venmo payment details.
-        <br />
-        Email: <a href="mailto:info@16zip.com" className="text-blue-600 underline">info@16zip.com</a>
-      </li>
-    </ol>
-  </div>
-)}
-
-
-
-
-
-
-
-
-{paymentMethod === 'crypto' && (
-  <div className="bg-blue-100 p-4 rounded-md text-sm text-gray-700 space-y-3">
-    <p>Scan QR code to pay:</p>
-    <QRCodeWrapper
-      value="bc1qv8wl5n9pe89qv9hptvnhljc0cg57c4j63nrynm"
-      size={160}
-    />
-  </div>
-)}
-
-          {orderStatus === 'success' && (
-            <p className="text-sm text-green-700 bg-green-100 p-2 rounded-md">
-              ✅ Your order has been successfully placed and is pending payment via <strong>{paymentMethod}</strong>.
-            </p>
-          )}
-          {orderStatus === 'error' && (
-            <p className="text-sm text-red-700 bg-red-100 p-2 rounded-md">
-              ❌ Something went wrong while placing your order. Please try again.
-            </p>
-          )}
-          <p className="mt-2 text-sm">
-            Your personal data will be used to process your order, support your experience throughout this website, and for other purposes described in our{' '}
-            <Link  href="/privacy-policy" className="text-red-700 underline">privacy policy</Link>.
-          </p>
-          {cryptoWarning && (
-            <p className="text-sm text-orange-700 bg-orange-100 p-2 rounded-md">
-              ⚠️ You selected Crypto. Please send the payment to the wallet address above and contact us with a screenshot of your transaction. We will process your order once we verify the payment.
-            </p>
-          )}
-
-          {/* Terms & Conditions Checkbox */}
-<div className="mt-2 flex items-center gap-2">
-  <input
-    type="checkbox"
-    id="terms"
-    checked={agreedToTerms}
-    onChange={(e) => setAgreedToTerms(e.target.checked)}
-    className="w-4 h-4"
-  />
-  <label htmlFor="terms" className="text-sm">
-    I have read and agree to the website <Link href="/terms" className="text-red-700 underline">terms and conditions</Link>
-  </label>
-</div>
-          
-<button
-  onClick={() => {
-    if (!agreedToTerms) {
-      alert("You must agree to the terms and conditions before placing your order.");
-      return;
-    }
-    handlePlaceOrder();
-  }}
-  className="w-full bg-red-700 text-white py-2 rounded-md mt-4 hover:bg-red-700 transition"
->
-  Place Order
-</button>
-        </div>
       </div>
     </div>
     </div>

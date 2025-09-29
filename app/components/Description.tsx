@@ -1,4 +1,3 @@
-// components/Description.tsx
 "use client";
 
 import React, { FC, useState, useEffect } from "react";
@@ -11,7 +10,7 @@ const Description: FC = () => {
   useEffect(() => {
     const translateText = async () => {
       const translated = await translate(
-        "At 16Zips, we’re dedicated to delivering premium Cannabis Flowers, Seeds, Edibles, Vapes, and more — all carefully curated to elevate your lifestyle and wellness. With fast, discreet shipping and friendly, reliable support, we make your shopping experience smooth, safe, and enjoyable. Whether you're exploring new favorites or sticking with trusted classics, every order is handled with care and crafted to exceed expectations. Join the 16Zips family — where quality, convenience, and customer care come together.",
+        "At 16Zips, we provide premium, lab-tested Cannabis Flowers, Seeds, Edibles, Vapes, and more—sourced for quality, consistency, and wellness. Every product is discreetly shipped with care, backed by responsive support and a commitment to your satisfaction. Whether you’re discovering new essentials or returning to trusted favorites, you can count on a seamless, secure, and elevated experience. Welcome to 16Zips—where excellence meets reliability.",
       );
       setTranslatedText(translated);
     };

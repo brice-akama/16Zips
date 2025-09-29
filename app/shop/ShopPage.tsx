@@ -347,7 +347,7 @@ export default function ShopPage({ categorySlug, products, categorySEO, bestSell
                       {item.subMenu.map((sub) => (
                         <li
                           key={sub}
-                          className={`cursor-pointer py-1 px-4 rounded-lg ${selectedCategory === sub ? "bg-blue-500 text-white" : "hover:bg-gray-100"
+                          className={`cursor-pointer py-1 px-4 rounded-lg ${selectedCategory === sub ? "bg-red-700 text-white" : "hover:bg-gray-100"
                             }`}
                           onClick={() => handleCategoryClick(sub)}
                         >
@@ -445,7 +445,7 @@ export default function ShopPage({ categorySlug, products, categorySEO, bestSell
                     ].map((item) => (
                       <li key={item.name} className="mb-2">
                         <div
-                          className={`flex justify-between items-center cursor-pointer py-2 px-4 rounded-lg ${selectedCategory === item.name ? "bg-blue-600 text-white" : "hover:bg-gray-200"
+                          className={`flex justify-between items-center cursor-pointer py-2 px-4 rounded-lg ${selectedCategory === item.name ? "bg-red-700 text-white" : "hover:bg-gray-200"
                             }`}
                           onClick={() =>
                             setOpenCategory(openCategory === item.name ? null : item.name)
@@ -463,7 +463,7 @@ export default function ShopPage({ categorySlug, products, categorySEO, bestSell
                             {item.subMenu.map((sub) => (
                               <li
                                 key={sub}
-                                className={`cursor-pointer py-1 px-4 rounded-lg ${selectedCategory === sub ? "bg-blue-500 text-white" : "hover:bg-gray-100"
+                                className={`cursor-pointer py-1 px-4 rounded-lg ${selectedCategory === sub ? "bg-red-700 text-white" : "hover:bg-gray-100"
                                   }`}
                                 onClick={() => {
                                   handleCategoryClick(sub);
