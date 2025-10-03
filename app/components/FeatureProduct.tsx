@@ -68,10 +68,10 @@ export default function FeatureProduct() {
       {/* Heading */}
       <div className="text-center mb-12">
         <h1 className="text-3xl md:text-4xl font-extrabold text-gray-800 mb-4 tracking-tight"> {/* 🎨 Stronger weight, tracking */}
-          Browse Our Full Collection
+        Browse the Full Collection
         </h1>
         <p className="text-gray-600 max-w-3xl mx-auto leading-relaxed text-balance"> {/* 🎨 Better readability */}
-          From flower to edibles and everything in between — find your perfect match in our curated collection.
+         Explore our thoughtfully curated selection—from premium flower and potent concentrates to artisan edibles and wellness-focused accessories. There’s something for every preference and experience.
         </p>
       </div>
 
