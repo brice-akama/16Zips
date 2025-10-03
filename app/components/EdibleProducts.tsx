@@ -68,10 +68,10 @@ export default function EdibleProducts() {
       {/* Heading */}
       <div className="text-center mb-12">
         <h1 className="text-3xl md:text-4xl font-extrabold text-gray-800 mb-4 tracking-tight"> {/* 🎨 Stronger weight, tracking */}
-          Browse Our Full Collection
+         Premium Flower Collection
         </h1>
         <p className="text-gray-600 max-w-3xl mx-auto leading-relaxed text-balance"> {/* 🎨 Better readability */}
-          From flower to edibles and everything in between — find your perfect match in our curated collection.
+          Discover our hand-selected selection of top-shelf cannabis flower—crafted for flavor, aroma, and quality. From classic strains to rare cultivars, this is where your journey begins.
         </p>
       </div>
 
