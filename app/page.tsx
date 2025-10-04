@@ -8,6 +8,7 @@ import  BlogPost from './components/BlogPost';
 import Head from "next/head";
 import { Metadata } from "next";
 import CannabisInfoSection from './components/CannabisInfoSection';
+import ReviewsSlider from './components/Reviews';
 
 // Dynamically imported components with loading fallback
 const FeatureProduct = dynamic(() => import('./components/FeatureProduct'), {
@@ -74,7 +75,9 @@ const Home: React.FC = () => {
       <EdibleProducts />
       <Banner />
       <FeatureProduct />
+      
       <CannabisInfoSection />
+      <ReviewsSlider />
       <BlogPost />
     </div>
   );

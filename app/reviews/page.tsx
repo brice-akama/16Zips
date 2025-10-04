@@ -357,7 +357,7 @@ const paginate = (pageNumber: number) => {
         <div className="flex justify-center">
           <button
             onClick={() => setShowModal(true)}
-            className="inline-block bg-rose-600 text-white font-semibold px-6 py-3 rounded-lg shadow hover:bg-rose-700 transition text-base"
+            className="inline-block bg-red-700 text-white font-semibold px-6 py-3 rounded-lg shadow hover:bg-rose-700 transition text-base"
           >
             LEAVE A REVIEW
           </button>
@@ -457,7 +457,7 @@ const paginate = (pageNumber: number) => {
           </button>
           <button
             type="submit"
-            className="px-6 py-2 rounded-lg bg-gradient-to-r from-red-500 to-red-700 text-white font-semibold shadow hover:opacity-90 transition"
+            className="px-6 py-2 rounded-lg bg-gradient-to-r from-red-700 to-red-700 text-white font-semibold shadow hover:opacity-90 transition"
           >
             Submit Review
           </button>
