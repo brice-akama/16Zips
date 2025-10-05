@@ -24,7 +24,7 @@ const categories = [
   {
     name: 'Concentrates',
     image: '/assets/concentrate.png',
-    slug: 'concentrates',
+    slug: 'moon-rock',
   },
 ];
 
