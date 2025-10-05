@@ -1,3 +1,4 @@
+// components/TopCategorySection.tsx
 'use client';
 
 import Image from 'next/image';
@@ -11,57 +12,77 @@ const categories = [
     slug: 'edibles-gummies',
   },
   {
-    name: 'Vapes',
+    name: 'Disposable Vapes',
     image: '/assets/vape.png',
     slug: 'disposables-vapes',
   },
   {
-    name: 'Flower',
+    name: 'Premium Flower',
     image: '/assets/flowers.png',
-    slug: 'indica',
+    slug: 'flower',
   },
   {
     name: 'Concentrates',
     image: '/assets/concentrate.png',
-    slug: 'budder',
+    slug: 'concentrates',
   },
 ];
 
-export default function ShopByCategory() {
+export default function TopCategorySection() {
   return (
-    <section className="px-4 py-10">
-      <div
-        role="heading"
-        aria-level={2}
-        className="text-2xl font-bold text-center mb-10"
-      >
-        Shop by Category
-      </div>
+    <section className=" px-4  from-green-50 to-white">
+      <div className="max-w-7xl mx-auto">
+        {/* Header with Divider Lines */}
+        <div className="text-center mb-12">
+          <div className="flex items-center justify-center gap-6 mb-8 w-full">
+            <div className="flex-1 h-px bg-gray-200 "></div>
+            <h2 className="text-2xl md:text-5xl font-bold text-gray-900 whitespace-nowrap ">
+              Top Category
+            </h2>
+            <div className="flex-1 h-px bg-gray-200"></div>
+          </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        {categories.map((cat, index) => (
-          <motion.div
-            key={cat.slug}
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.4, delay: index * 0.1 }}
-            whileHover={{ scale: 1.05 }}
-            className="overflow-hidden rounded-xl shadow-md"
-          >
-            <Link href={`/shop?category=${cat.slug}`}>
-              <div className="relative w-full h-48">
-                <Image
-                  src={cat.image}
-                  alt={cat.name}
-                  fill
-                  sizes="(max-width: 768px) 100vw, 33vw"
-                  className="object-cover transition-transform duration-300"
-                />
-              </div>
-              
-            </Link>
-          </motion.div>
-        ))}
+          <p className="text-base md:text-lg text-gray-700 mb-2">
+            Our Product Range: Edibles, Vapes, Flower, Concentrates
+          </p>
+          <p className="text-sm md:text-base text-gray-600 max-w-3xl mx-auto">
+            At <span className="font-semibold">16Zips</span>, we offer a carefully curated selection of premium, lab-tested cannabis products.
+          </p>
+          <p className="text-sm md:text-base text-gray-600 mt-1">
+            Here's a quick look at what we provide:
+          </p>
+        </div>
+
+        {/* Category Grid */}
+        <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-6 md:gap-8">
+          {categories.map((cat, index) => (
+            <motion.div
+              key={cat.slug}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.4, delay: index * 0.1 }}
+              whileHover={{ y: -8 }}
+              className="group"
+            >
+              <Link
+                href={`/shop?category=${cat.slug}`}
+                className="block rounded-2xl overflow-hidden shadow-md hover:shadow-xl transition-shadow duration-300"
+                aria-label={`Browse ${cat.name} products`}
+              >
+                <div className="relative w-full aspect-[4/3] md:aspect-[3/2]">
+                  <Image
+                    src={cat.image}
+                    alt={cat.name}
+                    fill
+                    sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
+                    className="object-cover transition-transform duration-500 group-hover:scale-105"
+                  />
+                </div>
+                
+              </Link>
+            </motion.div>
+          ))}
+        </div>
       </div>
     </section>
   );
